@@ -1,0 +1,106 @@
+{
+  "project_info": {
+    "project_number": "888957940076",
+    "project_id": "fama-7db84",
+    "storage_bucket": "fama-7db84.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:888957940076:android:3be42b0f67a1a5c3ca8349",
+        "android_client_info": {
+          "package_name": "com.dakarapps.fama"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "888957940076-o7kflqmht38hj9ol584upenjb241iq46.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dakarapps.fama",
+            "certificate_hash": "2c3cd7518b721f1bc7afd96098bf9e320f31316d"
+          }
+        },
+        {
+          "client_id": "888957940076-uuf1onlokie5d7tll45jt0b5d9dvati0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dakarapps.fama",
+            "certificate_hash": "e7325345a3e5d60c19ea22aa52dcaac8ad5903fe"
+          }
+        },
+        {
+          "client_id": "888957940076-9onlai64nlmabp2po96163ntlfqoc2kv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKFPeONsJTzc9OcNRnexNCItpqVX41UhE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "888957940076-9onlai64nlmabp2po96163ntlfqoc2kv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "888957940076-6tc802adt6gtmlvpipcbr2hmstfk6igu.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.dakarapps.fama"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:888957940076:android:3ff18065f15df4bfca8349",
+        "android_client_info": {
+          "package_name": "com.dakarapps.famaRestau"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "888957940076-7lpn4asd642i2p0j37aaevir3u49qmm9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dakarapps.famaRestau",
+            "certificate_hash": "2c3cd7518b721f1bc7afd96098bf9e320f31316d"
+          }
+        },
+        {
+          "client_id": "888957940076-9onlai64nlmabp2po96163ntlfqoc2kv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKFPeONsJTzc9OcNRnexNCItpqVX41UhE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "888957940076-9onlai64nlmabp2po96163ntlfqoc2kv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "888957940076-6tc802adt6gtmlvpipcbr2hmstfk6igu.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.dakarapps.fama"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
