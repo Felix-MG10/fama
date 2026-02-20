@@ -37,16 +37,14 @@ class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
   void initState() {
     super.initState();
 
-    orderId = widget.orderID!;
-    if(widget.orderID != null) {
-      if(widget.orderID!.contains('?')){
-        var parts = widget.orderID!.split('?');
-        String id = parts[0].trim();                 // prefix: "date"
-        orderId = id;
-      }
+    String? oid = widget.orderID;
+    if (oid != null && oid.contains('?')) {
+      oid = oid.split('?')[0].trim();
     }
-    Get.find<OrderController>().trackOrder(orderId.toString(), null, false, contactNumber: widget.contactPersonNumber);
-
+    orderId = oid ?? '';
+    if (orderId!.isNotEmpty) {
+      Get.find<OrderController>().trackOrder(orderId!, null, false, contactNumber: widget.contactPersonNumber);
+    }
   }
 
   @override
@@ -69,10 +67,11 @@ class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
             }
           }
 
-          total = ((orderController.trackModel!.orderAmount! / 100) * Get.find<SplashController>().configModel!.loyaltyPointItemPurchasePoint!);
+          final orderAmt = orderController.trackModel!.orderAmount;
+          total = (orderAmt != null) ? ((orderAmt / 100) * (Get.find<SplashController>().configModel!.loyaltyPointItemPurchasePoint ?? 0)) : 0;
           success = orderController.trackModel!.paymentStatus == 'paid' || orderController.trackModel!.paymentMethod == 'cash_on_delivery' || orderController.trackModel!.paymentMethod == 'partial_payment';
 
-          if (!success && !Get.isDialogOpen! && orderController.trackModel!.orderStatus != 'canceled' && Get.currentRoute.startsWith(RouteHelper.orderSuccess)) {
+          if (!success && (Get.isDialogOpen != true) && orderController.trackModel!.orderStatus != 'canceled' && Get.currentRoute.startsWith(RouteHelper.orderSuccess)) {
             Future.delayed(const Duration(seconds: 1), () {
               Get.dialog(PaymentFailedDialog(orderID: orderId, orderAmount: widget.totalAmount, maxCodOrderAmount: maximumCodOrderAmount, contactPersonNumber: widget.contactPersonNumber), barrierDismissible: false);
             });

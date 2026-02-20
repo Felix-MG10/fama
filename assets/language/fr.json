@@ -967,6 +967,7 @@
   "restaurant_is_unavailable": "Le restaurant n'est pas disponible",
   "schedule": "Planifier",
   "currently_digital_payment_is_not_available": "Le paiement numérique n'est actuellement pas disponible",
+  "orange_money_temporarily_unavailable": "Orange Money est temporairement indisponible. Veuillez réessayer ou choisir un autre mode de paiement.",
   "all_food_items": "Tous les plats",
   "this_is_my_refer_code": "Ceci est mon code de parrainage",
   "instance_order_is_not_active": "La commande instantanée n'est pas active",

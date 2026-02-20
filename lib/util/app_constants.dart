@@ -55,6 +55,11 @@ class AppConstants {
   static const String paymentMobileUri = '/payment-mobile';
   /// Étape 2 Wave : retourne JSON avec deep_link, checkout_url, urls (success/fail/cancel)
   static const String wavePayUri = '/payment/wave/pay';
+  /// Orange Money : initie le paiement et retourne checkout_url (comme Wave) — ancien flux
+  static const String orangeMoneyPayUri = '/payment/orange_money/pay';
+  /// Orange Money : POST /test-orange { order_id?, amount?, callback_url? }
+  /// Mode test : { amount: 300 } | Paiement réel : { order_id, amount, callback_url }
+  static const String testOrangeBackendUri = '/test-orange';
   static const String wishListGetUri = '/api/v1/customer/wish-list';
   static const String addWishListUri = '/api/v1/customer/wish-list/add?';
   static const String removeWishListUri = '/api/v1/customer/wish-list/remove?';

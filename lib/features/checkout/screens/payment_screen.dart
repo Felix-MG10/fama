@@ -46,11 +46,12 @@ class PaymentScreenState extends State<PaymentScreen> {
   late MyInAppBrowser browser;
   double? maxCodOrderAmount;
 
-  /// Flux Wave : API puis WebView pour intercepter Fama:// après paiement
-  bool _waveApiLoading = true;
+  /// Flux Wave / Orange Money : API puis WebView pour intercepter Fama:// après paiement
+  bool _paymentApiLoading = true;
 
   bool get _isOrderPayment => (widget.addFundUrl == null || widget.addFundUrl!.isEmpty) && (widget.subscriptionUrl == '' || widget.subscriptionUrl!.isEmpty);
   bool get _isWaveMethod => widget.paymentMethod.toLowerCase() == 'wave';
+  bool get _isOrangeMoneyMethod => widget.paymentMethod.toLowerCase().replaceAll('-', '_') == 'orange_money';
 
   @override
   void initState() {
@@ -78,44 +79,102 @@ class PaymentScreenState extends State<PaymentScreen> {
     }
 
     browser = MyInAppBrowser(orderID: widget.orderModel.id.toString(), orderAmount: widget.orderModel.orderAmount, maxCodOrderAmount: maxCodOrderAmount, addFundUrl: widget.addFundUrl,
-        subscriptionUrl: widget.subscriptionUrl, contactNumber: widget.contactNumber, restaurantId: widget.restaurantId, packageId: widget.packageId, isDeliveryOrder: widget.orderModel.orderType == 'delivery');
+        subscriptionUrl: widget.subscriptionUrl, contactNumber: widget.contactNumber, restaurantId: widget.restaurantId, packageId: widget.packageId, isDeliveryOrder: widget.orderModel.orderType == 'delivery', isOrangeMoney: _isOrangeMoneyMethod);
 
-    if (_isOrderPayment && _isWaveMethod) {
+    if (_isOrderPayment && (_isWaveMethod || _isOrangeMoneyMethod)) {
       final apiClient = Get.find<ApiClient>();
-      final customerId = widget.orderModel.userId == 0 ? AuthHelper.getGuestId() : widget.orderModel.userId.toString();
-      final callbackUrl = Uri.encodeComponent('${AppConstants.baseUrl}/payment-success');
       final headers = Map<String, String>.from(apiClient.getHeader())..['Accept'] = 'application/json';
       try {
-        // Étape 1 : appeler payment-mobile pour obtenir payment_id
-        final step1Uri = '${AppConstants.paymentMobileUri}?order_id=${widget.orderModel.id}&customer_id=$customerId&payment_method=${widget.paymentMethod}&payment_platform=app&callback=$callbackUrl';
-        final step1Response = await apiClient.getData(step1Uri, headers: headers, showToaster: false);
-        String? paymentId;
-        if (step1Response.statusCode == 200 && step1Response.body != null) {
-          final body = step1Response.body;
-          paymentId = body['data']?['payment_id'] ?? body['payment_id'];
-        }
-        if (paymentId == null || paymentId.isEmpty) {
-          if (mounted) setState(() => _waveApiLoading = false);
-        } else {
-          // Étape 2 : appeler /payment/wave/pay avec payment_id
-          final step2Uri = '${AppConstants.wavePayUri}?payment_id=${Uri.encodeComponent(paymentId)}&payment_platform=app';
-          final step2Response = await apiClient.getData(step2Uri, headers: headers, showToaster: false);
-          if (step2Response.statusCode == 200 && step2Response.body != null && step2Response.body['status'] == 'success') {
-            final data = step2Response.body['data'];
-            final checkoutUrl = data?['checkout_url'] as String?;
-            if (checkoutUrl != null && checkoutUrl.isNotEmpty) {
-              // Ouvrir dans la WebView pour intercepter la redirection Fama:// après paiement
-              if (mounted) setState(() => _waveApiLoading = false);
-              selectedUrl = checkoutUrl;
+        if (_isOrangeMoneyMethod) {
+          // Orange Money : POST /test-orange (même URL que le test, avec order_id pour flux réel)
+          final amount = (widget.orderModel.orderAmount ?? 0).toInt();
+          final body = {
+            'order_id': widget.orderModel.id,
+            'amount': amount,
+            'callback_url': AppConstants.baseUrl,
+          };
+          final response = await apiClient.postData(AppConstants.testOrangeBackendUri, body, headers: headers);
+          final respBody = response.body;
+          if (response.statusCode == 200 && respBody != null) {
+            final isSuccess = respBody['status'] == 'success' || respBody['success'] == true;
+            if (isSuccess) {
+              // Réponse /test-orange : payment_url ou short_link à la racine OU dans orange_response
+              String? paymentUrl = respBody['payment_url'] as String? ?? respBody['short_link'] as String?;
+              if (paymentUrl == null || paymentUrl.isEmpty) {
+                final orangeResp = respBody['orange_response'];
+                paymentUrl = orangeResp?['payment_url'] as String? ?? orangeResp?['short_link'] as String?;
+              }
+              if (paymentUrl != null && paymentUrl.isNotEmpty) {
+                if (mounted) setState(() => _paymentApiLoading = false);
+                selectedUrl = paymentUrl;
+              } else {
+                if (mounted) setState(() => _paymentApiLoading = false);
+              }
             } else {
-              if (mounted) setState(() => _waveApiLoading = false);
+              final msg = respBody['message'] as String? ?? 'orange_money_temporarily_unavailable'.tr;
+              if (mounted) {
+                setState(() => _paymentApiLoading = false);
+                showCustomSnackBar((msg != null && msg.isNotEmpty) ? msg : 'orange_money_temporarily_unavailable'.tr);
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) Get.back();
+                });
+              }
+              return;
             }
           } else {
-            if (mounted) setState(() => _waveApiLoading = false);
+            final msg = respBody?['message'] as String?;
+            if (mounted) {
+              setState(() => _paymentApiLoading = false);
+              showCustomSnackBar((msg != null && msg.isNotEmpty) ? msg : 'orange_money_temporarily_unavailable'.tr);
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) Get.back();
+              });
+            }
+            return;
+          }
+        } else {
+          // Wave : flux en 2 étapes (payment-mobile puis wave/pay)
+          final customerId = widget.orderModel.userId == 0 ? AuthHelper.getGuestId() : widget.orderModel.userId.toString();
+          final callbackUrl = Uri.encodeComponent('${AppConstants.baseUrl}/payment-success');
+          final step1Uri = '${AppConstants.paymentMobileUri}?order_id=${widget.orderModel.id}&customer_id=$customerId&payment_method=${widget.paymentMethod}&payment_platform=app&callback=$callbackUrl';
+          final step1Response = await apiClient.getData(step1Uri, headers: headers, showToaster: false);
+          String? paymentId;
+          if (step1Response.statusCode == 200 && step1Response.body != null) {
+            final body = step1Response.body;
+            paymentId = body['data']?['payment_id'] ?? body['payment_id'];
+          }
+          if (paymentId == null || paymentId.isEmpty) {
+            if (mounted) setState(() => _paymentApiLoading = false);
+          } else {
+            final step2Uri = '${AppConstants.wavePayUri}?payment_id=${Uri.encodeComponent(paymentId)}&payment_platform=app';
+            final step2Response = await apiClient.getData(step2Uri, headers: headers, showToaster: false);
+            final step2Body = step2Response.body;
+            if (step2Response.statusCode == 200 && step2Body != null && step2Body['status'] == 'success') {
+              final data = step2Body['data'];
+              final checkoutUrl = data?['checkout_url'] as String? ?? data?['payment_url'] as String?;
+              if (checkoutUrl != null && checkoutUrl.isNotEmpty) {
+                if (mounted) setState(() => _paymentApiLoading = false);
+                selectedUrl = checkoutUrl;
+              } else {
+                if (mounted) setState(() => _paymentApiLoading = false);
+              }
+            } else if (step2Body != null && step2Body['status'] == 'error') {
+              final msg = step2Body['message'] as String? ?? '';
+              if (mounted) {
+                setState(() => _paymentApiLoading = false);
+                showCustomSnackBar((msg != null && msg.isNotEmpty) ? msg : 'orange_money_temporarily_unavailable'.tr);
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted) Get.back();
+                });
+              }
+              return;
+            } else {
+              if (mounted) setState(() => _paymentApiLoading = false);
+            }
           }
         }
       } catch (_) {
-        if (mounted) setState(() => _waveApiLoading = false);
+        if (mounted) setState(() => _paymentApiLoading = false);
       }
     }
 
@@ -153,7 +212,7 @@ class PaymentScreenState extends State<PaymentScreen> {
         body: Center(
           child: SizedBox(
             width: Dimensions.webMaxWidth,
-            child: _waveApiLoading && _isOrderPayment && _isWaveMethod
+            child: _paymentApiLoading && _isOrderPayment && (_isWaveMethod || _isOrangeMoneyMethod)
                 ? Center(
                     child: CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).primaryColor)),
                   )
@@ -192,8 +251,9 @@ class MyInAppBrowser extends InAppBrowser {
   final int? restaurantId;
   final int? packageId;
   final bool isDeliveryOrder;
+  final bool isOrangeMoney;
   MyInAppBrowser({required this.orderID, required this.orderAmount, required this.maxCodOrderAmount, this.contactNumber, super.windowId,
-    super.initialUserScripts, this.addFundUrl, this.subscriptionUrl, this.restaurantId, this.packageId, this.isDeliveryOrder = false});
+    super.initialUserScripts, this.addFundUrl, this.subscriptionUrl, this.restaurantId, this.packageId, this.isDeliveryOrder = false, this.isOrangeMoney = false});
 
   bool _canRedirect = true;
 
@@ -294,7 +354,35 @@ class MyInAppBrowser extends InAppBrowser {
       }
       return NavigationActionPolicy.CANCEL;
     }
-    // Intercepter les callbacks paiement : gérer dans l'app et ne pas charger dans la WebView
+    // Orange Money : ouvrir l'app Orange Money en externe SANS fermer la WebView.
+    // sameaosnapp:/mp/xxx peut afficher "page introuvable" → essayer d'abord l'URL HTTPS complète.
+    if (isOrangeMoney && _isOrangeMoneyUrl(url)) {
+      final pathMatch = RegExp(r'sameaosnapp:/+(mp/[a-zA-Z0-9_-]+)', caseSensitive: false).firstMatch(url);
+      final httpsUrl = pathMatch != null
+          ? 'https://sugu.orange-sonatel.com/${pathMatch.group(1)}'
+          : null;
+      bool launched = false;
+      if (httpsUrl != null) {
+        try {
+          launched = await launchUrl(Uri.parse(httpsUrl), mode: LaunchMode.externalApplication);
+        } catch (_) {}
+      }
+      if (!launched) {
+        final normalizedUrl = _normalizeOrangeMoneyUrl(url);
+        final omUri = Uri.tryParse(normalizedUrl);
+        if (omUri != null) {
+          try {
+            await launchUrl(omUri, mode: LaunchMode.externalApplication);
+          } catch (_) {}
+        }
+      }
+      return NavigationActionPolicy.CANCEL;
+    }
+    // Orange Money : ne pas intercepter payment-success/cancel/fail - le backend redirige vers fama://
+    if (isOrangeMoney && (url.contains('payment-success') || url.contains('payment-cancel') || url.contains('payment-fail'))) {
+      return NavigationActionPolicy.ALLOW;
+    }
+    // Autres paiements : intercepter les callbacks
     if (url.contains('payment-success') || url.contains('payment-fail') || url.contains('payment.wave.callback')) {
       _redirect(url, contactNumber, restaurantId, packageId);
       return NavigationActionPolicy.CANCEL;
@@ -321,13 +409,26 @@ class MyInAppBrowser extends InAppBrowser {
     } catch (_) {}
   }
 
+  /// Domaines autorisés pour les paiements (SSL) : backend + Orange Money (om.orange.sn), Wave, etc.
+  static const List<String> _paymentAllowedHosts = [
+    'aliceblue-herring-852976.hostingersite.com',
+    'om.orange.sn', 'orange.com', 'api.orange.com', 'api.orange-sonatel.com', 'sugu.orange-sonatel.com', 'orange.sn',
+    'wave.com', 'api.wave.com',
+  ];
+
+  static bool _isPaymentAllowedHost(String host) {
+    if (host.isEmpty) return false;
+    final mainHost = Uri.tryParse(AppConstants.webHostedUrl)?.host ?? '';
+    if (host == mainHost) return true;
+    return _paymentAllowedHosts.any((h) => host == h || host.endsWith('.$h'));
+  }
+
   /// Contournement temporaire : certificat SSL du serveur (Hostinger) non reconnu par Android.
-  /// À long terme, activer un certificat valide (ex. Let's Encrypt) sur le domaine.
+  /// Autorise aussi les domaines de paiement (Orange Money, Wave) pour les redirections.
   @override
   Future<ServerTrustAuthResponse?>? onReceivedServerTrustAuthRequest(URLAuthenticationChallenge challenge) async {
     final host = challenge.protectionSpace.host;
-    final allowedHost = Uri.tryParse(AppConstants.webHostedUrl)?.host ?? '';
-    if (host.isNotEmpty && allowedHost.isNotEmpty && host == allowedHost) {
+    if (_isPaymentAllowedHost(host)) {
       return ServerTrustAuthResponse(action: ServerTrustAuthResponseAction.PROCEED);
     }
     return ServerTrustAuthResponse(action: ServerTrustAuthResponseAction.CANCEL);
@@ -351,6 +452,29 @@ class MyInAppBrowser extends InAppBrowser {
     }
   }
 
+  /// Détecte les URLs qui ouvrent l'app Orange Money / Maxit (schémas courants).
+  /// Orange peut renvoyer sameaosnapp:/mp/xxx (un seul slash) ou sameaosnapp://mp/xxx.
+  static bool _isOrangeMoneyUrl(String url) {
+    final lower = url.toLowerCase();
+    return lower.startsWith('orange-money:') ||
+        lower.startsWith('orange_money:') ||
+        lower.startsWith('orangemoney:') ||
+        lower.startsWith('om:') ||
+        lower.startsWith('sameaosnapp:');
+  }
+
+  /// Normalise une URL Orange Money (ex. sameaosnapp:/mp/xxx → sameaosnapp://mp/xxx) pour url_launcher.
+  static String _normalizeOrangeMoneyUrl(String url) {
+    final lower = url.toLowerCase();
+    if (lower.startsWith('sameaosnapp:/') && !lower.startsWith('sameaosnapp://')) {
+      return url.replaceFirst('sameaosnapp:/', 'sameaosnapp://');
+    }
+    if (lower.startsWith('om:/') && !lower.startsWith('om://')) {
+      return url.replaceFirst(RegExp(r'om:/', caseSensitive: false), 'om://');
+    }
+    return url;
+  }
+
   static bool _isWaveCallbackSuccess(String url) {
     if (!url.contains('payment.wave.callback')) return false;
     final status = Uri.tryParse(url)?.queryParameters['status'];
@@ -364,6 +488,10 @@ class MyInAppBrowser extends InAppBrowser {
   }
 
   void _redirect(String url, String? contactNumber, int? restaurantId, int? packageId) {
+    // Orange Money : ne pas gérer payment-success/cancel/fail ici - le backend redirige vers fama://
+    if (isOrangeMoney && (url.contains('payment-success') || url.contains('payment-cancel') || url.contains('payment-fail'))) {
+      return;
+    }
 
     bool forSubscription = (subscriptionUrl != null && subscriptionUrl!.isNotEmpty && addFundUrl == '' && addFundUrl!.isEmpty);
 

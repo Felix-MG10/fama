@@ -54,11 +54,12 @@ class PaymentFailedDialog extends StatelessWidget {
               Get.find<SplashController>().configModel!.cashOnDelivery! ? CustomButtonWidget(
                 buttonText: 'switch_to_cash_on_delivery'.tr,
                 onPressed: () {
-                  if(maxCodOrderAmount == null || orderAmount! < maxCodOrderAmount!){
-                    double total = ((orderAmount! / 100) * Get.find<SplashController>().configModel!.loyaltyPointItemPurchasePoint!);
+                  final amt = orderAmount ?? 0;
+                  if (maxCodOrderAmount == null || amt < maxCodOrderAmount!) {
+                    double total = ((amt / 100) * (Get.find<SplashController>().configModel!.loyaltyPointItemPurchasePoint ?? 0));
                     orderController.switchToCOD(orderID, contactPersonNumber, points: total);
-                  }else{
-                    if(Get.isDialogOpen!) {
+                  } else {
+                    if (Get.isDialogOpen == true) {
                       Get.back();
                     }
                     showCustomSnackBar('${'you_cant_order_more_then'.tr} ${PriceConverter.convertPrice(maxCodOrderAmount)} ${'in_cash_on_delivery'.tr}');
@@ -69,6 +70,7 @@ class PaymentFailedDialog extends StatelessWidget {
               SizedBox(height: Get.find<SplashController>().configModel!.cashOnDelivery! ? Dimensions.paddingSizeLarge : 0),
               !orderController.isCancelLoading ? TextButton(
                 onPressed: () {
+                  if (orderID == null || orderID!.isEmpty) return;
                   Get.find<OrderController>().cancelOrder(int.parse(orderID!), 'Digital payment issue').then((success) {
                     if(success) {
                       Get.offAllNamed(RouteHelper.getInitialRoute());

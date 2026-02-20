@@ -967,6 +967,7 @@
   "restaurant_is_unavailable": "Restaurant is unavailable",
   "schedule": "Schedule",
   "currently_digital_payment_is_not_available": "Currently digital payment is not available",
+  "orange_money_temporarily_unavailable": "Orange Money is temporarily unavailable. Please try again or choose another payment method.",
   "all_food_items": "All Food Items",
   "this_is_my_refer_code": "This is my refer code",
   "instance_order_is_not_active": "Instance order is not active",
