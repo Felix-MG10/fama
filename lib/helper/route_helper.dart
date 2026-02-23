@@ -488,10 +488,14 @@ class RouteHelper {
     }),
     GetPage(name: address, page: () => getRoute(const AddressScreen())),
     GetPage(name: orderSuccess, page: () {
+      final amountParam = Get.parameters['amount'];
+      final amount = (amountParam != null && amountParam != 'null' && amountParam.isNotEmpty)
+          ? (double.tryParse(amountParam) ?? 0.0)
+          : 0.0;
       return getRoute(OrderSuccessfulScreen(
         orderID: Get.parameters['id'],
         status: Get.parameters['status'] != null ? (Get.parameters['status']!.contains('success') ? 1 : 0) : (Get.parameters['flag'] == 'success' ? 1 : 0),
-        totalAmount: Get.parameters['amount'] != null ? double.parse(Get.parameters['amount']!) : 0.0,
+        totalAmount: amount,
         contactPersonNumber: Get.parameters['contact_number'] != null && Get.parameters['contact_number'] != 'null'
             ? Get.parameters['contact_number']
             : Get.find<AuthController>().isGuestLoggedIn() ? Get.find<AuthController>().getGuestNumber() : null,

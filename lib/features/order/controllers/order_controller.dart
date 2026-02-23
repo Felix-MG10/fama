@@ -464,8 +464,10 @@ class OrderController extends GetxController implements GetxService {
     _isCancelLoading = false;
     Get.back();
     if (responseModel.isSuccess) {
-      OrderModel? orderModel = orderServiceInterface.findOrder(_runningOrderList, orderID);
-      _runningOrderList!.remove(orderModel);
+      final orderModel = orderServiceInterface.findOrder(_runningOrderList, orderID);
+      if (orderModel != null && _runningOrderList != null) {
+        _runningOrderList!.remove(orderModel);
+      }
       _showCancelled = true;
       showCustomSnackBar(responseModel.message, isError: false);
     } else {

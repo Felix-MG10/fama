@@ -37,7 +37,7 @@ double _getMinimumVersion() {
 }
 
 void _handleNavigation(NotificationBodyModel? notificationBody, DeepLinkBody? linkBody, [String? paymentOrderId, String? paymentStatus]) async {
-  if (paymentOrderId != null && paymentOrderId.isNotEmpty) {
+  if (paymentOrderId != null && paymentOrderId.isNotEmpty && paymentOrderId != '0' && int.tryParse(paymentOrderId) != 0) {
     final status = (paymentStatus?.toLowerCase() == 'success') ? 'success' : 'fail';
     Get.offNamed(RouteHelper.getOrderSuccessRoute(paymentOrderId, status, null, null, isDeliveryOrder: false));
   } else if (notificationBody != null && linkBody == null) {

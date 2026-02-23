@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:stackfood_multivendor/features/checkout/widgets/payment_failed_dialog.dart';
+import 'package:stackfood_multivendor/features/order/controllers/order_controller.dart';
 import 'package:stackfood_multivendor/features/dashboard/controllers/dashboard_controller.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
 import 'package:stackfood_multivendor/features/order/domain/models/order_model.dart';
@@ -38,7 +39,7 @@ class PaymentScreen extends StatefulWidget {
   PaymentScreenState createState() => PaymentScreenState();
 }
 
-class PaymentScreenState extends State<PaymentScreen> {
+class PaymentScreenState extends State<PaymentScreen> with WidgetsBindingObserver {
   late String selectedUrl;
   double value = 0.0;
   final bool _isLoading = true;
@@ -48,6 +49,7 @@ class PaymentScreenState extends State<PaymentScreen> {
 
   /// Flux Wave / Orange Money : API puis WebView pour intercepter Fama:// après paiement
   bool _paymentApiLoading = true;
+  bool _checkingOrderStatus = false;
 
   bool get _isOrderPayment => (widget.addFundUrl == null || widget.addFundUrl!.isEmpty) && (widget.subscriptionUrl == '' || widget.subscriptionUrl!.isEmpty);
   bool get _isWaveMethod => widget.paymentMethod.toLowerCase() == 'wave';
@@ -56,6 +58,7 @@ class PaymentScreenState extends State<PaymentScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
 
     if(_isOrderPayment) {
       final callbackUrl = Uri.encodeComponent('${AppConstants.baseUrl}/payment-success');
@@ -66,6 +69,43 @@ class PaymentScreenState extends State<PaymentScreen> {
       selectedUrl = widget.addFundUrl!;
     }
     _initData();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && !_checkingOrderStatus &&
+        _isOrderPayment && (_isWaveMethod || _isOrangeMoneyMethod)) {
+      _checkingOrderStatus = true;
+      Future.delayed(const Duration(milliseconds: 1500), () async {
+        if (!mounted) {
+          _checkingOrderStatus = false;
+          return;
+        }
+        await _checkPaymentStatusAndRedirect();
+        if (mounted) _checkingOrderStatus = false;
+      });
+    }
+  }
+
+  /// Fallback : quand l'utilisateur revient de Wave/Orange sans deep link, vérifier si la commande est payée.
+  Future<void> _checkPaymentStatusAndRedirect() async {
+    if (!mounted) return;
+    try {
+      final orderId = widget.orderModel.id.toString();
+      await Get.find<OrderController>().trackOrder(orderId, null, false, contactNumber: widget.contactNumber);
+      final trackModel = Get.find<OrderController>().trackModel;
+      if (mounted && trackModel != null && trackModel.paymentStatus == 'paid') {
+        final total = (widget.orderModel.orderAmount ?? 0) / 100 * (Get.find<SplashController>().configModel?.loyaltyPointItemPurchasePoint ?? 0);
+        Get.find<LoyaltyController>().saveEarningPoint(total.toStringAsFixed(0));
+        Get.offNamed(RouteHelper.getOrderSuccessRoute(orderId, 'success', widget.orderModel.orderAmount, widget.contactNumber, isDeliveryOrder: widget.orderModel.orderType == 'delivery'));
+      }
+    } catch (_) {}
   }
 
   Future<void> _initData() async {
@@ -86,12 +126,14 @@ class PaymentScreenState extends State<PaymentScreen> {
       final headers = Map<String, String>.from(apiClient.getHeader())..['Accept'] = 'application/json';
       try {
         if (_isOrangeMoneyMethod) {
-          // Orange Money : POST /test-orange (même URL que le test, avec order_id pour flux réel)
+          // Orange Money : POST /test-orange. callback_url = page backend vers laquelle Orange redirige après paiement.
+          // Le backend doit rediriger vers fama://... ou vers /payment-success pour que l'app affiche OrderSuccessfulScreen.
           final amount = (widget.orderModel.orderAmount ?? 0).toInt();
+          final callbackUrl = '${AppConstants.baseUrl}/payment-success?order_id=${widget.orderModel.id}';
           final body = {
             'order_id': widget.orderModel.id,
             'amount': amount,
-            'callback_url': AppConstants.baseUrl,
+            'callback_url': callbackUrl,
           };
           final response = await apiClient.postData(AppConstants.testOrangeBackendUri, body, headers: headers);
           final respBody = response.body;

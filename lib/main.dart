@@ -79,9 +79,16 @@ Future<void> main() async {
       }
       appLinks.uriLinkStream.listen((Uri u) {
         final p = _parsePaymentCallbackUri(u);
-        if (p != null && Get.currentRoute.isNotEmpty) {
+        if (p != null) {
           final status = (p.$2.toLowerCase() == 'success') ? 'success' : 'fail';
-          Get.offNamed(RouteHelper.getOrderSuccessRoute(p.$1, status, null, null, isDeliveryOrder: false));
+          // Délai pour laisser l'app restaurer la stack (retour Wave/Orange, possible cold start)
+          Future.delayed(const Duration(milliseconds: 1500), () {
+            try {
+              if (Get.key.currentState?.mounted == true) {
+                Get.offAllNamed(RouteHelper.getOrderSuccessRoute(p.$1, status, null, null, isDeliveryOrder: false));
+              }
+            } catch (_) {}
+          });
         }
       });
     } catch (_) {}
@@ -141,6 +148,8 @@ Future<void> main() async {
   final orderId = uri.queryParameters['order_id'];
   final status = uri.queryParameters['status'];
   if (orderId == null || orderId.isEmpty || status == null || status.isEmpty) return null;
+  // Rejeter order_id invalide (ex: 0) - le backend doit envoyer l'ID réel
+  if (orderId == '0' || int.tryParse(orderId) == 0) return null;
   return (orderId, status);
 }
 

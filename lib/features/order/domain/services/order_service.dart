@@ -121,14 +121,13 @@ class OrderService implements OrderServiceInterface {
 
   @override
   OrderModel? findOrder(List<OrderModel>? runningOrderList, int? orderID) {
-    OrderModel? orderModel;
-    for(OrderModel order in runningOrderList!) {
+    if (runningOrderList == null || orderID == null) return null;
+    for(OrderModel order in runningOrderList) {
       if(order.id == orderID) {
-        orderModel = order;
-        break;
+        return order;
       }
     }
-    return orderModel;
+    return null;
   }
 
   @override
