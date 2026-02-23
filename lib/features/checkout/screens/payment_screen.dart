@@ -378,9 +378,11 @@ class MyInAppBrowser extends InAppBrowser {
       }
       return NavigationActionPolicy.CANCEL;
     }
-    // Orange Money : ne pas intercepter payment-success/cancel/fail - le backend redirige vers fama://
+    // Orange Money : intercepter payment-success/fail/cancel pour rediriger vers OrderSuccessfulScreen.
+    // (Wave géré par le bloc suivant)
     if (isOrangeMoney && (url.contains('payment-success') || url.contains('payment-cancel') || url.contains('payment-fail'))) {
-      return NavigationActionPolicy.ALLOW;
+      _redirect(url, contactNumber, restaurantId, packageId);
+      return NavigationActionPolicy.CANCEL;
     }
     // Autres paiements : intercepter les callbacks
     if (url.contains('payment-success') || url.contains('payment-fail') || url.contains('payment.wave.callback')) {
@@ -488,11 +490,6 @@ class MyInAppBrowser extends InAppBrowser {
   }
 
   void _redirect(String url, String? contactNumber, int? restaurantId, int? packageId) {
-    // Orange Money : ne pas gérer payment-success/cancel/fail ici - le backend redirige vers fama://
-    if (isOrangeMoney && (url.contains('payment-success') || url.contains('payment-cancel') || url.contains('payment-fail'))) {
-      return;
-    }
-
     bool forSubscription = (subscriptionUrl != null && subscriptionUrl!.isNotEmpty && addFundUrl == '' && addFundUrl!.isEmpty);
 
     if(_canRedirect) {
@@ -501,7 +498,7 @@ class MyInAppBrowser extends InAppBrowser {
       bool isFailed = forSubscription ? url.startsWith('${AppConstants.baseUrl}/subscription-fail')
           : url.startsWith('${AppConstants.baseUrl}/payment-fail') || url.contains('payment-fail') || _isWaveCallbackFail(url);
       bool isCancel = forSubscription ? url.startsWith('${AppConstants.baseUrl}/subscription-cancel')
-          : url.startsWith('${AppConstants.baseUrl}/payment-cancel');
+          : url.startsWith('${AppConstants.baseUrl}/payment-cancel') || url.contains('payment-cancel');
       if (isSuccess || isFailed || isCancel) {
         _canRedirect = false;
         close();
