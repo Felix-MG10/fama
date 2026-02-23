@@ -33,6 +33,7 @@ class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
   String? orderId;
   final ScrollController scrollController = ScrollController();
   int _paymentCheckRetryCount = 0;
+  bool _resolvingOrderId = false;
   static const int _maxPaymentCheckRetries = 3;
   static const Duration _paymentCheckRetryDelay = Duration(seconds: 2);
 
@@ -45,10 +46,31 @@ class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
       oid = oid.split('?')[0].trim();
     }
     orderId = oid ?? '';
-    // Ne pas appeler track si order_id invalide (0 ou vide)
-    if (orderId != null && orderId!.isNotEmpty && orderId != '0') {
+
+    if ((orderId ?? '').isNotEmpty && orderId != '0' && int.tryParse(orderId ?? '') != 0) {
       Get.find<OrderController>().trackOrder(orderId!, null, false, contactNumber: widget.contactPersonNumber);
+    } else if (widget.status == 1) {
+      // order_id invalide (0) depuis callback Orange/Wave : récupérer la dernière commande en cours
+      _resolveLatestOrderAndTrack();
     }
+  }
+
+  Future<void> _resolveLatestOrderAndTrack() async {
+    if (_resolvingOrderId || !mounted) return;
+    _resolvingOrderId = true;
+    final orderController = Get.find<OrderController>();
+    await orderController.getRunningOrders(1);
+    if (!mounted) return;
+    final orders = orderController.runningOrderList;
+    if (orders != null && orders.isNotEmpty) {
+      final latestId = orders.first.id?.toString();
+      if (latestId != null) {
+        orderId = latestId;
+        orderController.trackOrder(latestId, null, false, contactNumber: widget.contactPersonNumber);
+      }
+    }
+    _resolvingOrderId = false;
+    if (mounted) setState(() {});
   }
 
   /// Retente le track quand on vient d'un callback succès (Orange/Wave) et que
@@ -104,9 +126,13 @@ class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
           }
         }
 
-        // order_id invalide (0, vide) OU track échoué (API 404)
+        // En cours de résolution (récup. dernière commande si order_id=0)
+        if (_resolvingOrderId || (orderController.isLoading && (orderId ?? '').isEmpty)) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        // order_id invalide ET pas de trackModel : afficher erreur uniquement si résolution terminée
         final invalidOrderId = (orderId ?? '').isEmpty || orderId == '0' || int.tryParse(orderId ?? '') == 0;
-        final trackFailed = invalidOrderId || (!orderController.isLoading && orderController.trackModel == null);
+        final trackFailed = invalidOrderId && !orderController.isLoading && orderController.trackModel == null;
         if (trackFailed) {
           return Center(child: SingleChildScrollView(
             child: FooterViewWidget(

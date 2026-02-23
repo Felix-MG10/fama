@@ -148,8 +148,6 @@ Future<void> main() async {
   final orderId = uri.queryParameters['order_id'];
   final status = uri.queryParameters['status'];
   if (orderId == null || orderId.isEmpty || status == null || status.isEmpty) return null;
-  // Rejeter order_id invalide (ex: 0) - le backend doit envoyer l'ID réel
-  if (orderId == '0' || int.tryParse(orderId) == 0) return null;
   return (orderId, status);
 }
 
