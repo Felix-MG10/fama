@@ -192,24 +192,25 @@ class _NewUserSetupScreenState extends State<NewUserSetupScreen> {
                       String number = _phoneController.text.trim();
 
                       String? countryCode = _countryDialCode;
-                      String? numberWithCountryCode;
+                      // Valeur brute envoyée à l'API (préfixe + numéro saisi) — ne pas l'écraser par phoneValid.phone qui peut être vide si le format est jugé invalide
+                      String? rawPhoneForApi;
                       PhoneValid phoneValid = PhoneValid(isValid: true, countryCode: countryCode ?? '', phone: '');
-                      if (number.isNotEmpty) {
-                        numberWithCountryCode = countryCode! + number;
-                        phoneValid = await CustomValidator.isPhoneValid(numberWithCountryCode);
-                        numberWithCountryCode = phoneValid.phone;
+                      if (number.isNotEmpty && countryCode != null) {
+                        rawPhoneForApi = countryCode + number;
+                        phoneValid = await CustomValidator.isPhoneValid(rawPhoneForApi);
                       }
 
                       if (_isSocial && number.isNotEmpty && !phoneValid.isValid && !_formKeyInfo!.currentState!.validate()) {
                         showCustomSnackBar('invalid_phone_number'.tr);
                       } else if(referCode.isNotEmpty && referCode.length != 10){
                         showCustomSnackBar('invalid_refer_code'.tr);
-                      }else if(_formKeyInfo!.currentState!.validate()) {
+                      } else if(_formKeyInfo!.currentState!.validate()) {
                         String? phoneValue;
                         if (widget.phone != null && widget.phone!.isNotEmpty) {
                           phoneValue = widget.phone;
-                        } else if (number.isNotEmpty) {
-                          phoneValue = numberWithCountryCode;
+                        } else if (number.isNotEmpty && rawPhoneForApi != null && rawPhoneForApi.isNotEmpty) {
+                          // Toujours envoyer le numéro saisi (avec indicatif) pour éviter "phone field is required" côté backend
+                          phoneValue = phoneValid.isValid ? phoneValid.phone : rawPhoneForApi;
                         }
                         authController.updatePersonalInfo(
                           name: name.isNotEmpty ? name : widget.name, phone: phoneValue,
