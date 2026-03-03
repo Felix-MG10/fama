@@ -476,10 +476,11 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     String? numberWithCountryCode;
     PhoneValid phoneValid = PhoneValid(isValid: true, countryCode: _countryDialCode ?? '', phone: '');
     
-    if (phoneNumber.isNotEmpty) {
-      numberWithCountryCode = _countryDialCode! + phoneNumber;
-      phoneValid = await CustomValidator.isPhoneValid(numberWithCountryCode);
-      numberWithCountryCode = phoneValid.phone;
+    if (phoneNumber.isNotEmpty && _countryDialCode != null) {
+      final rawPhone = _countryDialCode! + phoneNumber;
+      phoneValid = await CustomValidator.isPhoneValid(rawPhone);
+      // Ne pas écraser par phoneValid.phone (vide si format invalide) — garder la valeur saisie
+      numberWithCountryCode = phoneValid.isValid ? phoneValid.phone : rawPhone;
     }
 
     if (name.isEmpty) {

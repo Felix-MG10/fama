@@ -1368,5 +1368,6 @@
   "are_you_sure_you_want_to_clear_all_favourites" : "Are you sure you want to clear all favourites?",
   "confirm_address" : "Confirm Address",
   "no_zone_available" : "No zone available",
-  "no_vehicle_available" : "No vehicle available"
+  "no_vehicle_available" : "No vehicle available",
+  "phone_verification_failed_try_again" : "Phone verification failed. Please try again or test on a real device (simulator may have issues)."
 }

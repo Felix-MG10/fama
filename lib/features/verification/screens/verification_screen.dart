@@ -298,7 +298,8 @@ class VerificationScreenState extends State<VerificationScreen> {
         if(ResponsiveHelper.isDesktop(context)) {
           Get.offAllNamed(RouteHelper.getInitialRoute());
         } else {
-          Get.offNamed(RouteHelper.getAccessLocationRoute('verification'));
+          // offAllNamed pour vider la pile (SignUp, Verification) et rediriger proprement
+          Get.offAllNamed(RouteHelper.getAccessLocationRoute('verification'));
         }
       }
     }

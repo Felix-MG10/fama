@@ -407,9 +407,9 @@ class SignUpWidgetState extends State<SignUpWidget> {
     String? numberWithCountryCode;
     PhoneValid phoneValid = PhoneValid(isValid: true, countryCode: countryCode, phone: '');
     if (number.isNotEmpty) {
-      numberWithCountryCode = countryCode + number;
-      phoneValid = await CustomValidator.isPhoneValid(numberWithCountryCode);
-      numberWithCountryCode = phoneValid.phone;
+      final rawPhone = countryCode + number;
+      phoneValid = await CustomValidator.isPhoneValid(rawPhone);
+      numberWithCountryCode = phoneValid.isValid ? phoneValid.phone : rawPhone;
     }
 
     if(isDesktop){

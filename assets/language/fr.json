@@ -1364,5 +1364,6 @@
   "are_you_sure_you_want_to_clear_all_favourites": "Êtes-vous sûr de vouloir effacer tous les favoris ?",
   "confirm_address": "Confirmer l'adresse",
   "no_zone_available": "Aucune zone disponible",
-  "no_vehicle_available": "Aucun véhicule disponible"
+  "no_vehicle_available": "Aucun véhicule disponible",
+  "phone_verification_failed_try_again": "La vérification du numéro a échoué. Réessayez ou testez sur un appareil réel (le simulateur peut poser problème)."
 }
