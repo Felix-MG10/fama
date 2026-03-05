@@ -23,7 +23,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
-import 'package:stackfood_multivendor/util/test_orange_backend.dart';
 
 class MenuScreen extends StatefulWidget {
   const MenuScreen({super.key});
@@ -287,21 +286,6 @@ class _MenuScreenState extends State<MenuScreen> {
                     borderColor: Theme.of(context).primaryColor.withValues(alpha: 0.1),
                     padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeDefault),
                     child: Column(children: [
-                      if (kDebugMode)
-                        PortionWidget(
-                          icon: Images.helpIcon,
-                          title: '🧪 Test Orange API',
-                          route: '',
-                          onTap: () async {
-                            await testOrangeBackend();
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Test envoyé — voir la console debug (print)')),
-                              );
-                            }
-                          },
-                          hideDivider: false,
-                        ),
                       PortionWidget(icon: Images.chatIcon, title: 'live_chat'.tr, route: RouteHelper.getConversationRoute()),
                       PortionWidget(icon: Images.helpIcon, title: 'help_and_support'.tr, route: RouteHelper.getSupportRoute()),
                       PortionWidget(icon: Images.aboutIcon, title: 'about_us'.tr, route: RouteHelper.getAboutUsRoute()),
