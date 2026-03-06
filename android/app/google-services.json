@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "888957940076-kmae8kd6g02srmu753dn39ql1cqjvidn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dakarapps.fama",
+            "certificate_hash": "33ff8f5e68a5ff96865e54e04557cd8985620725"
+          }
+        },
+        {
           "client_id": "888957940076-o7kflqmht38hj9ol584upenjb241iq46.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -73,6 +81,42 @@
             "certificate_hash": "2c3cd7518b721f1bc7afd96098bf9e320f31316d"
           }
         },
+        {
+          "client_id": "888957940076-9onlai64nlmabp2po96163ntlfqoc2kv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDKFPeONsJTzc9OcNRnexNCItpqVX41UhE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "888957940076-9onlai64nlmabp2po96163ntlfqoc2kv.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "888957940076-6tc802adt6gtmlvpipcbr2hmstfk6igu.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.dakarapps.fama"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:888957940076:android:b78c4290befb5830ca8349",
+        "android_client_info": {
+          "package_name": "com.dakarapps.famadelivery"
+        }
+      },
+      "oauth_client": [
         {
           "client_id": "888957940076-9onlai64nlmabp2po96163ntlfqoc2kv.apps.googleusercontent.com",
           "client_type": 3

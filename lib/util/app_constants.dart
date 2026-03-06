@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 
 class AppConstants {
   static const String appName = 'Fama';
-  static const double appVersion = 8.6; ///Flutter SDK: 3.38.2
+  static const double appVersion = 8.8; ///Flutter SDK: 3.38.9
 
   static const String fontFamily = 'Roboto';
   static const bool payInWevView = false;
@@ -40,6 +40,7 @@ class AppConstants {
   static const String removeAddressUri = '/api/v1/customer/address/delete?address_id=';
   static const String addAddressUri = '/api/v1/customer/address/add';
   static const String updateAddressUri = '/api/v1/customer/address/update/';
+  static const String markDefaultUri = '/api/v1/customer/address/set-default';
   static const String setMenuUri = '/api/v1/products/set-menu';
   static const String customerInfoUri = '/api/v1/customer/info';
   static const String couponUri = '/api/v1/coupon/list';
@@ -51,15 +52,6 @@ class AppConstants {
   static const String orderCancelUri = '/api/v1/customer/order/cancel';
   static const String codSwitchUri = '/api/v1/customer/order/payment-method';
   static const String orderDetailsUri = '/api/v1/customer/order/details?order_id=';
-  /// Étape 1 Wave : crée PaymentRequest, retourne JSON avec payment_id
-  static const String paymentMobileUri = '/payment-mobile';
-  /// Étape 2 Wave : retourne JSON avec deep_link, checkout_url, urls (success/fail/cancel)
-  static const String wavePayUri = '/payment/wave/pay';
-  /// Orange Money : initie le paiement et retourne checkout_url (comme Wave) — ancien flux
-  static const String orangeMoneyPayUri = '/payment/orange_money/pay';
-  /// Orange Money : POST /test-orange { order_id?, amount?, callback_url? }
-  /// Mode test : { amount: 300 } | Paiement réel : { order_id, amount, callback_url }
-  static const String testOrangeBackendUri = '/test-orange';
   static const String wishListGetUri = '/api/v1/customer/wish-list';
   static const String addWishListUri = '/api/v1/customer/wish-list/add?';
   static const String removeWishListUri = '/api/v1/customer/wish-list/remove?';
@@ -105,6 +97,7 @@ class AppConstants {
   static const String restaurantRecommendedItemUri = '/api/v1/products/recommended';
   static const String vehicleChargeUri = '/api/v1/vehicle/extra_charge';
   static const String vehiclesUri = '/api/v1/get-vehicles';
+  static const String shiftsUri = '/api/v1/dm-shifts';
   static const String productListWithIdsUri = '/api/v1/customer/food-list';
   static const String recentlyViewedRestaurantUri = '/api/v1/restaurants/recently-viewed-restaurants';
   static const String subscriptionListUri = '/api/v1/customer/subscription';
@@ -185,6 +178,8 @@ class AppConstants {
   static const String maintenanceModeTopic = 'maintenance_mode_user_app';
   static const String demoResetTopic = 'stackfood_demo_reset';
   static const String configCacheKey = 'stackfood_config_cache';
+  static const String suggestLogin = 'stackfood_login_suggestion';
+  static const String searchCuisineHistory = 'search_cuisine_history';
 
 
   ///Refer & Earn work flow list..
@@ -206,13 +201,10 @@ class AppConstants {
   /// Deep Links
   static const String yourScheme = 'StackFood';
   static const String yourHost = 'stackfood.com';
-  /// Deep link pour le callback paiement Wave. Le backend doit rediriger payment-success
-  /// vers: Fama://stackfood.com/payment-callback?status=success&order_id=XXX
-  static const String paymentCallbackPath = '/payment-callback';
 
   /// Languages
   static List<LanguageModel> languages = [
-    LanguageModel(imageUrl: Images.french, languageName: 'French', countryCode: 'FR', languageCode: 'fr'),
+        LanguageModel(imageUrl: Images.french, languageName: 'French', countryCode: 'FR', languageCode: 'fr'),
     LanguageModel(imageUrl: Images.english, languageName: 'English', countryCode: 'US', languageCode: 'en'),
     LanguageModel(imageUrl: Images.arabic, languageName: 'عربى', countryCode: 'SA', languageCode: 'ar'),
     LanguageModel(imageUrl: Images.spanish, languageName: 'Spanish', countryCode: 'ES', languageCode: 'es'),

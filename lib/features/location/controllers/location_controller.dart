@@ -117,9 +117,6 @@ class LocationController extends GetxController implements GetxService {
     _zoneID = responseModel.zoneIds.isNotEmpty ? responseModel.zoneIds[0] : 0;
     if(updateInAddress && responseModel.isSuccess) {
       AddressModel address = AddressHelper.getAddressFromSharedPref()!;
-      address.zoneId = responseModel.zoneIds.isNotEmpty ? responseModel.zoneIds[0] : 0;
-      address.zoneIds = [];
-      address.zoneIds!.addAll(responseModel.zoneIds);
       address.zoneData = responseModel.zoneData;
       AddressHelper.saveAddressInSharedPref(address);
     }

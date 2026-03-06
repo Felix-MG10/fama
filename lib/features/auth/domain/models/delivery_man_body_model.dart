@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class DeliveryManBodyModel {
   String? fName;
   String? lName;
@@ -9,6 +11,7 @@ class DeliveryManBodyModel {
   String? earning;
   String? zoneId;
   String? vehicleId;
+  List<int>? shiftIds;
 
   DeliveryManBodyModel(
       {this.fName,
@@ -21,6 +24,7 @@ class DeliveryManBodyModel {
         this.earning,
         this.zoneId,
         this.vehicleId,
+        this.shiftIds
       });
 
   DeliveryManBodyModel.fromJson(Map<String, dynamic> json) {
@@ -48,6 +52,9 @@ class DeliveryManBodyModel {
     data['earning'] = earning!;
     data['zone_id'] = zoneId!;
     data['vehicle_id'] = vehicleId!;
+    if (shiftIds != null && shiftIds!.isNotEmpty) {
+      data['shifts'] = jsonEncode(shiftIds);
+    }
     return data;
   }
 }

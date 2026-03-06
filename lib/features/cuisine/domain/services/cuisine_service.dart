@@ -26,7 +26,22 @@ class CuisineService implements CuisineServiceInterface {
   }
 
   @override
-  Future<CuisineRestaurantModel?> getRestaurantList(int offset, int cuisineId) async {
-    return await cuisineRepositoryInterface.getRestaurantList(offset, cuisineId);
+  Future<CuisineRestaurantModel?> getRestaurantList(int offset, int cuisineId, {String? name, String? query}) async {
+    return await cuisineRepositoryInterface.getRestaurantList(offset, cuisineId, name: name, query: query);
+  }
+
+  @override
+  Future<bool> saveSearchHistory(List<String> searchHistories) async {
+    return await cuisineRepositoryInterface.saveSearchHistory(searchHistories);
+  }
+
+  @override
+  List<String> getSearchHistory() {
+    return cuisineRepositoryInterface.getSearchHistory();
+  }
+
+  @override
+  Future<bool> clearSearchHistory() async {
+    return cuisineRepositoryInterface.clearSearchHistory();
   }
 }

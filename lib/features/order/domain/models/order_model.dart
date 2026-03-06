@@ -89,6 +89,7 @@ class OrderModel {
   OrderReference? orderReference;
   double? bringChangeAmount;
   int? itemCampaignId;
+  bool? isPos;
 
   OrderModel({
     this.id,
@@ -146,6 +147,7 @@ class OrderModel {
     this.orderReference,
     this.bringChangeAmount,
     this.itemCampaignId,
+    this.isPos,
   });
 
   OrderModel.fromJson(Map<String, dynamic> json) {
@@ -218,6 +220,7 @@ class OrderModel {
     orderReference = json['order_reference'] != null ? OrderReference.fromJson(json['order_reference']) : null;
     bringChangeAmount = json['bring_change_amount']?.toDouble();
     itemCampaignId = json['item_campaign_id'];
+    isPos = json['is_pos'];
   }
 
   Map<String, dynamic> toJson() {
@@ -290,6 +293,7 @@ class OrderModel {
     }
     data['bring_change_amount'] = bringChangeAmount;
     data['item_campaign_id'] = itemCampaignId;
+    data['is_pos'] = isPos;
     return data;
   }
 }

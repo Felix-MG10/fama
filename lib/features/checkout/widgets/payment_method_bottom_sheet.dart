@@ -57,26 +57,12 @@ class _PaymentMethodBottomSheetState extends State<PaymentMethodBottomSheet> {
       if(walletBalance < widget.totalPrice){
         canSelectWallet = false;
       }
-      if(Get.find<CheckoutController>().isPartialPay){
-        notHideWallet = false;
-        if(Get.find<SplashController>().configModel!.partialPaymentMethod! == 'cod'){
-          notHideCod = true;
-          notHideDigital = false;
-          notHideOffline = false;
-        } else if(Get.find<SplashController>().configModel!.partialPaymentMethod! == 'digital_payment'){
-          notHideCod = false;
-          notHideDigital = true;
-          notHideOffline = false;
-        } else if(Get.find<SplashController>().configModel!.partialPaymentMethod! == 'offline_payment'){
-          notHideCod = false;
-          notHideDigital = false;
-          notHideOffline = true;
-        } else if(Get.find<SplashController>().configModel!.partialPaymentMethod! == 'both'){
-          notHideCod = true;
-          notHideDigital = true;
-          notHideOffline = true;
-        }
-      } else {
+        if(Get.find<CheckoutController>().isPartialPay){
+          notHideWallet = false;
+          notHideCod = Get.find<SplashController>().configModel!.partialPaymentMethod!.contains('cash_on_delivery');
+          notHideDigital = Get.find<SplashController>().configModel!.partialPaymentMethod!.contains('digital_payment');
+          notHideOffline = Get.find<SplashController>().configModel!.partialPaymentMethod!.contains('offline_payment');
+        } else {
         notHideWallet = false;
         notHideCod = true;
         notHideDigital = true;
@@ -151,7 +137,7 @@ class _PaymentMethodBottomSheetState extends State<PaymentMethodBottomSheet> {
 
                       checkoutController.subscriptionOrder || !notHideCod ? SizedBox() : changeAmountView(checkoutController),
 
-                      widget.isDigitalPaymentActive && notHideDigital && !checkoutController.subscriptionOrder ? Container(
+                      widget.isDigitalPaymentActive && notHideDigital && !checkoutController.subscriptionOrder && Get.find<SplashController>().configModel!.activePaymentMethodList!.isNotEmpty ? Container(
                         padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(Dimensions.radiusSmall),

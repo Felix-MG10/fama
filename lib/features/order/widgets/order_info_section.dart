@@ -45,7 +45,6 @@ class OrderInfoSection extends StatelessWidget {
   Widget build(BuildContext context) {
     bool isDesktop = ResponsiveHelper.isDesktop(context);
     bool isGuestLoggedIn = Get.find<AuthController>().isGuestLoggedIn();
-    ExpansibleController expansionTileController = ExpansibleController();
 
     bool pending = order.orderStatus == OrderStatus.pending.name;
     bool accepted = order.orderStatus == OrderStatus.accepted.name;
@@ -87,7 +86,18 @@ class OrderInfoSection extends StatelessWidget {
                 alignment: Alignment.centerLeft,
                 child: Padding(
                   padding: EdgeInsets.only(top: Dimensions.paddingSizeSmall, left: Dimensions.paddingSizeLarge, bottom: Dimensions.paddingSizeSmall),
-                  child: Text(subscription ? 'subscription_details'.tr : 'general_info'.tr, style: robotoMedium),
+                  child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                    Text(subscription ? 'subscription_details'.tr : 'general_info'.tr, style: robotoMedium),
+
+                    (order.isPos ?? false) ? Container(
+                      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                      ),
+                      child: Text('pos_order'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall)),
+                    ) : const SizedBox(),
+                  ]),
                 ),
               ),
 
@@ -104,97 +114,6 @@ class OrderInfoSection extends StatelessWidget {
               ),
 
             ]) : const SizedBox(),
-
-            /*Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-              ),
-              child: Column(
-                children: [
-                  Center(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.asset(
-                        order.orderStatus == 'pending' ? Images.pendingDineIn
-                            : (order.orderStatus == 'confirmed') ? Images.confirmDineIn
-                            : order.orderStatus == 'processing' ? Images.cookingDineIn
-                            : order.orderStatus == 'handover' ? Images.preparingFoodOrderDetails
-                            : Images.servedDineIn,
-                        height: 200),
-                    ),
-                  ),
-
-                  Center(child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall, horizontal: Dimensions.paddingSizeLarge),
-                    child: order.orderStatus == 'pending' ? Text(
-                      'your_order_is_pending_please_wait_for_restaurant_confirmation'.tr,
-                      textAlign: TextAlign.center, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeLarge*//*, color: Theme.of(context).disabledColor*//*),
-                    ) : order.orderStatus == 'processing' ? Column(children: [
-                      Text(
-                        'your_food_is_almost_ready'.tr,
-                        textAlign: TextAlign.center, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeLarge*//*, color: Theme.of(context).disabledColor*//*),
-                      ),
-
-                      Row(mainAxisSize: MainAxisSize.min, children: [
-
-                        Text(
-                          DateConverter.differenceInMinute(order.restaurant!.deliveryTime, order.createdAt, order.processingTime, order.scheduleAt, fromDineIn: true, processing: order.processing) < 5 ? '1 - 5'
-                              : '${DateConverter.differenceInMinute(order.restaurant!.deliveryTime, order.createdAt, order.processingTime, order.scheduleAt, fromDineIn: true, processing: order.processing)-5} '
-                              '- ${DateConverter.differenceInMinute(order.restaurant!.deliveryTime, order.createdAt, order.processingTime, order.scheduleAt, fromDineIn: true, processing: order.processing)}',
-                          style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge), textDirection: TextDirection.ltr,
-                        ),
-                        const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-
-                        Text('min'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge, color: Theme.of(context).textTheme.bodyMedium!.color)),
-                      ]),
-
-                    ]) : order.orderStatus == 'confirmed' ? RichText(
-                      textAlign: TextAlign.center,
-                      text: TextSpan(children: [
-                        TextSpan(text: 'your_dine_in_order_is_confirmed_please_make_sure_to_arrive_on_time'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeLarge - 1, color: Theme.of(context).textTheme.bodyMedium!.color)),
-                        TextSpan(text: ' - ', style: robotoBold.copyWith(color: Theme.of(context).textTheme.bodyMedium!.color)),
-                        TextSpan(
-                          text: DateConverter.dateTimeStringToDateTime(order.scheduleAt!),
-                          style: robotoMedium.copyWith(fontSize:Dimensions.fontSizeLarge - 1, color: Theme.of(context).textTheme.bodyMedium!.color),
-                        ),
-                      ]),
-                    ) : order.orderStatus == 'handover' ? DateConverter.differenceInMinute(null, order.createdAt, null, order.scheduleAt) > 0 ? Column(children: [
-                      Text(
-                        'your_food_is_ready_to_serve_you_are'.tr,
-                        textAlign: TextAlign.center, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeLarge*//*, color: Theme.of(context).disabledColor*//*),
-                      ),
-
-                      Row(mainAxisSize: MainAxisSize.min, children: [
-
-                        Text(
-                          DateConverter.differenceInMinute(null, order.createdAt, null, order.scheduleAt) < 5 ? '1 - 5 ${'min'.tr}'
-                              : DateConverter.convertMinutesToDayHourMinute(DateConverter.differenceInMinute(null, order.createdAt, null, order.scheduleAt)),
-                          style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge), textDirection: TextDirection.ltr,
-                        ),
-                        // const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-
-                        // Text('min'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge, color: Theme.of(context).textTheme.bodyMedium!.color)),
-                      ]),
-
-                      Text(
-                        'away_from_restaurant_hurry_up'.tr,
-                        textAlign: TextAlign.center, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeLarge*//*, color: Theme.of(context).disabledColor*//*),
-                      ),
-
-                    ]) : Text(
-                      'your_food_is_ready_to_serve_hurry_up'.tr,
-                      textAlign: TextAlign.center, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeLarge*//*, color: Theme.of(context).disabledColor*//*),
-                    ) : Text(
-                      'enjoy_your_meal'.tr,
-                      textAlign: TextAlign.center, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeLarge*//*, color: Theme.of(context).disabledColor*//*),
-                    ),
-                  )),
-
-                  SizedBox(height: Dimensions.paddingSizeDefault),
-
-                ],
-              ),
-            ),*/
 
             Container(
               decoration: BoxDecoration(
@@ -287,8 +206,40 @@ class OrderInfoSection extends StatelessWidget {
 
           ]) : CustomCard(
             isBorder: false,
-            borderRadius: 0,
-            child: Row(children: [
+            borderRadius: isDesktop ? Dimensions.radiusDefault : 0,
+            child: isDesktop ? Column(children: [
+              SizedBox(height: Dimensions.paddingSizeSmall),
+
+              Text('${subscription ? 'subscription'.tr : 'order'.tr} # ${order.id.toString()}', style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault)),
+
+              Text('${'your_order_is'.tr} ${order.orderStatus}', style: robotoMedium.copyWith(color: Theme.of(context).primaryColor, fontSize: Dimensions.fontSizeSmall)),
+              SizedBox(height: Dimensions.paddingSizeLarge),
+
+              ClipRRect(
+                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                child: Image.asset(
+                  pending ? Images.pendingOrderDetails : (confirmed || processing || handover) ? Images.preparingFoodOrderDetails : Images.animateDeliveryMan,
+                  height: 100, width: 100,
+                ),
+              ),
+              SizedBox(height: Dimensions.paddingSizeDefault),
+
+              Text('your_food_will_delivered_within'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Theme.of(context).disabledColor)),
+              const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+
+              Row(mainAxisSize: MainAxisSize.min, children: [
+                Text(
+                  DateConverter.differenceInMinute(order.restaurant!.deliveryTime, order.createdAt, order.processingTime, order.scheduleAt) < 5 ? '1 - 5'
+                      : '${DateConverter.differenceInMinute(order.restaurant!.deliveryTime, order.createdAt, order.processingTime, order.scheduleAt)-5} '
+                      '- ${DateConverter.differenceInMinute(order.restaurant!.deliveryTime, order.createdAt, order.processingTime, order.scheduleAt)}',
+                  style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge), textDirection: TextDirection.ltr,
+                ),
+                const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+
+                Text('min'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge, color: Theme.of(context).primaryColor)),
+              ]),
+              SizedBox(height: Dimensions.paddingSizeSmall),
+            ]) : Row(children: [
 
               ClipRRect(
                 borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
@@ -318,11 +269,11 @@ class OrderInfoSection extends StatelessWidget {
             ]),
           ) : const SizedBox() : const SizedBox(),
           SizedBox(height: DateConverter.isBeforeTime(order.scheduleAt) || isDineIn ? (!cancelled && ongoing && !subscription) ?
-          isDineIn ? Dimensions.paddingSizeSmall : Dimensions.paddingSizeSmall : 0 : 0),
+          isDineIn ? Dimensions.paddingSizeDefault : Dimensions.paddingSizeDefault : 0 : 0),
 
           pastOrder ? CustomCard(
             isBorder: false,
-            borderRadius: 0,
+            borderRadius: isDesktop ? Dimensions.radiusDefault : 0,
             padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeSmall),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
@@ -333,15 +284,26 @@ class OrderInfoSection extends StatelessWidget {
               ),
             ),
           ): const SizedBox(),
-          SizedBox(height: pastOrder ? Dimensions.paddingSizeSmall : 0),
+          SizedBox(height: pastOrder ? Dimensions.paddingSizeDefault : 0),
 
           CustomCard(
             isBorder: false,
-            borderRadius: 0,
+            borderRadius: isDesktop ? Dimensions.radiusDefault : 0,
             padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeSmall),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
-              Text(subscription ? 'subscription_details'.tr : 'general_info'.tr, style: robotoSemiBold),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                Text(subscription ? 'subscription_details'.tr : 'general_info'.tr, style: robotoSemiBold),
+
+                (order.isPos ?? false) ? Container(
+                  padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                  ),
+                  child: Text('pos_order'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall)),
+                ) : const SizedBox(),
+              ]),
               SizedBox(height: Dimensions.paddingSizeLarge),
 
               subscription ? Row(children: [
@@ -411,10 +373,11 @@ class OrderInfoSection extends StatelessWidget {
 
               subscription ? const Divider(height: Dimensions.paddingSizeExtraLarge) : const SizedBox(),
 
-              order.scheduled == 1 ? Row(children: [
+              order.scheduled == 1 ? Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                 Text('${'scheduled_at'.tr}:', style: robotoRegular),
                 const SizedBox(width: Dimensions.paddingSizeExtraSmall),
-                Text(DateConverter.dateTimeStringToDateTime(order.scheduleAt!), style: robotoMedium),
+
+                Text(DateConverter.dateTimeStringToDateTime(order.scheduleAt!), style: robotoRegular),
               ]) : const SizedBox(),
               order.scheduled == 1 ? const Divider(height: Dimensions.paddingSizeLarge) : const SizedBox(),
 
@@ -926,11 +889,11 @@ class OrderInfoSection extends StatelessWidget {
 
         ]),
       ) : const SizedBox(),
-      const SizedBox(height: Dimensions.paddingSizeSmall),
+      const SizedBox(height: Dimensions.paddingSizeDefault),
 
       isDineIn ? SizedBox() : CustomCard(
         isBorder: false,
-        borderRadius: 0,
+        borderRadius: isDesktop ? Dimensions.radiusDefault : 0,
         padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeSmall),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
@@ -1016,109 +979,51 @@ class OrderInfoSection extends StatelessWidget {
       ),
       const SizedBox(height: Dimensions.paddingSizeSmall),
 
-      !isDesktop ? CustomCard(
-        isBorder: false,
-        borderRadius: 0,
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      !isDesktop ? Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          childrenPadding: EdgeInsets.zero,
+          initiallyExpanded: true,
+          tilePadding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
+          title: Row(
+            children: [
+              Text(
+                'item_info'.tr,
+                style: robotoSemiBold,
+              ),
+              SizedBox(width: Dimensions.paddingSizeExtraSmall),
 
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeSmall),
-            child: Row(
-              children: [
-                Text('item_info'.tr, style: robotoSemiBold),
-                SizedBox(width: Dimensions.paddingSizeExtraSmall),
-
-                Container(
-                  padding: EdgeInsets.all(5),
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Text(orderController.orderDetails!.length.toString(), style: robotoRegular.copyWith(color: Theme.of(context).primaryColor)),
+              Container(
+                padding: EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
                 ),
-              ],
-            ),
+                child: Text(orderController.orderDetails!.length.toString(), style: robotoRegular.copyWith(color: Theme.of(context).primaryColor)),
+              ),
+            ],
           ),
-          Padding(padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge), child: Divider()),
+          children: <Widget>[
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: orderController.orderDetails!.length,
+              itemBuilder: (context, index) {
+                return Column(children: [
+                  OrderProductWidget(order: order, orderDetails: orderController.orderDetails![index], itemLength: orderController.orderDetails!.length, index: index),
 
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: orderController.orderDetails!.length,
-            itemBuilder: (context, index) {
-              return Column(children: [
-                OrderProductWidget(order: order, orderDetails: orderController.orderDetails![index], itemLength: orderController.orderDetails!.length, index: index),
-
-                index == orderController.orderDetails!.length - 1 ? const SizedBox() : const Divider(height: Dimensions.paddingSizeLarge),
-              ]);
-            },
-          ),
-        ]),
-      ) : const SizedBox(),
-      const SizedBox(height: Dimensions.paddingSizeSmall),
-
-     /* isDesktop && !isDineIn ? Padding(
-        padding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
-        child: Text('delivery_details'.tr, style: robotoMedium),
-      ) : const SizedBox(),
-
-      !isDineIn ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-
-        !isDesktop ? Padding(
-          padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeSmall),
-          child: Text('delivery_details'.tr, style: robotoMedium),
-        ) : const SizedBox(),
-
-        Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(isDesktop ? Dimensions.radiusDefault : 0),
-            boxShadow: [BoxShadow(color: isDesktop ? Colors.black.withValues(alpha: 0.05) : Theme.of(context).primaryColor.withValues(alpha: 0.05), blurRadius: 10)],
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeSmall),
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-
-            InkWell(
-              onTap: () {
-                if(order.restaurant != null && order.restaurant!.latitude != null && order.restaurant!.longitude != null){
-                  Get.toNamed(RouteHelper.getMapRoute(
-                    AddressModel(
-                      id: order.restaurant?.id, address: order.restaurant?.address, latitude: order.restaurant?.latitude,
-                      longitude: order.restaurant?.longitude, contactPersonNumber: '', contactPersonName: '', addressType: '',
-                    ), 'restaurant',
-                  ));
-                }else {
-                  showCustomSnackBar('unable_to_launch_google_map'.tr);
-                }
+                  index == orderController.orderDetails!.length - 1 ? const SizedBox() : const Divider(height: Dimensions.paddingSizeLarge),
+                ]);
               },
-              child: DeliveryDetails(from: true, address: order.restaurant?.address ?? ''),
             ),
-            const Divider(height: Dimensions.paddingSizeLarge),
-
-            InkWell(
-              onTap: () async {
-                if(order.deliveryAddress != null && order.deliveryAddress!.latitude != null && order.deliveryAddress!.longitude != null){
-                  Get.toNamed(RouteHelper.getMapRoute(
-                    AddressModel(
-                      id: order.deliveryAddress?.id, address: order.deliveryAddress?.address, latitude: order.deliveryAddress?.latitude,
-                      longitude: order.deliveryAddress?.longitude, contactPersonNumber: '', contactPersonName: '', addressType: '',
-                    ), 'user',
-                  ));
-                }else {
-                  showCustomSnackBar('unable_to_launch_google_map'.tr);
-                }
-              },
-              child: DeliveryDetails(from: false, address: order.deliveryAddress?.address ?? ''),
-            ),
-          ]),
+          ],
         ),
-
-      ]) : const SizedBox(),
-      const SizedBox(height: Dimensions.paddingSizeSmall),*/
+      ) : const SizedBox(),
+      const SizedBox(height: Dimensions.paddingSizeDefault),
 
       CustomCard(
         isBorder: false,
-        borderRadius: 0,
+        borderRadius: isDesktop ? Dimensions.radiusDefault : 0,
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
           Padding(
@@ -1235,11 +1140,11 @@ class OrderInfoSection extends StatelessWidget {
           ),
         ]),
       ),
-      const SizedBox(height: Dimensions.paddingSizeSmall),
+      const SizedBox(height: Dimensions.paddingSizeDefault),
 
       order.deliveryMan != null ? CustomCard(
         isBorder: false,
-        borderRadius: 0,
+        borderRadius: isDesktop ? Dimensions.radiusDefault : 0,
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         
           Padding(
@@ -1318,7 +1223,7 @@ class OrderInfoSection extends StatelessWidget {
 
       CustomCard(
         isBorder: false,
-        borderRadius: 0,
+        borderRadius: isDesktop ? Dimensions.radiusDefault : 0,
         padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeSmall),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
@@ -1343,7 +1248,7 @@ class OrderInfoSection extends StatelessWidget {
             SizedBox(height: (!isDesktop && order.paymentMethod != 'offline_payment') ? Dimensions.paddingSizeSmall : 0),
 
             order.paymentMethod == 'offline_payment'  || (order.paymentMethod == 'partial_payment' && orderController.trackModel!.offlinePayment != null)
-            ? offlineView(context, orderController, expansionTileController, ongoing, contactNumber) :  Row(children: [
+            ? offlineView(context, orderController, ongoing, contactNumber) :  Row(children: [
 
               Image.asset(
                 order.paymentMethod == 'cash_on_delivery' ? Images.cash : order.paymentMethod == 'wallet' ? Images.wallet
@@ -1368,7 +1273,7 @@ class OrderInfoSection extends StatelessWidget {
   }
 }
 
-Widget offlineView(BuildContext context, OrderController orderController, ExpansibleController controller, bool ongoing, String? contactNumber) {
+Widget offlineView(BuildContext context, OrderController orderController, bool ongoing, String? contactNumber) {
   return ListTileTheme(
     contentPadding: const EdgeInsets.all(0),
     dense: true,
@@ -1377,7 +1282,6 @@ Widget offlineView(BuildContext context, OrderController orderController, Expans
     child: Theme(
       data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
       child: ExpansionTile(
-        controller: controller,
         leading: Image.asset(
           Images.cash, width: 20, height: 20,
         ),

@@ -141,6 +141,7 @@ class CustomTextFieldWidgetState extends State<CustomTextFieldWidget> {
             focusNode: widget.focusNode,
             textAlign: widget.textAlign,
             validator: widget.validator,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
             style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeLarge),
             textInputAction: widget.inputAction,
             keyboardType: widget.isAmount ? TextInputType.number : widget.inputType,
@@ -217,7 +218,6 @@ class CustomTextFieldWidgetState extends State<CustomTextFieldWidget> {
                       onChanged: widget.onCountryChanged,
                       initialSelection: widget.countryDialCode,
                       favorite: [widget.countryDialCode ?? ''],
-                      countryFilter: ['US', 'FR', 'SN', 'GA'],
                       enabled: Get.find<SplashController>().configModel?.countryPickerStatus,
                       dialogBackgroundColor: Theme.of(context).cardColor,
                       textStyle: robotoRegular.copyWith(

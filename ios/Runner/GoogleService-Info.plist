@@ -3,23 +3,21 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>888957940076-6tc802adt6gtmlvpipcbr2hmstfk6igu.apps.googleusercontent.com</string>
+	<string>491987943015-8enep3h58pfk6da9oc17rv2iqostjvln.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.888957940076-6tc802adt6gtmlvpipcbr2hmstfk6igu</string>
-	<key>ANDROID_CLIENT_ID</key>
-	<string>888957940076-7lpn4asd642i2p0j37aaevir3u49qmm9.apps.googleusercontent.com</string>
+	<string>com.googleusercontent.apps.491987943015-8enep3h58pfk6da9oc17rv2iqostjvln</string>
 	<key>API_KEY</key>
-	<string>AIzaSyDy5nfIUMY3CtIM0n6VudwKNC-exZnHw_8</string>
+	<string>AIzaSyBzHWIQp_RVmD4zN5lSCnBy1SPkvfHrIMQ</string>
 	<key>GCM_SENDER_ID</key>
-	<string>888957940076</string>
+	<string>491987943015</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
 	<string>com.dakarapps.fama</string>
 	<key>PROJECT_ID</key>
-	<string>fama-7db84</string>
+	<string>stackmart-500c7</string>
 	<key>STORAGE_BUCKET</key>
-	<string>fama-7db84.firebasestorage.app</string>
+	<string>stackmart-500c7.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -31,6 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:888957940076:ios:1e14e64ee2a5f49aca8349</string>
+	<string>1:491987943015:ios:a52cf155c77290d78f1ec2</string>
 </dict>
 </plist>

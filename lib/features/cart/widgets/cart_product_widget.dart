@@ -201,11 +201,18 @@ class _CartProductWidgetState extends State<CartProductWidget> {
                                     showRemoveIcon: widget.cart.quantity! == 1,
                                   ),
 
-                                   AnimatedFlipCounter(
-                                    duration: const Duration(milliseconds: 500),
-                                    value: widget.cart.quantity!.toDouble(),
-                                    textStyle: robotoMedium.copyWith(fontSize: Dimensions.fontSizeExtraLarge),
-                                  ),
+                                   Container(
+                                     padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraSmall),
+                                     decoration: BoxDecoration(
+                                       borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                                       border: Border.all(color: Theme.of(context).disabledColor.withValues(alpha: 0.5)),
+                                     ),
+                                     child: AnimatedFlipCounter(
+                                      duration: const Duration(milliseconds: 500),
+                                      value: widget.cart.quantity!.toDouble(),
+                                      textStyle: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge),
+                                     ),
+                                   ),
 
                                   QuantityButton(
                                     onTap: cartController.isLoading ? (){} : () => cartController.setQuantity(true, widget.cart),

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:stackfood_multivendor/api/api_client.dart';
 import 'package:stackfood_multivendor/api/local_client.dart';
 import 'package:stackfood_multivendor/common/enums/data_source_enum.dart';
@@ -10,7 +11,8 @@ import 'package:get/get_connect/connect.dart';
 
 class CuisineRepository implements CuisineRepositoryInterface {
   final ApiClient apiClient;
-  CuisineRepository({required this.apiClient});
+  final SharedPreferences sharedPreferences;
+  CuisineRepository({required this.apiClient, required this.sharedPreferences});
 
   @override
   Future add(value) {
@@ -51,9 +53,17 @@ class CuisineRepository implements CuisineRepositoryInterface {
   }
 
   @override
-  Future<CuisineRestaurantModel?> getRestaurantList(int offset, int cuisineId) async {
+  Future<CuisineRestaurantModel?> getRestaurantList(int offset, int cuisineId, {String? name, String? query}) async {
     CuisineRestaurantModel? cuisineRestaurantsModel;
-    Response response = await apiClient.getData('${AppConstants.cuisineRestaurantUri}?cuisine_id=$cuisineId&offset=$offset&limit=10');
+    StringBuffer mainUrl = StringBuffer();
+    mainUrl.write('${AppConstants.cuisineRestaurantUri}?cuisine=$cuisineId&offset=$offset&limit=${(name == null || name.isEmpty) ? 10 : 30}');
+
+     if (name != null && name.isNotEmpty) mainUrl.write('&name=$name');
+     if (query != null && query.isNotEmpty) mainUrl.write('&filter_data=$query');
+
+     Response response = await apiClient.getData(mainUrl.toString());
+
+    // Response response = await apiClient.getData('${AppConstants.cuisineRestaurantUri}?cuisine_id=$cuisineId&offset=$offset&limit=10');
     if(response.statusCode == 200) {
       cuisineRestaurantsModel = CuisineRestaurantModel.fromJson(response.body);
     }
@@ -63,6 +73,21 @@ class CuisineRepository implements CuisineRepositoryInterface {
   @override
   Future update(Map<String, dynamic> body, int? id) {
     throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> saveSearchHistory(List<String> searchHistories) async {
+    return await sharedPreferences.setStringList(AppConstants.searchCuisineHistory, searchHistories);
+  }
+
+  @override
+  List<String> getSearchHistory() {
+    return sharedPreferences.getStringList(AppConstants.searchCuisineHistory) ?? [];
+  }
+
+  @override
+  Future<bool> clearSearchHistory() async {
+    return sharedPreferences.setStringList(AppConstants.searchCuisineHistory, []);
   }
 
 }

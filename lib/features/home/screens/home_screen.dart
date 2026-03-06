@@ -254,7 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                 children: [
                                                   Flexible(
                                                     child: Text(
-                                                      AddressHelper.getAddressFromSharedPref()!.address!,
+                                                      AddressHelper.getAddressFromSharedPref()?.address??'',
                                                       style: robotoRegular.copyWith(
                                                         color: Theme.of(context).cardColor, fontSize: Dimensions.fontSizeSmall/* - (scrollingRate * Dimensions.fontSizeSmall)*/,
                                                       ),

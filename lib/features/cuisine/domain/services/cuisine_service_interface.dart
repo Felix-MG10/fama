@@ -5,5 +5,8 @@ import 'package:stackfood_multivendor/features/cuisine/domain/models/cuisine_res
 abstract class CuisineServiceInterface{
   Future<CuisineModel?> getCuisineList({DataSourceEnum? source});
   List<int?> generateCuisineIds(CuisineModel? cuisineModel);
-  Future<CuisineRestaurantModel?> getRestaurantList(int offset, int cuisineId);
+  Future<CuisineRestaurantModel?> getRestaurantList(int offset, int cuisineId, {String? name, String? query});
+  Future<bool> saveSearchHistory(List<String> searchHistories);
+  List<String> getSearchHistory();
+  Future<bool> clearSearchHistory();
 }

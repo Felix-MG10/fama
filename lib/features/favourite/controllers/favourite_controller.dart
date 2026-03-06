@@ -113,11 +113,11 @@ class FavouriteController extends GetxController implements GetxService {
     _wishRestIdList = [];
   }
 
-  Future<void> clearAll() async {
+  Future<void> clearAll({required bool isFood}) async {
     _isLoading = true;
     update();
 
-    Response response = await favouriteServiceInterface.clearAll();
+    Response response = await favouriteServiceInterface.clearAll(isFood: isFood);
     if (response.statusCode == 200) {
       _wishProductList = [];
       _wishProductIdList = [];

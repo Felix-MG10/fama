@@ -13,7 +13,6 @@ import 'package:stackfood_multivendor/features/wallet/controllers/wallet_control
 import 'package:stackfood_multivendor/helper/route_helper.dart';
 import 'package:stackfood_multivendor/common/enums/user_type.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:stackfood_multivendor/util/app_constants.dart';
@@ -56,14 +55,15 @@ class NotificationHelper {
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       debugPrint("onMessage: ${message.data}, type: ${message.data['type']}");
 
-      if(!kReleaseMode && message.data['type'] == AppConstants.demoResetTopic) {
+      if(message.data['type'] == AppConstants.demoResetTopic) {
         Get.dialog(const DemoResetDialogWidget(), barrierDismissible: false);
       }else if(message.data['type'] == 'maintenance'){
         Get.find<SplashController>().getConfigData(handleMaintenanceMode: true);
       }
       if(message.data['type'] == 'message' && Get.currentRoute.startsWith(RouteHelper.messages)) {
         if(Get.find<AuthController>().isLoggedIn()) {
-          Get.find<ChatController>().getConversationList(1, fromTab: false);
+          Get.find<ChatController>().getConversationList(1, type: Get.find<ChatController>().type);
+          Get.find<ChatController>().getAdminConversationList();
           if(Get.find<ChatController>().messageModel!.conversation!.id.toString() == message.data['conversation_id'].toString()) {
             Get.find<ChatController>().getMessages(
               1, NotificationBodyModel(
@@ -79,7 +79,8 @@ class NotificationHelper {
         }
       }else if(message.data['type'] == 'message' && Get.currentRoute.startsWith(RouteHelper.conversation)) {
         if(Get.find<AuthController>().isLoggedIn()) {
-          Get.find<ChatController>().getConversationList(1, fromTab: false);
+          Get.find<ChatController>().getConversationList(1, type: Get.find<ChatController>().type);
+          Get.find<ChatController>().getAdminConversationList();
         }
         NotificationHelper.showNotification(message, flutterLocalNotificationsPlugin);
       }else if(message.data['type'] == 'add_fund'){

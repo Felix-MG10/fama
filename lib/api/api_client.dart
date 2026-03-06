@@ -31,13 +31,10 @@ class ApiClient extends GetxService {
     AddressModel? addressModel;
     try {
       addressModel = AddressModel.fromJson(jsonDecode(sharedPreferences.getString(AppConstants.userAddress)!));
-      if(kDebugMode) {
-        debugPrint('Adresse chargée - zoneIds: ${addressModel?.zoneIds}, zoneId: ${addressModel?.zoneId}');
-      }
     }catch(_) {}
     updateHeader(
-      token, addressModel?.zoneIds,
-      sharedPreferences.getString(AppConstants.languageCode), addressModel?.latitude,
+        token, addressModel?.zoneIds,
+        sharedPreferences.getString(AppConstants.languageCode), addressModel?.latitude,
         addressModel?.longitude
     );
   }
@@ -51,15 +48,8 @@ class ApiClient extends GetxService {
       AppConstants.longitude: longitude != null ? jsonEncode(longitude) : '0',
       'Authorization': 'Bearer $token'
     });
-    if(zoneIDs != null && zoneIDs.isNotEmpty) {
+    if(zoneIDs != null) {
       header.addAll({AppConstants.zoneId: jsonEncode(zoneIDs)});
-      if(kDebugMode) {
-        debugPrint('Header zoneId ajouté: ${AppConstants.zoneId} = ${jsonEncode(zoneIDs)}');
-      }
-    } else {
-      if(kDebugMode) {
-        debugPrint('Header zoneId NON ajouté - zoneIDs: $zoneIDs');
-      }
     }
     if(setHeader) {
       _mainHeaders = header;
@@ -143,8 +133,44 @@ class ApiClient extends GetxService {
                 ),
               );
             } else {
-              request.files.add(http.MultipartFile(file.key, file.file!.files.first.readStream!, file.file!.files.first.size,
-                  filename: basename(file.file!.files.first.name)));
+              PlatformFile platformFile = file.file!.files.first;
+
+              if(platformFile.bytes != null) {
+                request.files.add(
+                  http.MultipartFile.fromBytes(
+                    file.key,
+                    platformFile.bytes!,
+                    filename: platformFile.name,
+                    contentType: _getMediaType(platformFile.name),
+                  ),
+                );
+                print('====> Added file using bytes: ${platformFile.name}');
+              }
+              // Option 2: If readStream is available, read it to bytes first
+              else if(platformFile.readStream != null) {
+                try {
+                  // Read all bytes from stream
+                  List<int> bytes = [];
+                  await for (var chunk in platformFile.readStream!) {
+                    bytes.addAll(chunk);
+                  }
+
+                  Uint8List fileBytes = Uint8List.fromList(bytes);
+
+                  request.files.add(
+                    http.MultipartFile.fromBytes(
+                      file.key,
+                      fileBytes,
+                      filename: platformFile.name,
+                      contentType: _getMediaType(platformFile.name),
+                    ),
+                  );
+                  print('====> Added file using stream (converted to bytes): ${platformFile.name}, size: ${fileBytes.length}');
+                } catch (e) {
+                  print('ERROR reading stream for ${platformFile.name}: $e');
+                }
+              }
+              // Op
             }
           } else {
             File other = File(file.file!.files.single.path!);
@@ -161,6 +187,28 @@ class ApiClient extends GetxService {
     } catch (e) {
       return Response(statusCode: 1, statusText: noInternetMessage);
     }
+  }
+
+  // Helper method to get MediaType from filename
+  MediaType? _getMediaType(String filename) {
+    String extension = filename.split('.').last.toLowerCase();
+
+    Map<String, String> mimeTypes = {
+      'pdf': 'application/pdf',
+      'doc': 'application/msword',
+      'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'jpg': 'image/jpeg',
+      'jpeg': 'image/jpeg',
+      'png': 'image/png',
+    };
+
+    String? mimeType = mimeTypes[extension];
+    if (mimeType != null) {
+      List<String> parts = mimeType.split('/');
+      return MediaType(parts[0], parts[1]);
+    }
+
+    return null;
   }
 
   Future<Response> putData(String uri, dynamic body, {Map<String, String>? headers, bool handleError = true}) async {
@@ -211,6 +259,8 @@ class ApiClient extends GetxService {
         response0 = Response(statusCode: response0.statusCode, body: response0.body, statusText: errorResponse.errors![0].message);
       }else if(response0.body.toString().startsWith('{message')) {
         response0 = Response(statusCode: response0.statusCode, body: response0.body, statusText: response0.body['message']);
+      }else if(response0.body.toString().startsWith('{errors: {message:')) {
+        response0 = Response(statusCode: response0.statusCode, body: response0.body, statusText: response0.body['errors']['message']);
       }
     }else if(response0.statusCode != 200 && response0.body == null) {
       response0 = Response(statusCode: 0, statusText: noInternetMessage);

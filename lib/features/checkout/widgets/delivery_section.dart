@@ -1,11 +1,14 @@
 import 'package:stackfood_multivendor/common/widgets/custom_bottom_sheet_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_text_field_widget.dart';
+import 'package:stackfood_multivendor/features/address/controllers/address_controller.dart';
+import 'package:stackfood_multivendor/features/address/domain/models/address_model.dart';
 import 'package:stackfood_multivendor/features/checkout/controllers/checkout_controller.dart';
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
 import 'package:stackfood_multivendor/features/checkout/widgets/delivery_info_fields.dart';
 import 'package:stackfood_multivendor/features/checkout/widgets/saved_address_bottom_sheet.dart';
 import 'package:stackfood_multivendor/features/location/controllers/location_controller.dart';
 import 'package:stackfood_multivendor/helper/address_helper.dart';
+import 'package:stackfood_multivendor/helper/auth_helper.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:stackfood_multivendor/util/images.dart';
@@ -47,7 +50,16 @@ class _DeliverySectionState extends State<DeliverySection> {
   void initState() {
     super.initState();
     widget.checkoutController.setShowMoreDetails(false, willUpdate: false);
-    widget.checkoutController.insertAddresses(AddressHelper.getAddressFromSharedPref());
+    if (AuthHelper.isLoggedIn()&& Get.find<AddressController>().addressList != null && Get.find<AddressController>().addressList!.isNotEmpty) {
+      try {
+        AddressModel? addressModel = Get.find<AddressController>().addressList!.firstWhere((address) => address.isDefault!);
+        widget.checkoutController.insertAddresses(addressModel);
+      } catch (e) {
+        widget.checkoutController.insertAddresses(Get.find<AddressController>().addressList!.first);
+      }
+    } else {
+      widget.checkoutController.insertAddresses(AddressHelper.getAddressFromSharedPref());
+    }
   }
 
   @override
@@ -108,19 +120,21 @@ class _DeliverySectionState extends State<DeliverySection> {
                 ),
                 const SizedBox(width: Dimensions.paddingSizeSmall),
 
-                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(
-                    checkoutController.addressType.tr,
-                    style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault),
-                  ),
-                  const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(
+                      checkoutController.addressType.tr,
+                      style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault),
+                    ),
+                    const SizedBox(height: Dimensions.paddingSizeExtraSmall),
 
-                  Text(
-                    checkoutController.addressController.text,
-                    style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).disabledColor),
-                    maxLines: 1, overflow: TextOverflow.ellipsis,
-                  ),
-                ]),
+                    Text(
+                      checkoutController.addressController.text,
+                      style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).disabledColor),
+                      maxLines: 2, overflow: TextOverflow.ellipsis,
+                    ),
+                  ]),
+                ),
               ]),
             ),
             SizedBox(height: checkoutController.streetNumberController.text.isNotEmpty || checkoutController.houseController.text.isNotEmpty || checkoutController.floorController.text.isNotEmpty ? Dimensions.paddingSizeDefault : 0),

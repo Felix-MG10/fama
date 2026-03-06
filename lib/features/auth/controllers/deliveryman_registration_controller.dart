@@ -1,3 +1,4 @@
+import 'package:stackfood_multivendor/features/auth/domain/models/shift_model.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
 import 'package:stackfood_multivendor/api/api_client.dart';
 import 'package:stackfood_multivendor/features/splash/domain/models/config_model.dart';
@@ -29,9 +30,6 @@ class DeliverymanRegistrationController extends GetxController implements GetxSe
   List<XFile> _pickedIdentities = [];
   List<XFile> get pickedIdentities => _pickedIdentities;
 
-  double _dmStatus = 0.1;
-  double get dmStatus => _dmStatus;
-
   bool _lengthCheck = false;
   bool get lengthCheck => _lengthCheck;
 
@@ -55,6 +53,12 @@ class DeliverymanRegistrationController extends GetxController implements GetxSe
 
   List<VehicleModel>? _vehicles;
   List<VehicleModel>? get vehicles => _vehicles;
+
+  List<ShiftModel>? _shifts;
+  List<ShiftModel>? get shifts => _shifts;
+
+  List<ShiftModel> _selectedShifts = [];
+  List<ShiftModel> get selectedShifts => _selectedShifts;
 
   List<int?>? _vehicleIds;
   List<int?>? get vehicleIds => _vehicleIds;
@@ -165,11 +169,56 @@ class DeliverymanRegistrationController extends GetxController implements GetxSe
     }
   }
 
-  void dmStatusChange(double value, {bool isUpdate = true}){
-    _dmStatus = value;
-    if(isUpdate) {
-      update();
+  Future<void> getShiftList() async {
+    _isLoading = true;
+    update();
+    List<ShiftModel>? shifts = await deliverymanRegistrationServiceInterface.getShiftList();
+    if (shifts != null) {
+      _shifts = shifts;
     }
+    _isLoading = false;
+    update();
+  }
+
+  void toggleShift(ShiftModel shift) {
+    if (_selectedDmTypeId == 'salary_based') {return;}
+    if (_selectedShifts.any((deliveryManShift) => deliveryManShift.id == shift.id)) {
+      _selectedShifts.removeWhere((deliveryManShift) => deliveryManShift.id == shift.id);
+    } else {
+      _selectedShifts.add(shift);
+    }
+    update();
+  }
+
+  void removeShift(ShiftModel shift) {
+    _selectedShifts.removeWhere((deliveryManShift) => deliveryManShift.id == shift.id);
+    update();
+  }
+
+  bool isShiftSelected(ShiftModel shift) {
+    return _selectedShifts.any((deliveryManShift) => deliveryManShift.id == shift.id);
+  }
+
+  void clearSelectedShifts() {
+    _selectedShifts.clear();
+    update();
+  }
+
+  void setDeliverymanType(String? typeId) {
+    _selectedDmTypeId = typeId;
+    if (typeId == 'salary_based' && _shifts != null) {
+      ShiftModel? fullDayShift = _shifts!.firstWhereOrNull((shift) => shift.isFullDay == 1);
+      if (fullDayShift != null) {
+        _selectedShifts = [fullDayShift];
+      }
+    } else {
+      _selectedShifts.clear();
+    }
+    update();
+  }
+
+  List<int> getSelectedShiftIds() {
+    return _selectedShifts.map((shift) => shift.id!).toList();
   }
 
   void validPassCheck(String pass, {bool isUpdate = true}) {
@@ -320,21 +369,19 @@ class DeliverymanRegistrationController extends GetxController implements GetxSe
   void resetDmRegistrationData(){
     _selectedTabIndex = 0;
     _pickedImage = null;
-    _pickedIdentities = [];
     _selectedIdentityType = null;
     _selectedDmType = null;
     _selectedDmTypeId = null;
     _selectedVehicleId = null;
     _selectedDeliveryZoneId = null;
-    _pickedImage = null;
     _pickedIdentities = [];
-    _dmStatus = 0.4;
     _showPassView = false;
     _lengthCheck = false;
     _numberCheck = false;
     _uppercaseCheck = false;
     _lowercaseCheck = false;
     _spatialCheck = false;
+    _selectedShifts = [];
   }
 
 }

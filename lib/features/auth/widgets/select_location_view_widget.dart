@@ -2,8 +2,6 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_asset_image_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_text_field_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/validate_check.dart';
 import 'package:stackfood_multivendor/features/auth/widgets/zone_selection_widget.dart';
 import 'package:stackfood_multivendor/features/location/controllers/location_controller.dart';
 import 'package:stackfood_multivendor/features/location/widgets/permission_dialog.dart';
@@ -79,12 +77,14 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
               widget.fromView ? ZoneSelectionWidget(restaurantRegController: restaurantRegController, zoneList: zoneList, callBack: (){
                 _setPolygon(restaurantRegController.zoneList![restaurantRegController.selectedZoneIndex!]);
               }) : const SizedBox(),
-              widget.fromView ? const SizedBox(height: Dimensions.paddingSizeExtraLarge) : const SizedBox(),
+              widget.fromView ? const SizedBox(height: Dimensions.paddingSizeDefault) : const SizedBox(),
 
+              widget.fromView ? Text('set_precious_location_on_map_for_your_exact_pickup_location'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).hintColor)) : const SizedBox(),
+              widget.fromView ? const SizedBox(height: Dimensions.paddingSizeDefault) : const SizedBox(),
 
               mapView(restaurantRegController),
 
-              !restaurantRegController.inZone ? Padding(
+              !restaurantRegController.inZone && widget.fromView ? Padding(
                 padding: const EdgeInsets.only(top: 5.0),
                 child: Row(children: [
                   Text('* ', style: robotoBold.copyWith(color: Colors.red)),
@@ -93,22 +93,6 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
               ) : const SizedBox(),
 
               !isDesktop ? SizedBox(height: !widget.fromView ? Dimensions.paddingSizeSmall : 0) : const SizedBox(),
-
-              SizedBox(height: widget.fromView ? Dimensions.paddingSizeOverLarge : 0),
-
-              widget.fromView && !isDesktop ? CustomTextFieldWidget(
-                titleText: 'write_restaurant_address'.tr,
-                controller: widget.addressController,
-                focusNode: widget.addressFocus,
-                inputAction: TextInputAction.done,
-                inputType: TextInputType.text,
-                capitalization: TextCapitalization.sentences,
-                maxLines: 3,
-                showTitle: isDesktop,
-                required: true,
-                labelText: 'restaurant_address'.tr,
-                validator: (value) => ValidateCheck.validateEmptyText(value, "restaurant_address_field_is_required".tr),
-              ) : const SizedBox(),
 
             ]),
           )),
@@ -119,15 +103,15 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
 
   Widget mapView(RestaurantRegistrationController restaurantRegController) {
     return restaurantRegController.zoneList!.isNotEmpty ? Container(
-      height: ResponsiveHelper.isDesktop(context) ? widget.fromView ? 180 : MediaQuery.of(context).size.height * 0.8
-          : widget.fromView ? 150 : (context.height * 0.87),
+      height: ResponsiveHelper.isDesktop(context) ? widget.fromView ? 220 : MediaQuery.of(context).size.height * 0.8
+          : widget.fromView ? 340 : (context.height * 0.87),
       width: MediaQuery.of(context).size.width,
       decoration: widget.fromView ? BoxDecoration(
-        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-        border: Border.all(width: 1, color: Theme.of(context).primaryColor),
+        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+        border: Border.all(color: Theme.of(context).hintColor.withValues(alpha: 0.3)),
       ) : null,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
         child: Stack(clipBehavior: Clip.none, children: [
           GoogleMap(
             initialCameraPosition: CameraPosition(
@@ -143,6 +127,7 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
             mapToolbarEnabled: false,
             myLocationEnabled: false,
             zoomGesturesEnabled: true,
+            webCameraControlEnabled: false,
             polygons: _polygone,
             onCameraIdle: () {
               restaurantRegController.setLocation(
@@ -170,7 +155,9 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
           const Center(child: CustomAssetImageWidget(Images.picRestaurantMarker, height: 50, width: 50)),
 
           Positioned(
-            top: widget.fromView ? 10 : 20, left: widget.fromView ? 10 : 20, right: widget.fromView ? null : 20,
+            top: widget.fromView ? 10 : 20,
+            left: ResponsiveHelper.isDesktop(context) && widget.fromView ? null : widget.fromView ? 10 : 20,
+            right: widget.fromView ? 10 : 30,
             child: LocationSearchDialog(
               mapController: _mapController,
               pickedLocation: restaurantRegController.restaurantAddress.toString(),
@@ -187,7 +174,7 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
                 }
               },
               child: Container(
-                height: widget.fromView ? 30 : 40, width: 200,
+                height: widget.fromView ? 30 : 40, width: widget.fromView ? 200 : context.width,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(widget.fromView ? Dimensions.radiusSmall : 50),
                   color: Theme.of(context).cardColor,
@@ -196,8 +183,8 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
                 padding: const EdgeInsets.only(left: 10),
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  (GetPlatform.isWeb && !widget.fromView) ? restaurantRegController.restaurantAddress.toString() : 'search'.tr,
-                  style: robotoRegular.copyWith(color: Theme.of(context).hintColor),
+                  /*(!widget.fromView) ? */restaurantRegController.restaurantAddress.toString()/* : 'search_here'.tr*/,
+                  style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall), maxLines: 1, overflow: TextOverflow.ellipsis
                 ),
               ),
             ),
@@ -209,7 +196,7 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
           ) : const SizedBox(),
 
           widget.fromView ? Positioned(
-            bottom: 50, right: 0,
+            bottom: 130, right: 0,
             child: InkWell(
               onTap: () {
                 if(ResponsiveHelper.isDesktop(context)) {
@@ -233,7 +220,7 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
           ) : const SizedBox(),
 
           Positioned(
-            bottom: widget.fromView ? 10 : 210, right: 0,
+            bottom: widget.fromView ? 90 : 200, right: 0,
             child: InkWell(
               onTap: () => _checkPermission(() {
                   Get.find<LocationController>().getCurrentLocation(false, mapController: _mapController);
@@ -242,13 +229,13 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
                 padding: EdgeInsets.all(widget.fromView ? Dimensions.paddingSizeExtraSmall : Dimensions.paddingSizeSmall),
                 margin: const EdgeInsets.only(right: Dimensions.paddingSizeDefault),
                 decoration: BoxDecoration(borderRadius: BorderRadius.circular(50), color: Colors.white),
-                child: Icon(Icons.my_location_outlined, color: Theme.of(context).primaryColor, size: widget.fromView ? 20 : 25),
+                child: Icon(Icons.my_location_outlined, color: Theme.of(context).primaryColor, size: 20),
               ),
             ),
           ),
 
-          !widget.fromView ? Positioned(
-            bottom: 100, right: 0,
+          Positioned(
+            bottom: widget.fromView ? 10 : 110, right: widget.fromView ? -5 : 0,
             child: Container(
               margin: const EdgeInsets.only(right: Dimensions.paddingSizeDefault),
               decoration: BoxDecoration(
@@ -270,7 +257,7 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
                       ),
                     );
                   },
-                  child: const Icon(Icons.add, size: 25),
+                  child: Icon(Icons.add, size: ResponsiveHelper.isDesktop(context) ? 15 : 20),
                 ),
                 const Divider(),
 
@@ -287,11 +274,11 @@ class _SelectLocationViewWidgetState extends State<SelectLocationViewWidget> {
                       ),
                     );
                   },
-                  child: const Icon(Icons.remove, size: 25),
+                  child: Icon(Icons.remove, size: ResponsiveHelper.isDesktop(context) ? 15 : 20),
                 ),
               ]),
             ),
-          ) : const SizedBox(),
+          ),
 
           !widget.fromView ? Positioned(
             left: 20, right: 20, bottom: ResponsiveHelper.isDesktop(context) ? 40 : 20,

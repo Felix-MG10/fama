@@ -11,11 +11,8 @@ plugins {
 
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")
-val keystorePropertiesExist = keystorePropertiesFile.exists()
-if (keystorePropertiesExist) {
-    FileInputStream(keystorePropertiesFile).use { input ->
-        keystoreProperties.load(input)
-    }
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
 android {
@@ -44,48 +41,16 @@ android {
 
     signingConfigs {
         create("release") {
-            if (keystorePropertiesExist) {
-                val keyAlias = keystoreProperties["keyAlias"] as String?
-                val keyPassword = keystoreProperties["keyPassword"] as String?
-                val storeFile = keystoreProperties["storeFile"] as String?
-                val storePassword = keystoreProperties["storePassword"] as String?
-                
-                // Debug: afficher les valeurs lues
-                println("DEBUG - keyAlias: $keyAlias")
-                println("DEBUG - keyPassword: ${if (keyPassword != null) "***" else "null"}")
-                println("DEBUG - storeFile: $storeFile")
-                println("DEBUG - storePassword: ${if (storePassword != null) "***" else "null"}")
-                
-                if (keyAlias != null && keyPassword != null && storeFile != null && storePassword != null) {
-                    val resolvedStoreFile = rootProject.file(storeFile)
-                    println("DEBUG - Chemin resolue du keystore: ${resolvedStoreFile.absolutePath}")
-                    println("DEBUG - Keystore existe: ${resolvedStoreFile.exists()}")
-                    
-                    this.keyAlias = keyAlias
-                    this.keyPassword = keyPassword
-                    this.storeFile = resolvedStoreFile
-                    this.storePassword = storePassword
-                    println("✅ Configuration de signature release appliquee avec succes!")
-                } else {
-                    println("⚠️  ATTENTION: key.properties existe mais contient des valeurs manquantes. Utilisation de la signature de debug.")
-                    println("   Valeurs manquantes: keyAlias=${keyAlias == null}, keyPassword=${keyPassword == null}, storeFile=${storeFile == null}, storePassword=${storePassword == null}")
-                }
-            } else {
-                println("⚠️  ATTENTION: key.properties n'existe pas. Utilisation de la signature de debug.")
-                println("📝 Pour créer un keystore de release, suivez les instructions dans INSTRUCTIONS_SIGNATURE.md")
-            }
+            keyAlias = keystoreProperties["keyAlias"] as String?
+            keyPassword = keystoreProperties["keyPassword"] as String?
+            storeFile = keystoreProperties["storeFile"]?.let { file(it as String) }
+            storePassword = keystoreProperties["storePassword"] as String?
         }
     }
 
     buildTypes {
         getByName("release") {
-            val releaseSigningConfig = signingConfigs.getByName("release")
-            if (releaseSigningConfig.storeFile != null && releaseSigningConfig.storeFile!!.exists()) {
-                signingConfig = releaseSigningConfig
-            } else {
-                println("⚠️  Utilisation de la signature de debug pour le build release.")
-                signingConfig = signingConfigs.getByName("debug")
-            }
+            signingConfig = signingConfigs.getByName("debug") // or "release" if you have real keystore
         }
     }
 }

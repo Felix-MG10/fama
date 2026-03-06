@@ -30,11 +30,12 @@ class _SupportScreenState extends State<SupportScreen> {
     bool isDesktop = ResponsiveHelper.isDesktop(context);
 
     return Scaffold(
+      backgroundColor: Theme.of(context).cardColor,
       appBar: CustomAppBarWidget(title: 'help_and_support'.tr),
       endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
       body: isDesktop ? Center(
         child: SingleChildScrollView(
-          child: const FooterViewWidget(child: SizedBox( width: double.infinity, height: 650, child: WebSupportScreen())),
+          child: const FooterViewWidget(child: SizedBox(width: double.infinity, child: WebSupportScreen())),
         )) : SingleChildScrollView(
           child: Column(children: [
 
@@ -60,13 +61,12 @@ class _SupportScreenState extends State<SupportScreen> {
             const SizedBox(height: 50),
 
             Container(
-              width: size.width,
               padding: EdgeInsets.all(Dimensions.paddingSizeExtraLarge),
               decoration: BoxDecoration(
-                color: Theme.of(context).disabledColor.withValues(alpha: 0.07),
+                color: Theme.of(context).disabledColor.withValues(alpha: 0.02),
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(Dimensions.radiusExtraLarge),
-                  topRight: Radius.circular(Dimensions.radiusExtraLarge),
+                  topLeft: Radius.circular(Dimensions.paddingSizeExtraOverLarge),
+                  topRight: Radius.circular(Dimensions.paddingSizeExtraOverLarge),
                 ),
               ),
               child: Column(children: [
@@ -130,18 +130,18 @@ class SupportCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return CustomCard(
       padding: EdgeInsets.all(Dimensions.paddingSizeDefault),
-      borderRadius: Dimensions.radiusExtraLarge,
+      borderRadius: Dimensions.radiusDefault,
       child: InkWell(
         onTap: onTap,
         child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
           Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+              color: Theme.of(context).primaryColor.withValues(alpha: 0.07),
               borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
             ),
             padding: EdgeInsets.all(Dimensions.paddingSizeSmall),
-            child: Icon(icon, color: Theme.of(context).primaryColor),
+            child: Icon(icon, size: 20, color: Theme.of(context).primaryColor),
           ),
           SizedBox(width: Dimensions.paddingSizeDefault),
 
@@ -171,13 +171,13 @@ class SupportCard extends StatelessWidget {
                 description,
                 style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).hintColor),
               ),
-              SizedBox(height: Dimensions.paddingSizeExtraSmall),
+              SizedBox(height: Dimensions.paddingSizeSmall),
 
               !isAddress ? Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
                 Expanded(
                   child: Text(
                     contactInfo ?? '',
-                    style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge),
+                    style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault),
                   ),
                 ),
                 SizedBox(width: Dimensions.paddingSizeDefault),

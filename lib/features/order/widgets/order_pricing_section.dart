@@ -62,7 +62,7 @@ class OrderPricingSection extends StatelessWidget {
           ),
         ]) : const SizedBox(),
 
-        const SizedBox(height: Dimensions.paddingSizeSmall),
+        const SizedBox(height: Dimensions.paddingSizeDefault),
 
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),

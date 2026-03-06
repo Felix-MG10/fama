@@ -11,7 +11,8 @@ class AddressConfirmDialogueWidget extends StatelessWidget {
   final String? title;
   final String description;
   final Function onYesPressed;
-  const AddressConfirmDialogueWidget({super.key, required this.icon, this.title, required this.description, required this.onYesPressed});
+  final bool isDefault;
+  const AddressConfirmDialogueWidget({super.key, required this.icon, this.title, required this.description, required this.onYesPressed, this.isDefault = false});
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +46,30 @@ class AddressConfirmDialogueWidget extends StatelessWidget {
               ),
               const SizedBox(height: Dimensions.paddingSizeLarge),
 
-              GetBuilder<LocationController>(builder: (locationController) {
+              isDefault ? GetBuilder<LocationController>(builder: (locationController) {
+                return !locationController.isLoading ? Row(children: [
+
+                  Expanded(child: CustomButtonWidget(
+                    buttonText:  'cancel'.tr, textColor: Theme.of(context).disabledColor,
+                    onPressed: () => Get.back(),
+                    radius: Dimensions.radiusDefault, height: 50, color: Theme.of(context).disabledColor.withValues(alpha: 0.2),
+                  )),
+                  const SizedBox(width: Dimensions.paddingSizeLarge),
+
+                  Expanded(child: TextButton(
+                    onPressed: () => onYesPressed(),
+                    style: TextButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.error, minimumSize: const Size(Dimensions.webMaxWidth, 50), padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(Dimensions.radiusDefault)),
+                    ),
+                    child: Text(
+                      'ok'.tr, textAlign: TextAlign.center,
+                      style: robotoBold.copyWith(color: Theme.of(context).cardColor),
+                    ),
+                  )),
+
+                ]) : const Center(child: CircularProgressIndicator());
+              }) :  GetBuilder<LocationController>(builder: (locationController) {
                 return !locationController.isLoading ? Row(children: [
 
                   Expanded(child: TextButton(

@@ -240,14 +240,12 @@ class AuthController extends GetxController implements GetxService {
         _isLoading = false;
         update();
 
-        final msg = e.message ?? '';
         if(e.code == 'invalid-phone-number') {
           showCustomSnackBar('please_submit_a_valid_phone_number'.tr);
-        } else if(msg.toLowerCase().contains('internal error')) {
-          showCustomSnackBar('phone_verification_failed_try_again'.tr);
-        } else {
-          showCustomSnackBar(msg.replaceAll('_', ' '));
+        }else{
+          showCustomSnackBar(e.message?.replaceAll('_', ' '));
         }
+
       },
       codeSent: (String vId, int? resendToken) {
 

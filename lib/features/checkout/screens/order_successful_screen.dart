@@ -32,60 +32,21 @@ class OrderSuccessfulScreen extends StatefulWidget {
 class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
   String? orderId;
   final ScrollController scrollController = ScrollController();
-  int _paymentCheckRetryCount = 0;
-  bool _resolvingOrderId = false;
-  static const int _maxPaymentCheckRetries = 3;
-  static const Duration _paymentCheckRetryDelay = Duration(seconds: 2);
 
   @override
   void initState() {
     super.initState();
 
-    String? oid = widget.orderID;
-    if (oid != null && oid.contains('?')) {
-      oid = oid.split('?')[0].trim();
-    }
-    orderId = oid ?? '';
-
-    if ((orderId ?? '').isNotEmpty && orderId != '0' && int.tryParse(orderId ?? '') != 0) {
-      Get.find<OrderController>().trackOrder(orderId!, null, false, contactNumber: widget.contactPersonNumber);
-    } else if (widget.status == 1) {
-      // order_id invalide (0) depuis callback Orange/Wave : récupérer la dernière commande en cours
-      _resolveLatestOrderAndTrack();
-    }
-  }
-
-  Future<void> _resolveLatestOrderAndTrack() async {
-    if (_resolvingOrderId || !mounted) return;
-    _resolvingOrderId = true;
-    final orderController = Get.find<OrderController>();
-    await orderController.getRunningOrders(1);
-    if (!mounted) return;
-    final orders = orderController.runningOrderList;
-    if (orders != null && orders.isNotEmpty) {
-      final latestId = orders.first.id?.toString();
-      if (latestId != null) {
-        orderId = latestId;
-        orderController.trackOrder(latestId, null, false, contactNumber: widget.contactPersonNumber);
+    orderId = widget.orderID!;
+    if(widget.orderID != null) {
+      if(widget.orderID!.contains('?')){
+        var parts = widget.orderID!.split('?');
+        String id = parts[0].trim();                 // prefix: "date"
+        orderId = id;
       }
     }
-    _resolvingOrderId = false;
-    if (mounted) setState(() {});
-  }
+    Get.find<OrderController>().trackOrder(orderId.toString(), null, false, contactNumber: widget.contactPersonNumber);
 
-  /// Retente le track quand on vient d'un callback succès (Orange/Wave) et que
-  /// le backend n'a pas encore mis à jour payment_status.
-  void _retryTrackIfNeeded(OrderController orderController) {
-    if (widget.status != 1 || _paymentCheckRetryCount >= _maxPaymentCheckRetries) return;
-    final isUnpaid = orderController.trackModel?.paymentStatus != 'paid' &&
-        orderController.trackModel?.paymentMethod != 'cash_on_delivery' &&
-        orderController.trackModel?.paymentMethod != 'partial_payment';
-    if (!isUnpaid || orderId == null || orderId!.isEmpty) return;
-    _paymentCheckRetryCount++;
-    Future.delayed(_paymentCheckRetryDelay, () {
-      if (!mounted) return;
-      Get.find<OrderController>().trackOrder(orderId!, null, false, contactNumber: widget.contactPersonNumber);
-    });
   }
 
   @override
@@ -108,50 +69,14 @@ class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
             }
           }
 
-          final orderAmt = orderController.trackModel!.orderAmount;
-          total = (orderAmt != null) ? ((orderAmt / 100) * (Get.find<SplashController>().configModel!.loyaltyPointItemPurchasePoint ?? 0)) : 0;
+          total = ((orderController.trackModel!.orderAmount! / 100) * Get.find<SplashController>().configModel!.loyaltyPointItemPurchasePoint!);
           success = orderController.trackModel!.paymentStatus == 'paid' || orderController.trackModel!.paymentMethod == 'cash_on_delivery' || orderController.trackModel!.paymentMethod == 'partial_payment';
 
-          if (!success && (Get.isDialogOpen != true) && orderController.trackModel!.orderStatus != 'canceled' && Get.currentRoute.startsWith(RouteHelper.orderSuccess)) {
-            // Si on vient d’un callback succès (Orange/Wave), retenter le track car
-            // le backend peut ne pas avoir encore mis à jour payment_status
-            if (widget.status == 1) {
-              _retryTrackIfNeeded(orderController);
-            }
-            if (widget.status != 1 || _paymentCheckRetryCount >= _maxPaymentCheckRetries) {
-              Future.delayed(const Duration(seconds: 1), () {
-                Get.dialog(PaymentFailedDialog(orderID: orderId, orderAmount: widget.totalAmount, maxCodOrderAmount: maximumCodOrderAmount, contactPersonNumber: widget.contactPersonNumber), barrierDismissible: false);
-              });
-            }
+          if (!success && !Get.isDialogOpen! && orderController.trackModel!.orderStatus != 'canceled' && Get.currentRoute.startsWith(RouteHelper.orderSuccess)) {
+            Future.delayed(const Duration(seconds: 1), () {
+              Get.dialog(PaymentFailedDialog(orderID: orderId, orderAmount: widget.totalAmount, maxCodOrderAmount: maximumCodOrderAmount, contactPersonNumber: widget.contactPersonNumber), barrierDismissible: false);
+            });
           }
-        }
-
-        // En cours de résolution (récup. dernière commande si order_id=0)
-        if (_resolvingOrderId || (orderController.isLoading && (orderId ?? '').isEmpty)) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        // order_id invalide ET pas de trackModel : afficher erreur uniquement si résolution terminée
-        final invalidOrderId = (orderId ?? '').isEmpty || orderId == '0' || int.tryParse(orderId ?? '') == 0;
-        final trackFailed = invalidOrderId && !orderController.isLoading && orderController.trackModel == null;
-        if (trackFailed) {
-          return Center(child: SingleChildScrollView(
-            child: FooterViewWidget(
-              child: SizedBox(width: Dimensions.webMaxWidth, child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Image.asset(Images.warning, width: 100, height: 100),
-                const SizedBox(height: Dimensions.paddingSizeLarge),
-                Text('order_not_found'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge)),
-                const SizedBox(height: Dimensions.paddingSizeDefault),
-                Padding(
-                  padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-                  child: CustomButtonWidget(
-                    width: ResponsiveHelper.isDesktop(context) ? 300 : double.infinity,
-                    buttonText: 'back_to_home'.tr,
-                    onPressed: () => Get.offAllNamed(RouteHelper.getInitialRoute()),
-                  ),
-                ),
-              ])),
-            ),
-          ));
         }
 
         return orderController.trackModel != null ? Center(child: SingleChildScrollView(

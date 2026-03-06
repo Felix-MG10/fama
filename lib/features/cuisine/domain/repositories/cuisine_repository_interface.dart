@@ -6,5 +6,8 @@ import 'package:stackfood_multivendor/interface/repository_interface.dart';
 abstract class CuisineRepositoryInterface extends RepositoryInterface{
   @override
   Future<CuisineModel?> getList({int? offset, DataSourceEnum? source});
-  Future<CuisineRestaurantModel?> getRestaurantList(int offset, int cuisineId);
+  Future<CuisineRestaurantModel?> getRestaurantList(int offset, int cuisineId, {String? name, String? query});
+  Future<bool> saveSearchHistory(List<String> searchHistories);
+  List<String> getSearchHistory();
+  Future<bool> clearSearchHistory();
 }

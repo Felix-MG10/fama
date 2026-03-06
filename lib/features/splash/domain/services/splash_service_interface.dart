@@ -8,6 +8,8 @@ abstract class SplashServiceInterface {
   Future<bool> initSharedData();
   bool? showIntro();
   void disableIntro();
+  bool showLoginSuggestion();
+  void disableLoginSuggestion();
   Future<void> saveCookiesData(bool data);
   bool getCookiesData();
   void cookiesStatusChange(String? data);

@@ -5,5 +5,5 @@ abstract class FavouriteRepositoryInterface<Response> implements RepositoryInter
   Future<Response> add(dynamic a, {bool isRestaurant = false, int? id});
   @override
   Future<Response> delete(int? id, {bool isRestaurant = false});
-  Future<Response> clearAll();
+  Future<Response> clearAll({required bool isFood});
 }

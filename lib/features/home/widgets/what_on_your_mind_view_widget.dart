@@ -1,4 +1,5 @@
 import 'package:stackfood_multivendor/common/widgets/custom_ink_well_widget.dart';
+import 'package:stackfood_multivendor/features/category/screens/category_product_screen.dart';
 import 'package:stackfood_multivendor/features/home/widgets/arrow_icon_button_widget.dart';
 import 'package:stackfood_multivendor/features/language/controllers/localization_controller.dart';
 import 'package:stackfood_multivendor/features/category/controllers/category_controller.dart';
@@ -81,9 +82,20 @@ class WhatOnYourMindViewWidget extends StatelessWidget {
                     borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
                   ),
                   child: CustomInkWellWidget(
-                    onTap: () => Get.toNamed(RouteHelper.getCategoryProductRoute(
-                      categoryController.categoryList![index].id, categoryController.categoryList![index].name!,
-                    )),
+                    onTap: () {
+                      if(GetPlatform.isWeb) {
+                        Get.toNamed(RouteHelper.getCategoryProductRoute(
+                          categoryController.categoryList![index].id,
+                          categoryController.categoryList![index].name!,
+                        ));
+                      } else {
+                        Get.to(CategoryProductScreen(
+                            categoryID: categoryController.categoryList![index].id!.toString(),
+                            categoryName: categoryController.categoryList![index].name!),
+                        );
+                      }
+
+                    },
                     radius: Dimensions.radiusSmall,
                     child: Column(children: [
 

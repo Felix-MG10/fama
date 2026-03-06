@@ -1,4 +1,5 @@
 import 'package:stackfood_multivendor/api/api_client.dart';
+import 'package:stackfood_multivendor/features/auth/domain/models/shift_model.dart';
 import 'package:stackfood_multivendor/features/dashboard/controllers/dashboard_controller.dart';
 import 'package:stackfood_multivendor/features/splash/domain/models/config_model.dart';
 import 'package:stackfood_multivendor/features/auth/domain/models/vehicle_model.dart';
@@ -25,6 +26,11 @@ class DeliverymanRegistrationService implements DeliverymanRegistrationServiceIn
     XFile? pLogo;
     XFile? pickLogo = await ImagePicker().pickImage(source: ImageSource.gallery);
     if(pickLogo != null) {
+      List<String> supportedFormat = ['image/jpg', 'image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+      if(!supportedFormat.contains(pickLogo.mimeType) && GetPlatform.isWeb) {
+        showCustomSnackBar('please_select_valid_image_file'.tr);
+        return null;
+      }
       await pickLogo.length().then((value) {
         if(value > 2000000) {
           pLogo = null;
@@ -40,6 +46,11 @@ class DeliverymanRegistrationService implements DeliverymanRegistrationServiceIn
   @override
   Future<List<VehicleModel>?> getVehicleList() async {
     return await deliverymanRegistrationRepoInterface.getVehicleList();
+  }
+
+  @override
+  Future<List<ShiftModel>?> getShiftList() async {
+    return await deliverymanRegistrationRepoInterface.getShiftList();
   }
 
   @override
@@ -93,8 +104,15 @@ class DeliverymanRegistrationService implements DeliverymanRegistrationServiceIn
       );
     }
     if(result != null && result.files.isNotEmpty) {
-      if(result.files.single.size > 2000000) {
-        showCustomSnackBar('please_upload_lower_size_file'.tr);
+
+      List<String> supportedFormat = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'pdf', 'doc', 'docx'];
+      if(!supportedFormat.contains(result.files.single.extension) && GetPlatform.isWeb) {
+        showCustomSnackBar('please_select_valid_file'.tr);
+        return null;
+      }
+
+      if(result.files.single.size > 1000000) {
+        showCustomSnackBar('please_upload_lower_size_file_1_mb'.tr);
         result = null;
       } else {
         return result;

@@ -27,21 +27,21 @@ class DeliverymanAdditionalDataSectionWidget extends StatelessWidget {
       decoration: isDesktop ? null : BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-        boxShadow: [BoxShadow(color: Colors.black12, spreadRadius: 1, blurRadius: 5)],
+        boxShadow: [BoxShadow(color: Theme.of(context).disabledColor.withValues(alpha: 0.4), blurRadius: 12, spreadRadius: 0)],
       ),
-      margin: EdgeInsets.all(isDesktop ? 0 : Dimensions.paddingSizeDefault),
+      margin: const EdgeInsets.all(Dimensions.paddingSizeDefault),
       padding: EdgeInsets.only(
-        left: isDesktop ? Dimensions.paddingSizeLarge : Dimensions.paddingSizeSmall,
-        right: isDesktop ? Dimensions.paddingSizeLarge : Dimensions.paddingSizeSmall,
-        top: isDesktop ? Dimensions.paddingSizeDefault : Dimensions.paddingSizeSmall,
+        left: isDesktop ? 0 : Dimensions.paddingSizeSmall,
+        right: isDesktop ? 0 : Dimensions.paddingSizeSmall,
+        top: isDesktop ? 0 : Dimensions.paddingSizeSmall,
         bottom: isDesktop ? 0 : Dimensions.paddingSizeSmall,
       ),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-        Text('additional_info'.tr, style: robotoSemiBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
-        SizedBox(height: Dimensions.paddingSizeExtraSmall),
+        isDesktop ? SizedBox() : Text('additional_info'.tr, style: robotoSemiBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
+        SizedBox(height: isDesktop ? 0 : Dimensions.paddingSizeExtraSmall),
 
-        Text('additional_info_subtitle'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).hintColor)),
-        SizedBox(height: Dimensions.paddingSizeDefault),
+        isDesktop ? SizedBox() : Text('additional_info_subtitle'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).hintColor)),
+        SizedBox(height: isDesktop ? 0 :  Dimensions.paddingSizeDefault),
 
         ListView.builder(
           physics: const NeverScrollableScrollPhysics(),
@@ -68,14 +68,14 @@ class DeliverymanAdditionalDataSectionWidget extends StatelessWidget {
                 validator: deliverymanController.dataList![index].isRequired == 1 ? (value) => ValidateCheck.validateEmptyText(value, null) : null,
               ) : showDate ? Column(children: [
 
-                Row(children: [
-                  Text(deliverymanController.camelCaseToSentence(deliverymanController.dataList![index].inputData ?? ''), style: robotoMedium),
-
-                  Text(
-                    deliverymanController.dataList![index].isRequired == 1 ? ' *' : '',
-                    style: robotoRegular.copyWith(color: Theme.of(context).colorScheme.error),
-                  ),
-                ]),
+                // Row(children: [
+                //   Text(deliverymanController.camelCaseToSentence(deliverymanController.dataList![index].inputData ?? ''), style: robotoMedium),
+                //
+                //   Text(
+                //     deliverymanController.dataList![index].isRequired == 1 ? ' *' : '',
+                //     style: robotoRegular.copyWith(color: Theme.of(context).colorScheme.error),
+                //   ),
+                // ]),
                 const SizedBox(height: Dimensions.paddingSizeExtraSmall),
 
                 Container(
@@ -100,7 +100,7 @@ class DeliverymanAdditionalDataSectionWidget extends StatelessWidget {
                       }
                     },
                     child: Row(children: [
-                      Expanded(child: Text(deliverymanController.additionalList![index] ?? 'not_set_yet'.tr, style: robotoRegular.copyWith(color: Theme.of(context).hintColor))),
+                      Expanded(child: Text(deliverymanController.additionalList![index] ?? '${deliverymanController.camelCaseToSentence(deliverymanController.dataList![index].inputData!)}${deliverymanController.dataList![index].isRequired == 1 ? ' *' : ''}', style: robotoRegular.copyWith(color: Theme.of(context).hintColor))),
 
                       Icon(Icons.calendar_month_rounded, color: Theme.of(context).disabledColor),
                     ]),
@@ -140,21 +140,25 @@ class DeliverymanAdditionalDataSectionWidget extends StatelessWidget {
                   },
                 )
 
-              ]) : showFile ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              ]) : showFile ? Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                ),
+                padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
-                Row(children: [
-                  Text(deliverymanController.camelCaseToSentence(deliverymanController.dataList![index].inputData ?? ''), style: robotoMedium),
+                  Row(children: [
+                    Text(deliverymanController.camelCaseToSentence(deliverymanController.dataList![index].inputData ?? ''), style: robotoMedium),
 
-                  Text(
-                    deliverymanController.dataList![index].isRequired == 1 ? ' *' : '',
-                    style: robotoRegular.copyWith(color: Theme.of(context).colorScheme.error),
-                  ),
-                ]),
-                const SizedBox(height: Dimensions.paddingSizeSmall),
+                    Text(
+                      deliverymanController.dataList![index].isRequired == 1 ? ' *' : '',
+                      style: robotoRegular.copyWith(color: Theme.of(context).colorScheme.error),
+                    ),
+                  ]),
+                  const SizedBox(height: Dimensions.paddingSizeSmall),
 
-                Builder(
-                  builder: (context) {
-
+                  Builder(builder: (context) {
                     FilePickerResult? file = 0 == deliverymanController.additionalList![index].length ? null : deliverymanController.additionalList![index][0];
                     bool isImage = false;
                     String fileName = '';
@@ -167,8 +171,112 @@ class DeliverymanAdditionalDataSectionWidget extends StatelessWidget {
                         isImage = file.files.first.name.contains('jpg') || file.files.first.name.contains('jpeg') || file.files.first.name.contains('png');
                       }
                     }
+                    return deliverymanController.dataList![index].mediaData!.uploadMultipleFiles == 1 ? SizedBox(
+                      height: 120,
+                      child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: deliverymanController.additionalList![index].length + 1,
+                      itemBuilder: (context, i) {
+                        FilePickerResult? file = i == deliverymanController.additionalList![index].length ? null : deliverymanController.additionalList![index][i];
+                        bool isImage = false;
+                        String fileName = '';
+                        if (file != null) {
+                          if (!GetPlatform.isWeb) {
+                            fileName = file.files.single.path!.split('/').last;
+                            isImage = file.files.single.path!.contains('jpg') || file.files.single.path!.contains('jpeg') ||
+                                file.files.single.path!.contains('png');
+                          } else {
+                            fileName = file.files.first.name;
+                            isImage = file.files.first.name.contains('jpg') || file.files.first.name.contains('jpeg') ||
+                                file.files.first.name.contains('png');
+                          }
+                        }
 
-                    return deliverymanController.dataList![index].mediaData!.uploadMultipleFiles == 0 && file != null ? Stack(children: [
+                        return file == null ? Padding(
+                          padding: const EdgeInsets.only(right: Dimensions.paddingSizeSmall),
+                          child: InkWell(
+                            onTap: () async {
+                              await deliverymanController.pickFile(index, deliverymanController.dataList![index].mediaData!);
+                            },
+                            child: DottedBorder(
+                              options: RoundedRectDottedBorderOptions(
+                                color: Theme.of(context).disabledColor,
+                                strokeWidth: 1,
+                                strokeCap: StrokeCap.butt,
+                                dashPattern: const [5, 5],
+                                padding: const EdgeInsets.all(0),
+                                radius: const Radius.circular(Dimensions.radiusDefault),
+                              ),
+                              child: Container(
+                                height: 120,
+                                width: 160,
+                                alignment: Alignment.center,
+                                padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).cardColor,
+                                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                                ),
+                                child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                  Icon(Icons.cloud_upload_outlined, size: 30, color: Theme.of(context).disabledColor),
+                                  const SizedBox(height: Dimensions.paddingSizeSmall),
+                                  Text(
+                                    'select_a_file'.tr,
+                                    style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).disabledColor), textAlign: TextAlign.center,
+                                  ),
+                                ]),
+                              ),
+                            ),
+                          ),
+                        ) : Stack(children: [
+                          Container(
+                            width: 160, height: 120,
+                            margin: const EdgeInsets.only(right: Dimensions.paddingSizeSmall),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                              color: Theme.of(context).cardColor,
+                            ),
+                            child: isImage && !GetPlatform.isWeb ? ClipRRect(
+                              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                              child: GetPlatform.isWeb ? Image.network(
+                                file.files.single.path!, width: 100, height: 100, fit: BoxFit.cover,
+                              ) : Image.file(
+                                File(file.files.single.path!), width: 100, height: 100, fit: BoxFit.cover,
+                              ),
+                            ) : Container(
+                              padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+                              alignment: Alignment.center,
+                              child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                Image.asset(Images.documentIcon, height: 30, width: 30, fit: BoxFit.contain),
+                                const SizedBox(height: Dimensions.paddingSizeSmall),
+                                Text(
+                                  fileName,
+                                  style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeExtraSmall),
+                                  maxLines: 2, overflow: TextOverflow.ellipsis, textAlign: TextAlign.center,
+                                ),
+                              ]),
+                            ),
+                          ),
+
+                          Positioned(
+                            top: 0, right: 10,
+                            child: InkWell(
+                              onTap: (){
+                                deliverymanController.removeAdditionalFile(index, i);
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                                  border: Border.all(color: Theme.of(context).disabledColor.withValues(alpha: 0.1)),
+                                ),
+                                padding: const EdgeInsets.all(2),
+                                child: Icon(CupertinoIcons.clear, color: Theme.of(context).colorScheme.error, size: 15),
+                              ),
+                            ),
+                          ),
+                        ]);
+                      }),
+                    ) : deliverymanController.dataList![index].mediaData!.uploadMultipleFiles == 0 && file != null ? Stack(children: [
 
                       Container(
                         height: 70,
@@ -279,96 +387,12 @@ class DeliverymanAdditionalDataSectionWidget extends StatelessWidget {
                         ),
                       ),
                     );
-                  },
-                ),
-                const SizedBox(height: Dimensions.paddingSizeSmall),
+                  }),
 
-                deliverymanController.dataList![index].mediaData!.uploadMultipleFiles == 1 && deliverymanController.additionalList![index].length > 0 ? SizedBox(
-                  height: 80,
-                  child: ListView.builder(
-                    physics:  const AlwaysScrollableScrollPhysics(),
-                    itemCount: deliverymanController.additionalList![index].length,
-                    scrollDirection: Axis.horizontal,
-                    shrinkWrap: true,
-                    itemBuilder: (context, i) {
-                      FilePickerResult? file = i == deliverymanController.additionalList![index].length ? null : deliverymanController.additionalList![index][i];
-                      bool isImage = false;
-                      String fileName = '';
-                      if(file != null) {
-                        if(!GetPlatform.isWeb) {
-                          fileName = file.files.single.path!.split('/').last;
-                          isImage = file.files.single.path!.contains('jpg') || file.files.single.path!.contains('jpeg') || file.files.single.path!.contains('png');
-                        } else {
-                          fileName = file.files.first.name;
-                          isImage = file.files.first.name.contains('jpg') || file.files.first.name.contains('jpeg') || file.files.first.name.contains('png');
-                        }
-                      }
-                      return file != null ? Stack(children: [
-
-                        Container(
-                          width: MediaQuery.of(context).size.width * 0.4,
-                          height: 70,
-                          margin: const EdgeInsets.only(bottom: 10, right: 10),
-                          child: Center(
-                            child: isImage && !GetPlatform.isWeb ? ClipRRect(
-                              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                              child: GetPlatform.isWeb ? Image.network(
-                                file.files.single.path!, width: 100, height: 100, fit: BoxFit.cover,
-                              ) : Image.file(
-                                File(file.files.single.path!), width: 500, height: 70, fit: BoxFit.cover,
-                              ),
-                            ) : DottedBorder(
-                              options: RoundedRectDottedBorderOptions(
-                                color: Theme.of(context).disabledColor,
-                                strokeWidth: 1,
-                                strokeCap: StrokeCap.butt,
-                                dashPattern: const [5, 5],
-                                padding: const EdgeInsets.all(0),
-                                radius: const Radius.circular(Dimensions.radiusDefault),
-                              ),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeDefault),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
-                                ),
-                                child: Row(children: [
-                                  Image.asset(Images.documentIcon, height: 30, width: 30, fit: BoxFit.contain),
-                                  const SizedBox(width: Dimensions.paddingSizeSmall),
-
-                                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-
-                                    Text(fileName, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall)),
-                                    SizedBox(height: isDesktop ? 3 : Dimensions.paddingSizeExtraSmall),
-
-                                    Text(
-                                      '${file.files.single.size / 1000} Kbps',
-                                      style: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeExtraSmall),
-                                    ),
-
-                                  ])),
-
-                                ]),
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        Positioned(
-                          top: -10, right: 0,
-                          child: IconButton(
-                            onPressed: (){
-                              deliverymanController.removeAdditionalFile(index, i);
-                            },
-                            icon: Icon(CupertinoIcons.clear, color: Theme.of(context).disabledColor, size: 20),
-                          ),
-                        ),
-
-                      ]) : const SizedBox();
-                    },
-                  ),
-                ) :  const SizedBox(),
-              ]) : const SizedBox(),
+                ]),
+              ) : SizedBox(),
             );
+
           },
         ),
       ]),

@@ -46,7 +46,7 @@ class DateConverter {
   }
 
   static String timeStringToTime(String dateTime) {
-    return DateFormat('hh:mm a').format(DateFormat('HH:mm:ss').parse(dateTime));
+    return DateFormat(_timeFormatter()).format(DateFormat('HH:mm:ss').parse(dateTime));
   }
 
   static String stringToReadableString(String dateTime) {

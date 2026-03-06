@@ -131,7 +131,7 @@ class TrackDetailsView extends StatelessWidget {
 
           Flexible(
             child: Text(
-              takeAway ? track.deliveryAddress!.address! : track.deliveryMan!.location!,
+              takeAway ? track.deliveryAddress!.address! : track.deliveryMan!.location??'no_address_found'.tr,
               style: robotoMedium.copyWith(color: Theme.of(context).textTheme.bodyMedium!.color!.withValues(alpha: 0.7)),
               maxLines: 1, overflow: TextOverflow.ellipsis,
             ),

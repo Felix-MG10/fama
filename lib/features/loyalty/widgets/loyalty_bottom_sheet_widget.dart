@@ -124,14 +124,6 @@ class _WalletBottomSheetState extends State<LoyaltyBottomSheetWidget> {
                         loyaltyController.convertPointToWallet(amount);
                       }
                     }
-                    // if(_amountController.text.isEmpty) {
-                    //   if(Get.isBottomSheetOpen!){
-                    //     Get.back();
-                    //   }
-                    //   showCustomSnackBar('input_field_is_empty'.tr);
-                    // }else{
-                    //
-                    // }
 
                   },
                 );

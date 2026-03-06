@@ -16,6 +16,7 @@ class AddressModel {
   String? floor;
   List<ZoneData>? zoneData;
   String? email;
+  bool? isDefault;
 
   AddressModel({
     this.id,
@@ -33,6 +34,7 @@ class AddressModel {
     this.floor,
     this.zoneData,
     this.email,
+    this.isDefault,
   });
 
   AddressModel.fromJson(Map<String, dynamic> json) {
@@ -58,6 +60,7 @@ class AddressModel {
     if(json['contact_person_email'] != null) {
       email = json['contact_person_email'];
     }
+    isDefault = json['is_default'];
   }
 
   Map<String, dynamic> toJson() {
@@ -81,6 +84,7 @@ class AddressModel {
     if(email != null) {
       data['contact_person_email'] = email;
     }
+    data['is_default'] = isDefault;
     return data;
   }
 }

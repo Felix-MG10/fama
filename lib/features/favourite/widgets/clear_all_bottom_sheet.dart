@@ -9,7 +9,8 @@ import 'package:stackfood_multivendor/util/images.dart';
 import 'package:stackfood_multivendor/util/styles.dart';
 
 class ClearAllBottomSheet extends StatelessWidget {
-  const ClearAllBottomSheet({super.key});
+  final bool isFood;
+  const ClearAllBottomSheet({super.key, this.isFood = true});
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +72,7 @@ class ClearAllBottomSheet extends StatelessWidget {
               color: Theme.of(context).colorScheme.error,
               fontSize: Dimensions.fontSizeDefault,
               isLoading: favouriteController.isLoading,
-              onPressed: () => favouriteController.clearAll(),
+              onPressed: () => favouriteController.clearAll(isFood: isFood),
             )),
 
           ]),

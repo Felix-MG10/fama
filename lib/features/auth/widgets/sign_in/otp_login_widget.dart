@@ -7,7 +7,6 @@ import 'package:stackfood_multivendor/common/widgets/validate_check.dart';
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
 import 'package:stackfood_multivendor/features/auth/widgets/social_login_widget.dart';
 import 'package:stackfood_multivendor/features/auth/widgets/trams_conditions_check_box_widget.dart';
-import 'package:stackfood_multivendor/features/auth/widgets/test_firebase_button.dart';
 import 'package:stackfood_multivendor/features/language/controllers/localization_controller.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
@@ -50,26 +49,6 @@ class OtpLoginWidget extends StatelessWidget {
             validator: (value) => ValidateCheck.validateEmptyText(value, "please_enter_phone_number".tr),
           ),
           const SizedBox(height: Dimensions.paddingSizeExtraLarge),
-
-          // 🧪 BOUTON DE TEST FIREBASE (TEMPORAIRE) - Apparaît quand un numéro est saisi
-          Builder(
-            builder: (context) {
-              String phoneText = phoneController.text.trim();
-              String? dialCode = countryDialCode ?? '';
-              bool showTestButton = phoneText.isNotEmpty && dialCode.isNotEmpty;
-              
-              if (showTestButton) {
-                String fullPhoneNumber = '$dialCode$phoneText';
-                return Column(
-                  children: [
-                    TestFirebaseButton(phoneNumber: fullPhoneNumber),
-                    const SizedBox(height: Dimensions.paddingSizeSmall),
-                  ],
-                );
-              }
-              return const SizedBox.shrink();
-            },
-          ),
 
           Align(
             alignment: Alignment.centerLeft,

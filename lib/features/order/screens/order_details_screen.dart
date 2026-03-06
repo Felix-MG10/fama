@@ -218,7 +218,7 @@ class OrderDetailsScreenState extends State<OrderDetailsScreen> with WidgetsBind
           }),
           endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
 
-          floatingActionButton: ((!subscription || (order?.subscription!.status != 'canceled' && order?.subscription!.status != 'completed')) && ((pending && !digitalPay) || accepted || confirmed
+          floatingActionButton: !isDesktop && ((!subscription || (order?.subscription!.status != 'canceled' && order?.subscription!.status != 'completed')) && ((pending && !digitalPay) || accepted || confirmed
               || processing || handover || pickedUp)) && order?.orderType == 'delivery' ? Padding(
             padding: const EdgeInsets.only(bottom: 120),
             child: Container(
@@ -250,17 +250,9 @@ class OrderDetailsScreenState extends State<OrderDetailsScreen> with WidgetsBind
                     padding: const EdgeInsets.only(top: Dimensions.paddingSizeLarge),
                     child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
-                      Expanded(flex: 6, child: Column(children: [
-
-                        subscription ? Text('${'subscription'.tr} # ${order.id.toString()}', style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)) : const SizedBox(),
-                        SizedBox(height: subscription ? Dimensions.paddingSizeExtraSmall : 0),
-
-                        subscription ? Text('${'your_order_is'.tr} ${order.orderStatus}', style: robotoRegular.copyWith(color: Theme.of(context).primaryColor)) : const SizedBox(),
-                        SizedBox(height: subscription ? Dimensions.paddingSizeLarge : 0),
-
-                          OrderInfoSection(order: order, orderController: orderController, schedules: schedules, showChatPermission: showChatPermission,
-                            contactNumber: widget.contactNumber, totalAmount: total),
-                        ],
+                      Expanded(flex: 6, child: OrderInfoSection(
+                        order: order, orderController: orderController, schedules: schedules, showChatPermission: showChatPermission,
+                        contactNumber: widget.contactNumber, totalAmount: total,
                       )),
                       const SizedBox(width: Dimensions.paddingSizeLarge),
 
@@ -269,7 +261,7 @@ class OrderDetailsScreenState extends State<OrderDetailsScreen> with WidgetsBind
                         couponDiscount: couponDiscount, tax: tax!, dmTips: dmTips, deliveryCharge: deliveryCharge,
                         total: total, orderController: orderController, orderId: widget.orderId, contactNumber: widget.contactNumber,
                         extraPackagingAmount: extraPackagingCharge, referrerBonusAmount: referrerBonusAmount,
-                      ))
+                      )),
 
                     ]),
                   ) : Padding(

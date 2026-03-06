@@ -7,7 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
 import 'package:stackfood_multivendor/common/widgets/confirmation_dialog_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_asset_image_widget.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_tool_tip.dart';
+import 'package:stackfood_multivendor/common/widgets/gap_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/validate_check.dart';
 import 'package:stackfood_multivendor/features/auth/domain/models/restaurant_body_model.dart';
 import 'package:stackfood_multivendor/features/auth/domain/models/translation_body_model.dart';
@@ -27,6 +27,7 @@ import 'package:stackfood_multivendor/features/auth/widgets/registration_stepper
 import 'package:stackfood_multivendor/features/auth/widgets/restaurant_additional_data_section_widget.dart';
 import 'package:stackfood_multivendor/features/auth/widgets/select_location_view_widget.dart';
 import 'package:stackfood_multivendor/features/cuisine/controllers/cuisine_controller.dart';
+import 'package:stackfood_multivendor/helper/custom_validator.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:stackfood_multivendor/util/images.dart';
@@ -107,12 +108,7 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
     Get.find<RestaurantRegistrationController>().getPackageList(isUpdate: false);
 
     for (var language in _languageList) {
-      _tabs.add(Tab(
-        child: Text(
-          language.value ?? '',
-          overflow: TextOverflow.ellipsis,
-        ),
-      ));
+      _tabs.add(Tab(text: language.value));
     }
     _formKeyLogin = GlobalKey<FormState>();
     _formKeySecond = GlobalKey<FormState>();
@@ -137,6 +133,9 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
 
   @override
   Widget build(BuildContext context) {
+    
+    bool isDesktop = ResponsiveHelper.isDesktop(context);
+    
     return GetBuilder<RestaurantRegistrationController>(builder: (restaurantRegController) {
 
       if(restaurantRegController.restaurantAddress != null){
@@ -173,37 +172,22 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                 
                 WebScreenTitleWidget( title: 'join_as_a_restaurant'.tr ),
 
-                ResponsiveHelper.isDesktop(context) ? Center(child: SizedBox(
+                isDesktop ? Center(child: SizedBox(
                   width: Dimensions.webMaxWidth,
                   child: Padding(
                     padding: const EdgeInsets.only(top: 25, bottom: 35),
                     child: RegistrationStepperWidget(status: restaurantRegController.storeStatus == 0.9 ? 'business' : ''),
                   ),
-                )) : Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical:  Dimensions.paddingSizeSmall),
-                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(
-                      restaurantRegController.storeStatus == 0.1 ? 'provide_store_information_to_proceed_next'.tr : restaurantRegController.storeStatus == 0.6 ? 'provide_owner_information_to_confirm'.tr : 'you_are_one_step_away_choose_your_business_plan'.tr,
-                      style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).hintColor),
-                    ),
-
-                    const SizedBox(height: Dimensions.paddingSizeSmall),
-
-                    LinearProgressIndicator(
-                      backgroundColor: Theme.of(context).disabledColor, minHeight: 2,
-                      value: restaurantRegController.storeStatus,
-                    ),
-                  ]),
-                ),
+                )) : SizedBox(),
                 
                 Expanded(
                   child: SingleChildScrollView(
                     controller: _scrollController,
-                    padding: ResponsiveHelper.isDesktop(context) ? EdgeInsets.zero : const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall, horizontal: Dimensions.paddingSizeDefault),
+                    padding: isDesktop ? EdgeInsets.zero : const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall, horizontal: Dimensions.paddingSizeDefault),
                     child: FooterViewWidget(
                       child: SizedBox(
                         width: Dimensions.webMaxWidth,
-                        child: ResponsiveHelper.isDesktop(context) ? webView(restaurantRegController) : Column(children: [
+                        child: isDesktop ? webView(restaurantRegController, isDesktop) : Column(children: [
                           
                           Visibility(
                             visible: restaurantRegController.storeStatus == 0.1,
@@ -212,15 +196,15 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
                                 Text('restaurant_info'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
-                                const SizedBox(height: Dimensions.paddingSizeDefault),
+                                const Gap(Dimensions.paddingSizeSmall),
 
                                 Container(
                                   decoration: BoxDecoration(
                                     color: Theme.of(context).cardColor,
                                     borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                                    boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5, spreadRadius: 1)],
+                                    boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5, spreadRadius: 0)],
                                   ),
-                                  padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeDefault),
+                                  padding: EdgeInsets.all(Dimensions.paddingSizeSmall),
                                   child: Column(children: [
 
                                     SizedBox(
@@ -228,23 +212,14 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                       child: TabBar(
                                         tabAlignment: TabAlignment.start,
                                         controller: _tabController,
-                                        indicatorColor: Theme.of(context).primaryColor,
+                                        indicatorColor: Theme.of(context).textTheme.bodyLarge?.color,
                                         indicatorWeight: 3,
-                                        labelColor: Theme.of(context).primaryColor,
+                                        labelColor: Theme.of(context).textTheme.bodyLarge?.color,
                                         unselectedLabelColor: Theme.of(context).disabledColor,
-                                        labelPadding: ResponsiveHelper.isTablet(context)
-                                          ? const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
-                                          : const EdgeInsets.only(right: Dimensions.paddingSizeLarge),
-                                        indicatorPadding: ResponsiveHelper.isTablet(context)
-                                          ? const EdgeInsets.symmetric(horizontal: 16)
-                                          : const EdgeInsets.only(right: Dimensions.paddingSizeLarge),
-                                        unselectedLabelStyle: robotoRegular.copyWith(
-                                          color: Theme.of(context).disabledColor, 
-                                          fontSize: ResponsiveHelper.isTablet(context) ? Dimensions.fontSizeSmall : Dimensions.fontSizeSmall
-                                        ),
-                                        labelStyle: robotoBold.copyWith(
-                                          fontSize: ResponsiveHelper.isTablet(context) ? Dimensions.fontSizeSmall : Dimensions.fontSizeDefault
-                                        ),
+                                        unselectedLabelStyle: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeSmall),
+                                        labelStyle: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault),
+                                        labelPadding: const EdgeInsets.only(right: Dimensions.paddingSizeLarge),
+                                        indicatorPadding: const EdgeInsets.only(right: Dimensions.paddingSizeLarge),
                                         isScrollable: true,
                                         indicatorSize: TabBarIndicatorSize.tab,
                                         tabs: _tabs,
@@ -270,8 +245,36 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                       required: true,
                                       validator: (value) => ValidateCheck.validateEmptyText(value, "restaurant_name_field_is_required".tr),
                                     ),
-                                    const SizedBox(height: Dimensions.paddingSizeOverLarge),
+                                    const Gap(Dimensions.paddingSizeExtraLarge),
 
+                                    CustomTextFieldWidget(
+                                      titleText: 'write_restaurant_address'.tr,
+                                      controller: _addressController[_tabController!.index],
+                                      focusNode: _addressFocus[_tabController!.index],
+                                      nextFocus: _tabController!.index != _languageList.length-1 ? _addressFocus[_tabController!.index] : _addressFocus[0],
+                                      inputType: TextInputType.streetAddress,
+                                      //prefixImage: Images.location,
+                                      capitalization: TextCapitalization.words,
+                                      labelText: '${'restaurant_address'.tr} (${_languageList[_tabController!.index].value!})',
+                                      required: true,
+                                      maxLines: 3,
+                                      validator: (value) => ValidateCheck.validateEmptyText(value, "restaurant_address_field_is_required".tr),
+                                    ),
+                                  ]),
+                                ),
+                                const Gap(Dimensions.paddingSizeDefault),
+
+                                Text('restaurant_logo_and_cover_photo'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
+                                const Gap(Dimensions.paddingSizeSmall),
+
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).cardColor,
+                                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                                    boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5, spreadRadius: 0)],
+                                  ),
+                                  padding: EdgeInsets.all(Dimensions.paddingSizeSmall),
+                                  child: Column(children: [
                                     Row(children: [
                                       Expanded(flex: 4,
                                         child: Column(
@@ -284,7 +287,7 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                                 Text('*'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Colors.red)),
                                               ],
                                             ),
-                                            const SizedBox(height: Dimensions.paddingSizeDefault),
+                                            const Gap(Dimensions.paddingSizeDefault),
 
                                             Align(alignment: Alignment.center, child: Stack(children: [
                                               Padding(
@@ -300,20 +303,20 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                                     child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
 
                                                       Icon(CupertinoIcons.photo_camera_solid, size: 38, color: Theme.of(context).disabledColor.withValues(alpha: 0.6)),
-                                                      const SizedBox(height: Dimensions.paddingSizeSmall),
+                                                      const Gap(Dimensions.paddingSizeSmall),
 
                                                       Text(
-                                                        'upload_store_logo'.tr,
+                                                        'upload_logo'.tr,
                                                         style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall), textAlign: TextAlign.center,
                                                       ),
-                                                      const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                                                      const Gap(Dimensions.paddingSizeExtraSmall),
 
                                                       Text(
                                                         'upload_jpg_png_gif_maximum_2_mb'.tr,
                                                         style: robotoRegular.copyWith(color: Theme.of(context).disabledColor.withValues(alpha: 0.6), fontSize: Dimensions.fontSizeSmall - 2),
                                                         textAlign: TextAlign.center,
                                                       ),
-                                                      const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                                                      const Gap(Dimensions.paddingSizeExtraSmall),
 
                                                       Text(
                                                         '(${'1_1_ratio'.tr})',
@@ -330,8 +333,10 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                                   onTap: () => restaurantRegController.pickImage(true, false),
                                                   child: DottedBorder(
                                                     options: RoundedRectDottedBorderOptions(
-                                                      color: Theme.of(context).primaryColor,
-                                                      strokeWidth: 1,
+                                                      color: restaurantRegController.showLogoValidation 
+                                                        ? Colors.red 
+                                                        : Theme.of(context).disabledColor.withValues(alpha: 0.6),
+                                                      strokeWidth: restaurantRegController.showLogoValidation ? 2 : 1,
                                                       strokeCap: StrokeCap.butt,
                                                       dashPattern: const [5, 5],
                                                       padding: const EdgeInsets.all(0),
@@ -354,10 +359,18 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                                 ),
                                               ),
                                             ])),
+                                            if (restaurantRegController.showLogoValidation)
+                                              Padding(
+                                                padding: const EdgeInsets.only(top: Dimensions.paddingSizeSmall),
+                                                child: Text(
+                                                  'select_restaurant_logo'.tr,
+                                                  style: robotoRegular.copyWith(color: Colors.red, fontSize: Dimensions.fontSizeSmall),
+                                                ),
+                                              ),
                                           ],
                                         ),
                                       ),
-                                      const SizedBox(width: Dimensions.paddingSizeDefault),
+                                      const Gap.horizontal(Dimensions.paddingSizeDefault),
 
                                       Expanded(flex: 6,
                                         child: Column(
@@ -370,7 +383,7 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                                 Text('*'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Colors.red)),
                                               ],
                                             ),
-                                            const SizedBox(height: Dimensions.paddingSizeDefault),
+                                            const Gap(Dimensions.paddingSizeDefault),
 
                                             Stack(children: [
                                               Padding(
@@ -388,7 +401,7 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                                       Icon(CupertinoIcons.photo_camera_solid, size: 38, color: Theme.of(context).disabledColor.withValues(alpha: 0.6)),
 
                                                       Text(
-                                                        'upload_store_cover'.tr,
+                                                        'upload_cover'.tr,
                                                         style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeSmall), textAlign: TextAlign.center,
                                                       ),
 
@@ -397,7 +410,7 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                                         style: robotoRegular.copyWith(color: Theme.of(context).disabledColor.withValues(alpha: 0.6), fontSize: Dimensions.fontSizeSmall - 2),
                                                         textAlign: TextAlign.center,
                                                       ),
-                                                      const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                                                      const Gap(Dimensions.paddingSizeExtraSmall),
 
                                                       Text(
                                                         '(${'1_2_ratio'.tr})',
@@ -415,8 +428,10 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                                   onTap: () => restaurantRegController.pickImage(false, false),
                                                   child: DottedBorder(
                                                     options: RoundedRectDottedBorderOptions(
-                                                      color: Theme.of(context).primaryColor,
-                                                      strokeWidth: 1,
+                                                      color: restaurantRegController.showCoverValidation 
+                                                        ? Colors.red 
+                                                        : Theme.of(context).disabledColor.withValues(alpha: 0.6),
+                                                      strokeWidth: restaurantRegController.showCoverValidation ? 2 : 1,
                                                       strokeCap: StrokeCap.butt,
                                                       dashPattern: const [5, 5],
                                                       padding: const EdgeInsets.all(0),
@@ -439,25 +454,33 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                                 ),
                                               ),
                                             ]),
+                                            if (restaurantRegController.showCoverValidation)
+                                              Padding(
+                                                padding: const EdgeInsets.only(top: Dimensions.paddingSizeSmall),
+                                                child: Text(
+                                                  'select_restaurant_cover_photo'.tr,
+                                                  style: robotoRegular.copyWith(color: Colors.red, fontSize: Dimensions.fontSizeSmall),
+                                                ),
+                                              ),
                                           ],
                                         ),
                                       ),
                                     ]),
                                   ]),
                                 ),
-                                const SizedBox(height: Dimensions.paddingSizeDefault),
+                                const Gap(Dimensions.paddingSizeDefault),
 
                                 Text('location_info'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
-                                const SizedBox(height: Dimensions.paddingSizeDefault),
+                                const Gap(Dimensions.paddingSizeSmall),
 
                                 restaurantRegController.zoneList != null ? SelectLocationViewWidget(
                                   fromView: true, addressController: _addressController[0], addressFocus: _addressFocus[0],
                                 ) : const Center(child: CircularProgressIndicator()),
 
-                                const SizedBox(height: Dimensions.paddingSizeDefault),
+                                const Gap(Dimensions.paddingSizeDefault),
 
                                 Text('restaurant_preference'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
-                                const SizedBox(height: Dimensions.paddingSizeDefault),
+                                const Gap(Dimensions.paddingSizeDefault),
 
                                 Container(
                                   decoration: BoxDecoration(
@@ -465,11 +488,11 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                     borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
                                     boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
                                   ),
-                                  padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeDefault),
+                                  padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
                                   child: Column(children: [
 
                                     CuisineWidget(cuisineTextController: _cuisineController, cuisineFocus: _cuisineFocus),
-                                    const SizedBox(height: Dimensions.paddingSizeOverLarge),
+                                    const Gap(Dimensions.paddingSizeOverLarge),
 
                                     InkWell(
                                       onTap: () {
@@ -515,10 +538,18 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                     ),
                                   ]),
                                 ),
-                                const SizedBox(height: Dimensions.paddingSizeDefault),
-                                
-                                Text('business_tin'.tr, style: robotoBold),
-                                const SizedBox(height: Dimensions.paddingSizeDefault),
+                              ]),
+                            ),
+                          ),
+
+                          Visibility(
+                            visible: restaurantRegController.storeStatus == 0.6,
+                            child: Form(
+                              key: _formKeySecond,
+                              child: Column(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
+
+                                Text('owner_info'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
+                                const Gap(Dimensions.paddingSizeSmall),
 
                                 Container(
                                   decoration: BoxDecoration(
@@ -526,7 +557,144 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                     borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
                                     boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
                                   ),
-                                  padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeDefault),
+                                  padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+                                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                    CustomTextFieldWidget(
+                                      titleText: 'write_first_name'.tr,
+                                      controller: _fNameController,
+                                      focusNode: _fNameFocus,
+                                      nextFocus: _lNameFocus,
+                                      inputType: TextInputType.name,
+                                      capitalization: TextCapitalization.words,
+                                      prefixIcon: CupertinoIcons.person_crop_circle_fill,
+                                      iconSize: 25,
+                                      required: true,
+                                      labelText: 'first_name'.tr,
+                                      validator: (value) => ValidateCheck.validateEmptyText(value, "first_name_field_is_required".tr),
+                                    ),
+                                    const Gap(Dimensions.paddingSizeOverLarge),
+
+                                    CustomTextFieldWidget(
+                                      titleText: 'write_last_name'.tr,
+                                      controller: _lNameController,
+                                      focusNode: _lNameFocus,
+                                      nextFocus: _phoneFocus,
+                                      prefixIcon: CupertinoIcons.person_crop_circle_fill,
+                                      iconSize: 25,
+                                      inputType: TextInputType.name,
+                                      capitalization: TextCapitalization.words,
+                                      required: true,
+                                      labelText: 'last_name'.tr,
+                                      validator: (value) => ValidateCheck.validateEmptyText(value, "last_name_field_is_required".tr),
+                                    ),
+                                    const Gap(Dimensions.paddingSizeOverLarge),
+
+                                    CustomTextFieldWidget(
+                                      titleText: isDesktop ? 'phone'.tr : 'enter_phone_number'.tr,
+                                      controller: _phoneController,
+                                      focusNode: _phoneFocus,
+                                      nextFocus: _emailFocus,
+                                      inputType: TextInputType.phone,
+                                      isPhone: true,
+                                      showTitle: isDesktop,
+                                      onCountryChanged: (CountryCode countryCode) {
+                                        _countryDialCode = countryCode.dialCode;
+                                      },
+                                      countryDialCode: _countryDialCode == null ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code
+                                          : _countryDialCode ?? Get.find<LocalizationController>().locale.countryCode,
+                                      required: true,
+                                      labelText: 'phone'.tr,
+                                      validator: (value) => ValidateCheck.validateEmptyText(value, null),
+                                    ),
+                                  ]),
+                                ),
+                                const Gap(Dimensions.paddingSizeDefault),
+
+                                Text('account_info'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
+                                const Gap(Dimensions.paddingSizeSmall),
+
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).cardColor,
+                                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                                    boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
+                                  ),
+                                  padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+                                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                    CustomTextFieldWidget(
+                                      titleText: 'write_email'.tr,
+                                      controller: _emailController,
+                                      focusNode: _emailFocus,
+                                      nextFocus: _passwordFocus,
+                                      inputType: TextInputType.emailAddress,
+                                      prefixIcon: Icons.email,
+                                      iconSize: 25,
+                                      required: true,
+                                      labelText: 'email'.tr,
+                                      validator: (value) => ValidateCheck.validateEmail(value),
+                                    ),
+                                    const Gap(Dimensions.paddingSizeOverLarge),
+
+                                    GetBuilder<DeliverymanRegistrationController>(builder: (deliverymanRegiController) {
+                                      return Column(children: [
+                                        CustomTextFieldWidget(
+                                          titleText: '8+characters'.tr,
+                                          controller: _passwordController,
+                                          focusNode: _passwordFocus,
+                                          nextFocus: _confirmPasswordFocus,
+                                          inputType: TextInputType.visiblePassword,
+                                          prefixIcon: Icons.lock,
+                                          iconSize: 25,
+                                          isPassword: true,
+                                          onChanged: (value){
+                                            if(value != null && value.isNotEmpty){
+                                              if(!deliverymanRegiController.showPassView){
+                                                deliverymanRegiController.showHidePassView();
+                                              }
+                                              deliverymanRegiController.validPassCheck(value);
+                                            }else{
+                                              if(deliverymanRegiController.showPassView){
+                                                deliverymanRegiController.showHidePassView();
+                                              }
+                                            }
+                                          },
+                                          required: true,
+                                          labelText: 'password'.tr,
+                                          validator: (value) => ValidateCheck.validateEmptyText(value, "password_field_is_required".tr),
+                                        ),
+                                        deliverymanRegiController.showPassView ? const PassViewWidget() : const SizedBox(),
+
+                                      ]);
+                                    }),
+                                    const Gap(Dimensions.paddingSizeOverLarge),
+
+                                    CustomTextFieldWidget(
+                                      titleText: '8+characters'.tr,
+                                      controller: _confirmPasswordController,
+                                      focusNode: _confirmPasswordFocus,
+                                      inputType: TextInputType.visiblePassword,
+                                      inputAction: TextInputAction.done,
+                                      prefixIcon: Icons.lock,
+                                      iconSize: 25,
+                                      isPassword: true,
+                                      required: true,
+                                      labelText: 'confirm_password'.tr,
+                                      validator: (value) => ValidateCheck.validateEmptyText(value, "password_field_is_required".tr),
+                                    ),
+                                  ]),
+                                ),
+                                const Gap(Dimensions.paddingSizeDefault),
+
+                                Text('business_tin'.tr, style: robotoBold),
+                                const Gap(Dimensions.paddingSizeDefault),
+
+                                Container(
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).cardColor,
+                                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                                    boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
+                                  ),
+                                  padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
                                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
                                     CustomTextFieldWidget(
@@ -534,9 +702,9 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                       labelText: 'tin'.tr,
                                       controller: _tinNumberController,
                                       inputAction: TextInputAction.done,
-                                      inputType: TextInputType.number,
+                                      inputType: TextInputType.text,
                                     ),
-                                    const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+                                    const Gap(Dimensions.paddingSizeExtraLarge),
 
                                     InkWell(
                                       onTap: () async {
@@ -584,52 +752,49 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                         ],
                                       ),
                                     ),
-                                    const SizedBox(height: Dimensions.paddingSizeLarge),
+                                    const Gap(Dimensions.paddingSizeLarge),
 
                                     Text('tin_certificate'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeLarge)),
 
                                     Text('doc_format'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).disabledColor)),
-                                    const SizedBox(height: Dimensions.paddingSizeLarge),
+                                    const Gap(Dimensions.paddingSizeLarge),
 
                                     restaurantRegController.tinFiles!.isEmpty ? InkWell(
                                       onTap: () {
                                         restaurantRegController.pickFiles();
                                       },
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraLarge),
-                                        child: DottedBorder(
-                                          options: RoundedRectDottedBorderOptions(
-                                            radius: const Radius.circular(Dimensions.radiusDefault),
-                                            dashPattern: const [8, 4],
-                                            strokeWidth: 1,
-                                            color: Get.isDarkMode ? Colors.white.withValues(alpha: 0.2) : const Color(0xFFE5E5E5),
+                                      child: DottedBorder(
+                                        options: RoundedRectDottedBorderOptions(
+                                          radius: const Radius.circular(Dimensions.radiusDefault),
+                                          dashPattern: const [8, 4],
+                                          strokeWidth: 1,
+                                          color: Get.isDarkMode ? Colors.white.withValues(alpha: 0.2) : const Color(0xFFE5E5E5),
+                                        ),
+                                        child: Container(
+                                          height: 120,
+                                          width: double.infinity,
+                                          decoration: BoxDecoration(
+                                            color: Get.isDarkMode ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFFAFAFA),
+                                            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
                                           ),
-                                          child: Container(
-                                            height: 120,
-                                            width: double.infinity,
-                                            decoration: BoxDecoration(
-                                              color: Get.isDarkMode ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFFAFAFA),
-                                              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                                            ),
-                                            child: Row(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: [
-                                                const SizedBox(width: Dimensions.paddingSizeSmall),
-                                                CustomAssetImageWidget(Images.uploadIcon, height: 40, width: 40, color: Get.isDarkMode ? Colors.grey : null),
-                                                const SizedBox(width: Dimensions.paddingSizeSmall),
-                                                RichText(
-                                                  textAlign: TextAlign.center,
-                                                  text: TextSpan(
-                                                    children: [
-                                                      TextSpan(
-                                                        text: 'click_to_upload'.tr,
-                                                        style: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall, color: Colors.blue),
-                                                      ),
-                                                    ],
-                                                  ),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              const Gap.horizontal(Dimensions.paddingSizeSmall),
+                                              CustomAssetImageWidget(Images.uploadIcon, height: 40, width: 40, color: Get.isDarkMode ? Colors.grey : null),
+                                              const Gap.horizontal(Dimensions.paddingSizeSmall),
+                                              RichText(
+                                                textAlign: TextAlign.center,
+                                                text: TextSpan(
+                                                  children: [
+                                                    TextSpan(
+                                                      text: 'click_to_upload'.tr,
+                                                      style: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall, color: Colors.blue),
+                                                    ),
+                                                  ],
                                                 ),
-                                              ],
-                                            ),
+                                              ),
+                                            ],
                                           ),
                                         ),
                                       ),
@@ -663,22 +828,29 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                                         children: [
                                                           Builder(
                                                             builder: (context) {
-                                                              final filePath = restaurantRegController.tinFiles![0].paths[0];
-                                                              final fileName = filePath!.split('/').last.toLowerCase();
+                                                              final filePath;
+                                                              final fileName;
+                                                              if(GetPlatform.isWeb) {
+                                                                filePath = restaurantRegController.tinFiles![0].files[0];
+                                                                fileName = filePath.name.toLowerCase();
+                                                              } else {
+                                                                filePath = restaurantRegController.tinFiles![0].paths[0];
+                                                                fileName = filePath!.split('/').last.toLowerCase();
+                                                              }
 
                                                               if (fileName.endsWith('.pdf')) {
                                                                 // Show PDF preview
                                                                 return Row(
                                                                   children: [
                                                                     const Icon(Icons.picture_as_pdf, size: 40, color: Colors.red),
-                                                                    const SizedBox(width: 10),
+                                                                    const Gap.horizontal(10),
                                                                     Expanded(
                                                                       child: Text(
                                                                         fileName,
                                                                         overflow: TextOverflow.ellipsis,
                                                                       ),
                                                                     ),
-                                                                    const SizedBox(width: 35),
+                                                                    const Gap.horizontal(35),
                                                                   ],
                                                                 );
                                                               } else if (fileName.endsWith('.doc') || fileName.endsWith('.docx')) {
@@ -686,14 +858,14 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                                                 return Row(
                                                                   children: [
                                                                     const Icon(Icons.description, size: 40, color: Colors.blue),
-                                                                    const SizedBox(width: 10),
+                                                                    const Gap.horizontal(10),
                                                                     Expanded(
                                                                       child: Text(
                                                                         fileName,
                                                                         overflow: TextOverflow.ellipsis,
                                                                       ),
                                                                     ),
-                                                                    const SizedBox(width: 35),
+                                                                    const Gap.horizontal(35),
                                                                   ],
                                                                 );
                                                               } else {
@@ -701,14 +873,14 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                                                 return Row(
                                                                   children: [
                                                                     const Icon(Icons.insert_drive_file, size: 40, color: Colors.grey),
-                                                                    const SizedBox(width: 10),
+                                                                    const Gap.horizontal(10),
                                                                     Expanded(
                                                                       child: Text(
                                                                         fileName,
                                                                         overflow: TextOverflow.ellipsis,
                                                                       ),
                                                                     ),
-                                                                    const SizedBox(width: 35),
+                                                                    const Gap.horizontal(35),
                                                                   ],
                                                                 );
                                                               }
@@ -741,160 +913,10 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
 
                                   ]),
                                 ),
-
-                              ]),
-                            ),
-                          ),
-
-                          Visibility(
-                            visible: restaurantRegController.storeStatus == 0.6,
-                            child: Form(
-                              key: _formKeySecond,
-                              child: Column(mainAxisAlignment: MainAxisAlignment.start, crossAxisAlignment: CrossAxisAlignment.start, children: [
-
-                                Row(children: [
-                                  Text('owner_info'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
-                                  const SizedBox(width: Dimensions.paddingSizeSmall),
-
-                                  CustomToolTip(
-                                    message: 'this_info_will_need_for_restaurant_app_and_panel_login'.tr,
-                                    tooltipController: tooltipController,
-                                    preferredDirection: AxisDirection.down,
-                                  ),
-                                ]),
-                                const SizedBox(height: Dimensions.paddingSizeDefault),
-
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).cardColor,
-                                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                                    boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
-                                  ),
-                                  padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeDefault),
-                                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-
-                                    CustomTextFieldWidget(
-                                      titleText: 'write_first_name'.tr,
-                                      controller: _fNameController,
-                                      focusNode: _fNameFocus,
-                                      nextFocus: _lNameFocus,
-                                      inputType: TextInputType.name,
-                                      capitalization: TextCapitalization.words,
-                                      prefixIcon: CupertinoIcons.person_crop_circle_fill,
-                                      iconSize: 25,
-                                      required: true,
-                                      labelText: 'first_name'.tr,
-                                      validator: (value) => ValidateCheck.validateEmptyText(value, "first_name_field_is_required".tr),
-                                    ),
-                                    const SizedBox(height: Dimensions.paddingSizeOverLarge),
-
-                                    CustomTextFieldWidget(
-                                      titleText: 'write_last_name'.tr,
-                                      controller: _lNameController,
-                                      focusNode: _lNameFocus,
-                                      nextFocus: _phoneFocus,
-                                      prefixIcon: CupertinoIcons.person_crop_circle_fill,
-                                      iconSize: 25,
-                                      inputType: TextInputType.name,
-                                      capitalization: TextCapitalization.words,
-                                      required: true,
-                                      labelText: 'last_name'.tr,
-                                      validator: (value) => ValidateCheck.validateEmptyText(value, "last_name_field_is_required".tr),
-                                    ),
-                                    const SizedBox(height: Dimensions.paddingSizeOverLarge),
-
-                                    CustomTextFieldWidget(
-                                      titleText: ResponsiveHelper.isDesktop(context) ? 'phone'.tr : 'enter_phone_number'.tr,
-                                      controller: _phoneController,
-                                      focusNode: _phoneFocus,
-                                      nextFocus: _emailFocus,
-                                      inputType: TextInputType.phone,
-                                      isPhone: true,
-                                      showTitle: ResponsiveHelper.isDesktop(context),
-                                      onCountryChanged: (CountryCode countryCode) {
-                                        _countryDialCode = countryCode.dialCode;
-                                      },
-                                      countryDialCode: _countryDialCode != null ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code
-                                          : Get.find<LocalizationController>().locale.countryCode,
-                                      required: false,
-                                      labelText: 'phone'.tr,
-                                      validator: (value) {
-                                        if (value == null || value.isEmpty) {
-                                          return null; // Phone is optional
-                                        }
-                                        return null; // Validation will be done in validation logic if phone is provided
-                                      },
-                                    ),
-                                    const SizedBox(height: Dimensions.paddingSizeOverLarge),
-
-                                    CustomTextFieldWidget(
-                                      titleText: 'write_email'.tr,
-                                      controller: _emailController,
-                                      focusNode: _emailFocus,
-                                      nextFocus: _passwordFocus,
-                                      inputType: TextInputType.emailAddress,
-                                      prefixIcon: Icons.email,
-                                      iconSize: 25,
-                                      required: true,
-                                      labelText: 'email'.tr,
-                                      validator: (value) => ValidateCheck.validateEmail(value),
-                                    ),
-                                    const SizedBox(height: Dimensions.paddingSizeOverLarge),
-
-                                    GetBuilder<DeliverymanRegistrationController>(builder: (deliverymanRegiController) {
-                                      return Column(children: [
-                                        CustomTextFieldWidget(
-                                          titleText: '8+characters'.tr,
-                                          controller: _passwordController,
-                                          focusNode: _passwordFocus,
-                                          nextFocus: _confirmPasswordFocus,
-                                          inputType: TextInputType.visiblePassword,
-                                          prefixIcon: Icons.lock,
-                                          iconSize: 25,
-                                          isPassword: true,
-                                          onChanged: (value){
-                                            if(value != null && value.isNotEmpty){
-                                              if(!deliverymanRegiController.showPassView){
-                                                deliverymanRegiController.showHidePassView();
-                                              }
-                                              deliverymanRegiController.validPassCheck(value);
-                                            }else{
-                                              if(deliverymanRegiController.showPassView){
-                                                deliverymanRegiController.showHidePassView();
-                                              }
-                                            }
-                                          },
-                                          required: true,
-                                          labelText: 'password'.tr,
-                                          validator: (value) => ValidateCheck.validateEmptyText(value, "password_field_is_required".tr),
-                                        ),
-                                        deliverymanRegiController.showPassView ? const PassViewWidget() : const SizedBox(),
-
-                                      ]);
-                                    }),
-
-                                    const SizedBox(height: Dimensions.paddingSizeOverLarge),
-
-                                    CustomTextFieldWidget(
-                                      titleText: '8+characters'.tr,
-                                      controller: _confirmPasswordController,
-                                      focusNode: _confirmPasswordFocus,
-                                      inputType: TextInputType.visiblePassword,
-                                      inputAction: TextInputAction.done,
-                                      prefixIcon: Icons.lock,
-                                      iconSize: 25,
-                                      isPassword: true,
-                                      required: true,
-                                      labelText: 'confirm_password'.tr,
-                                      validator: (value) => ValidateCheck.validateEmptyText(value, "password_field_is_required".tr),
-                                    ),
-                                    // const SizedBox(height: Dimensions.paddingSizeExtraLarge),
-                                  ]),
-                                ),
-                                const SizedBox(height: Dimensions.paddingSizeLarge),
+                                const Gap(Dimensions.paddingSizeDefault),
 
                                 restaurantRegController.dataList!.isNotEmpty ? Text('additional_info'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)) : const SizedBox(),
-                                SizedBox(height: restaurantRegController.dataList!.isNotEmpty ? Dimensions.paddingSizeLarge : 0),
+                                Gap(restaurantRegController.dataList!.isNotEmpty ? Dimensions.paddingSizeSmall : 0),
 
                                 restaurantRegController.dataList!.isNotEmpty ? RestaurantAdditionalDataSectionWidget(restaurantRegiController: restaurantRegController, scrollController: _scrollController) : const SizedBox(),
 
@@ -920,7 +942,7 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                       index: 0, onTap: ()=> restaurantRegController.setBusiness(0),
                                     ),
                                   ) : const SizedBox(),
-                                  SizedBox(width: Get.find<SplashController>().configModel!.commissionBusinessModel != 0 ? Dimensions.paddingSizeDefault : 0),
+                                  Gap.horizontal(Get.find<SplashController>().configModel!.commissionBusinessModel != 0 ? Dimensions.paddingSizeDefault : 0),
 
                                   Get.find<SplashController>().configModel!.subscriptionBusinessModel != 0 ? Expanded(
                                     child: BaseCardWidget(restaurantRegistrationController: restaurantRegController, title: 'subscription_base'.tr,
@@ -930,7 +952,7 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
 
                                 ]),
                               ),
-                              const SizedBox(height: Dimensions.paddingSizeExtraLarge),
+                              const Gap(Dimensions.paddingSizeExtraLarge),
 
                               restaurantRegController.businessIndex == 0 ? Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
@@ -946,7 +968,7 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                     style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).textTheme.bodyLarge?.color?.withValues(alpha: 0.7)), textAlign: TextAlign.justify, textScaler: const TextScaler.linear(1.1),
                                   ),
                                 ),
-                                const SizedBox(height: Dimensions.paddingSizeLarge),
+                                const Gap(Dimensions.paddingSizeLarge),
 
                                 restaurantRegController.packageModel != null ? SizedBox(
                                   height: 440,
@@ -967,7 +989,7 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                   ) : Center(child: Column(mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Image.asset(Images.emptyFoodIcon, height: 150),
-                                      const SizedBox(height: Dimensions.paddingSizeLarge),
+                                      const Gap(Dimensions.paddingSizeLarge),
                                       Text('no_package_available'.tr, style: robotoMedium),
                                     ]),
                                   ),
@@ -978,7 +1000,7 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                             ]),
                           ),
 
-                          const SizedBox(height: Dimensions.paddingSizeLarge),
+                          const Gap(Dimensions.paddingSizeLarge),
                           
                         ]),
                       ),
@@ -986,7 +1008,7 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                   ),
                 ),
 
-                ResponsiveHelper.isDesktop(context) ? const SizedBox() : buttonView(),
+                isDesktop ? const SizedBox() : buttonView(isDesktop: isDesktop),
 
               ]),
             ),
@@ -996,131 +1018,527 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
     });
   }
 
-  Widget webView(RestaurantRegistrationController restaurantRegistrationController){
+  Widget webView(RestaurantRegistrationController restaurantRegistrationController, bool isDesktop){
     return Form(
       key: _formKeySecond,
       child: Center(
         child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
 
-          restaurantRegistrationController.storeStatus != 0.9 ? Column(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                  boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
-                ),
-                padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
-                margin: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
-                child: Column(mainAxisAlignment: MainAxisAlignment.start, children: [
-                  Row(children: [
-                    Container(
-                      height: 40,
-                      width: 500,
-                      color: Colors.transparent,
-                      child: TabBar(
-                        tabAlignment: TabAlignment.start,
-                        controller: _tabController,
-                        indicatorColor: Theme.of(context).primaryColor,
-                        indicatorWeight: 3,
-                        labelColor: Theme.of(context).primaryColor,
-                        unselectedLabelColor: Theme.of(context).disabledColor,
-                        labelPadding: ResponsiveHelper.isTablet(context)
-                          ? const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
-                          : const EdgeInsets.symmetric(horizontal: Dimensions.radiusDefault, vertical: 0),
-                        unselectedLabelStyle: robotoRegular.copyWith(
-                          color: Theme.of(context).disabledColor, 
-                          fontSize: ResponsiveHelper.isTablet(context) ? Dimensions.fontSizeExtraSmall : Dimensions.fontSizeSmall
-                        ),
-                        labelStyle: robotoBold.copyWith(
-                          fontSize: ResponsiveHelper.isTablet(context) ? Dimensions.fontSizeExtraSmall : Dimensions.fontSizeSmall, 
-                          color: Theme.of(context).primaryColor
-                        ),
-                        isScrollable: true,
-                        indicatorSize: TabBarIndicatorSize.tab,
-                        tabs: _tabs,
-                        onTap: (int ? value) {
-                          setState(() {});
-                        },
-                      ),
-                    ),
-                  ]),
-                  const SizedBox(height: Dimensions.paddingSizeSmall),
-
-                  Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-
-                    Expanded(
-                      child: Column( children: [
-                        const SizedBox(height: Dimensions.paddingSizeExtraLarge),
-                        CustomTextFieldWidget(
-                          hintText: 'write_restaurant_name'.tr,
-                          controller: _nameController[_tabController!.index],
-                          focusNode: _nameFocus[_tabController!.index],
-                          nextFocus: _tabController!.index != _languageList!.length-1 ? _addressFocus[_tabController!.index] : _addressFocus[0],
-                          inputType: TextInputType.name,
-                          capitalization: TextCapitalization.words,
-                          prefixImage: Images.shopIcon,
-                          labelText: '${'store_name'.tr} (${_languageList[_tabController!.index].value!})',
-                          required: true,
-                          validator: (value) => ValidateCheck.validateEmptyText(value, "restaurant_name_field_is_required".tr),
-                        ),
-                        const SizedBox(height: Dimensions.paddingSizeExtraLarge),
-
-                        CustomTextFieldWidget(
-                          hintText: 'write_restaurant_address'.tr,
-                          controller: _addressController[0],
-                          focusNode: _addressFocus[0],
-                          inputAction: TextInputAction.done,
-                          inputType: TextInputType.text,
-                          capitalization: TextCapitalization.sentences,
-                          maxLines: 3,
-                          required: true,
-                          labelText: 'restaurant_address'.tr,
-                          validator: (value) => ValidateCheck.validateEmptyText(value, "restaurant_address_field_is_required".tr),
-                        ),
-                        const SizedBox(height: Dimensions.paddingSizeExtraLarge),
-
-                        CuisineWidget(cuisineTextController: _cuisineController, cuisineFocus: _cuisineFocus),
-
-                      ]),
-                    ),
-                    const SizedBox(width: Dimensions.paddingSizeExtraOverLarge),
-
-                    Expanded(
-                      child: Column(children: [
-                        const SizedBox(height: Dimensions.paddingSizeExtraLarge),
-                        restaurantRegistrationController.zoneList != null ? SelectLocationViewWidget(fromView: true, addressController: _addressController[0], addressFocus: _addressFocus[0]) : const Center(child: CircularProgressIndicator()),
-                      ]),
-                    ),
-                  ]),
-                  // const SizedBox(height: Dimensions.paddingSizeSmall),
-                ]),
+          restaurantRegistrationController.storeStatus != 0.9 ? Column(children: [
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
               ),
+              padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('restaurant_info'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault)),
+                const Gap(Dimensions.paddingSizeSmall),
 
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                  boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
-                ),
-                padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
-                margin: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
-                child: Column(children: [
+                Row(children: [
+                  Expanded(
+                    child: Column(children: [
+                      Container(
+                        padding: EdgeInsets.all(Dimensions.paddingSizeSmall),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).disabledColor.withValues(alpha: 0.07),
+                          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                        ),
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Container(
+                            height: 40, width: 500,
+                            color: Colors.transparent,
+                            child: TabBar(
+                              tabAlignment: TabAlignment.start,
+                              controller: _tabController,
+                              indicatorColor: Theme.of(context).textTheme.bodyLarge?.color,
+                              indicatorWeight: 3,
+                              labelColor: Theme.of(context).textTheme.bodyLarge?.color,
+                              unselectedLabelColor: Theme.of(context).disabledColor,
+                              unselectedLabelStyle: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeSmall),
+                              labelStyle: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).primaryColor),
+                              labelPadding: const EdgeInsets.symmetric(horizontal: Dimensions.radiusDefault, vertical: 0 ),
+                              isScrollable: true,
+                              indicatorSize: TabBarIndicatorSize.tab,
+                              tabs: _tabs,
+                              onTap: (int ? value) {
+                                setState(() {});
+                              },
+                            ),
+                          ),
+                          const Gap(Dimensions.paddingSizeLarge),
 
-                  Row(children: [
-                    const Icon(Icons.person),
-                    const SizedBox(width: Dimensions.paddingSizeSmall),
-                    Text('general_information'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault)),
-                  ]),
-                  const Divider(),
-                  const SizedBox(height: Dimensions.paddingSizeLarge),
+                          CustomTextFieldWidget(
+                            hintText: 'write_restaurant_name'.tr,
+                            controller: _nameController[_tabController!.index],
+                            focusNode: _nameFocus[_tabController!.index],
+                            nextFocus: _tabController!.index != _languageList!.length-1 ? _addressFocus[_tabController!.index] : _addressFocus[0],
+                            inputType: TextInputType.name,
+                            capitalization: TextCapitalization.words,
+                            prefixImage: Images.shopIcon,
+                            labelText: '${'store_name'.tr} (${_languageList[_tabController!.index].value!})',
+                            required: true,
+                            validator: (value) => ValidateCheck.validateEmptyText(value, "restaurant_name_field_is_required".tr),
+                          ),
+                          const Gap(Dimensions.paddingSizeOverLarge),
 
-                  Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Expanded(child: Column(children: [
+                          CustomTextFieldWidget(
+                            hintText: 'write_restaurant_address'.tr,
+                            controller: _addressController[0],
+                            focusNode: _addressFocus[0],
+                            inputAction: TextInputAction.done,
+                            inputType: TextInputType.text,
+                            capitalization: TextCapitalization.sentences,
+                            maxLines: 3,
+                            required: true,
+                            labelText: 'restaurant_address'.tr,
+                            validator: (value) => ValidateCheck.validateEmptyText(value, "restaurant_address_field_is_required".tr),
+                          ),
+                        ]),
+                      ),
+                      const Gap(Dimensions.paddingSizeExtraLarge),
+
+                      CuisineWidget(cuisineTextController: _cuisineController, cuisineFocus: _cuisineFocus),
+                    ]),
+                  ),
+                  const Gap.horizontal(Dimensions.paddingSizeLarge),
+
+                  Expanded(
+                    child: restaurantRegistrationController.zoneList != null ? SelectLocationViewWidget(fromView: true, addressController: _addressController[0], addressFocus: _addressFocus[0]) : const Center(child: CircularProgressIndicator()),
+                  ),
+                ]),
+              ]),
+            ),
+            const Gap(Dimensions.paddingSizeExtraLarge),
+
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
+              ),
+              padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('general_info'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault)),
+                const Gap(Dimensions.paddingSizeLarge),
+
+                Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Expanded(child: InkWell(
+                    onTap: () {
+                      Get.dialog(const CustomTimePickerWidget());
+                    },
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Container(
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).cardColor,
+                            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                            border: Border.all(color: Theme.of(context).disabledColor, width: 0.5),
+                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
+                          child: Row(children: [
+                            Expanded(child: Text(
+                              '${restaurantRegistrationController.storeMinTime} : ${restaurantRegistrationController.storeMaxTime} ${restaurantRegistrationController.storeTimeUnit}',
+                              style: robotoMedium,
+                            )),
+                            Icon(Icons.access_time_filled, color: Theme.of(context).primaryColor,)
+                          ]),
+                        ),
+
+                        Positioned(
+                          left: 10, top: -15,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).cardColor,
+                            ),
+                            padding: const EdgeInsets.all(5),
+                            child: Row(
+                              children: [
+                                Text('select_time'.tr, style: robotoRegular.copyWith(color: Theme.of(context).disabledColor)),
+                                Text(' *', style: robotoRegular.copyWith(color: Colors.red)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
+                  const Gap.horizontal(Dimensions.paddingSizeLarge),
+
+                  Expanded(child: Row(children: [
+                    Expanded(child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(children: [
+                          Text('restaurant_logo'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault)),
+                          Text(' *', style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Colors.red)),
+                        ]),
+                        const Gap(Dimensions.paddingSizeSmall),
+
+                        Container(
+                          padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).disabledColor.withValues(alpha: 0.07),
+                            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                          ),
+                          child: Column(children: [
+                            Align(alignment: Alignment.center, child: Stack(children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                                child: restaurantRegistrationController.pickedLogo != null ? GetPlatform.isWeb ? Image.network(
+                                  restaurantRegistrationController.pickedLogo!.path, width: 100, height: 100, fit: BoxFit.cover,
+                                ) : Image.file(
+                                  File(restaurantRegistrationController.pickedLogo!.path), width: 100, height: 100, fit: BoxFit.cover,
+                                ) : Container(
+                                  width: 100, height: 100,
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).cardColor,
+                                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                                  ),
+                                  child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                    Icon(CupertinoIcons.camera_fill, color: Theme.of(context).disabledColor.withValues(alpha: 0.8), size: 25),
+                                    const Gap(Dimensions.paddingSizeExtraSmall),
+
+                                    Text('upload_logo'.tr, style: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeExtraSmall)),
+                                  ]),
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 0, right: 0, top: 0, left: 0,
+                                child: InkWell(
+                                  onTap: () => restaurantRegistrationController.pickImage(true, false),
+                                  child: DottedBorder(
+                                    options: RoundedRectDottedBorderOptions(
+                                      color: restaurantRegistrationController.showLogoValidation 
+                                        ? Colors.red 
+                                        : Theme.of(context).disabledColor,
+                                      strokeWidth: restaurantRegistrationController.showLogoValidation ? 2 : 1,
+                                      strokeCap: StrokeCap.butt,
+                                      dashPattern: const [5, 5],
+                                      padding: const EdgeInsets.all(0),
+                                      radius: const Radius.circular(Dimensions.radiusDefault),
+                                    ),
+                                    child: Center(
+                                      child: Visibility(
+                                        visible: restaurantRegistrationController.pickedLogo != null,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(25),
+                                          decoration: BoxDecoration(
+                                            border: Border.all(width: 2, color: Colors.white),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(Icons.camera_alt, color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ])),
+                            const Gap(Dimensions.paddingSizeSmall),
+
+                            Text(
+                              'identity_image_ratio'.tr,
+                              style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeExtraSmall),
+                              textAlign: TextAlign.center,
+                            ),
+                            if (restaurantRegistrationController.showLogoValidation)
+                              Padding(
+                                padding: const EdgeInsets.only(top: Dimensions.paddingSizeExtraSmall),
+                                child: Text(
+                                  'select_restaurant_logo'.tr,
+                                  style: robotoRegular.copyWith(color: Colors.red, fontSize: Dimensions.fontSizeSmall),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                          ]),
+                        ),
+                      ],
+                    )),
+                    const Gap.horizontal(Dimensions.paddingSizeDefault),
+
+                    Expanded(child: Column(
+                      children: [
+                        Row(children: [
+                          Text('restaurant_cover'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault)),
+                          Text(' *', style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault, color: Colors.red)),
+                        ]),
+                        const Gap(Dimensions.paddingSizeSmall),
+
+                        Container(
+                          padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).disabledColor.withValues(alpha: 0.07),
+                            borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                          ),
+                          child: Column(children: [
+                            Stack(children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                                child: restaurantRegistrationController.pickedCover != null ? GetPlatform.isWeb ? Image.network(
+                                  restaurantRegistrationController.pickedCover!.path, width: context.width, height: 100, fit: BoxFit.cover,
+                                ) : Image.file(
+                                  File(restaurantRegistrationController.pickedCover!.path), width: context.width, height: 100, fit: BoxFit.cover,
+                                ) : Container(
+                                  width: context.width, height: 100,
+                                  decoration: BoxDecoration(
+                                    color: Theme.of(context).cardColor,
+                                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                                  ),
+                                  child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                    Icon(CupertinoIcons.camera_fill, color: Theme.of(context).disabledColor.withValues(alpha: 0.8), size: 25),
+                                    const Gap(Dimensions.paddingSizeExtraSmall),
+
+                                    Text('upload_cover'.tr, style: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeExtraSmall)),
+                                  ]),
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 0, right: 0, top: 0, left: 0,
+                                child: InkWell(
+                                  onTap: () => restaurantRegistrationController.pickImage(false, false),
+                                  child: DottedBorder(
+                                    options: RoundedRectDottedBorderOptions(
+                                      color: restaurantRegistrationController.showCoverValidation 
+                                        ? Colors.red 
+                                        : Theme.of(context).disabledColor,
+                                      strokeWidth: restaurantRegistrationController.showCoverValidation ? 2 : 1,
+                                      strokeCap: StrokeCap.butt,
+                                      dashPattern: const [5, 5],
+                                      padding: const EdgeInsets.all(0),
+                                      radius: const Radius.circular(Dimensions.radiusDefault),
+                                    ),
+                                    child: Center(
+                                      child: Visibility(
+                                        visible: restaurantRegistrationController.pickedCover != null,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(25),
+                                          decoration: BoxDecoration(
+                                            border: Border.all(width: 3, color: Colors.white),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(Icons.camera_alt, color: Colors.white, size: 50),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ]),
+                            const Gap(Dimensions.paddingSizeSmall),
+
+                            Text(
+                              'upload_identity_image_ratio'.tr,
+                              style: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeExtraSmall),
+                              textAlign: TextAlign.center,
+                            ),
+                            if (restaurantRegistrationController.showCoverValidation)
+                              Padding(
+                                padding: const EdgeInsets.only(top: Dimensions.paddingSizeExtraSmall),
+                                child: Text(
+                                  'select_restaurant_cover_photo'.tr,
+                                  style: robotoRegular.copyWith(color: Colors.red, fontSize: Dimensions.fontSizeSmall),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                          ]),
+                        ),
+                      ],
+                    )),
+                  ])),
+                ]),
+              ]),
+            ),
+            const Gap(Dimensions.paddingSizeExtraLarge),
+
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
+              ),
+              padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('owner_info'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault)),
+                const Gap(Dimensions.paddingSizeLarge),
+
+                Row(children: [
+                  Expanded(child: CustomTextFieldWidget(
+                    hintText: 'write_first_name'.tr,
+                    controller: _fNameController,
+                    focusNode: _fNameFocus,
+                    nextFocus: _lNameFocus,
+                    inputType: TextInputType.name,
+                    capitalization: TextCapitalization.words,
+                    prefixIcon: CupertinoIcons.person_crop_circle_fill,
+                    iconSize: 25,
+                    required: true,
+                    labelText: 'first_name'.tr,
+                    validator: (value) => ValidateCheck.validateEmptyText(value, "first_name_field_is_required".tr),
+                  )),
+                  const Gap.horizontal(Dimensions.paddingSizeLarge),
+
+                  Expanded(child: CustomTextFieldWidget(
+                    hintText: 'write_last_name'.tr,
+                    controller: _lNameController,
+                    focusNode: _lNameFocus,
+                    nextFocus: _phoneFocus,
+                    inputType: TextInputType.name,
+                    prefixIcon: CupertinoIcons.person_crop_circle_fill,
+                    iconSize: 25,
+                    capitalization: TextCapitalization.words,
+                    required: true,
+                    labelText: 'last_name'.tr,
+                    validator: (value) => ValidateCheck.validateEmptyText(value, "last_name_field_is_required".tr),
+                  )),
+                  const Gap.horizontal(Dimensions.paddingSizeLarge),
+
+                  Expanded(
+                    child: CustomTextFieldWidget(
+                      hintText: isDesktop ? 'phone'.tr : 'enter_phone_number'.tr,
+                      controller: _phoneController,
+                      focusNode: _phoneFocus,
+                      nextFocus: _emailFocus,
+                      inputType: TextInputType.phone,
+                      isPhone: true,
+                      onCountryChanged: (CountryCode countryCode) {
+                        _countryDialCode = countryCode.dialCode;
+                      },
+                      countryDialCode: _countryDialCode == null ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code
+                          : _countryDialCode ?? Get.find<LocalizationController>().locale.countryCode,
+                      required: true,
+                      labelText: 'phone'.tr,
+                      validator: (value) => ValidateCheck.validateEmptyText(value, null),
+                    ),
+                  ),
+                ]),
+                const Gap(Dimensions.paddingSizeSmall),
+              ]),
+            ),
+            const Gap(Dimensions.paddingSizeExtraLarge),
+
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
+              ),
+              padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('account_info'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault)),
+                const Gap(Dimensions.paddingSizeLarge),
+
+                Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Expanded(
+                    child: CustomTextFieldWidget(
+                      hintText: 'write_email'.tr,
+                      controller: _emailController,
+                      focusNode: _emailFocus,
+                      nextFocus: _passwordFocus,
+                      inputType: TextInputType.emailAddress,
+                      prefixIcon: Icons.email,
+                      iconSize: 25,
+                      required: true,
+                      labelText: 'email'.tr,
+                      validator: (value) => ValidateCheck.validateEmail(value),
+                    ),
+                  ),
+                  const Gap.horizontal(Dimensions.paddingSizeLarge),
+
+                  Expanded(
+                    child: GetBuilder<DeliverymanRegistrationController>(builder: (deliverymanRegiController) {
+                      return Column(children: [
+                        CustomTextFieldWidget(
+                          hintText: '8+characters'.tr,
+                          controller: _passwordController,
+                          focusNode: _passwordFocus,
+                          nextFocus: _confirmPasswordFocus,
+                          inputType: TextInputType.visiblePassword,
+                          prefixIcon: Icons.lock,
+                          iconSize: 25,
+                          isPassword: true,
+                          onChanged: (value){
+                            if(value != null && value.isNotEmpty){
+                              if(!deliverymanRegiController.showPassView){
+                                deliverymanRegiController.showHidePassView();
+                              }
+                              deliverymanRegiController.validPassCheck(value);
+                            }else{
+                              if(deliverymanRegiController.showPassView){
+                                deliverymanRegiController.showHidePassView();
+                              }
+                            }
+                          },
+                          required: true,
+                          labelText: 'password'.tr,
+                          validator: (value) => ValidateCheck.validateEmptyText(value, "password_field_is_required".tr),
+                        ),
+                        deliverymanRegiController.showPassView ? const PassViewWidget() : const SizedBox(),
+
+                      ]);
+                    }),
+                  ),
+                  const Gap.horizontal(Dimensions.paddingSizeLarge),
+
+                  Expanded(child: CustomTextFieldWidget(
+                    titleText: '8+characters'.tr,
+                    controller: _confirmPasswordController,
+                    focusNode: _confirmPasswordFocus,
+                    inputType: TextInputType.visiblePassword,
+                    inputAction: TextInputAction.done,
+                    prefixIcon: Icons.lock,
+                    iconSize: 25,
+                    isPassword: true,
+                    required: true,
+                    labelText: 'confirm_password'.tr,
+                    validator: (value) => ValidateCheck.validateEmptyText(value, "password_field_is_required".tr),
+                  )),
+                ]),
+                const Gap(Dimensions.paddingSizeSmall),
+              ]),
+            ),
+            const Gap(Dimensions.paddingSizeExtraLarge),
+
+            Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
+              ),
+              padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('business_tin'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault)),
+                const Gap(Dimensions.paddingSizeSmall),
+
+                Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
+                  Expanded(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
+
+                      CustomTextFieldWidget(
+                        hintText: 'taxpayer_identification_number_tin'.tr,
+                        labelText: 'tin'.tr,
+                        controller: _tinNumberController,
+                        inputAction: TextInputAction.done,
+                        inputType: TextInputType.text,
+                        validator: (value) => ValidateCheck.validateEmptyText(value, "restaurant_tin_field_is_required".tr),
+                      ),
+                      const Gap(Dimensions.paddingSizeExtraOverLarge),
 
                       InkWell(
-                        onTap: () {
-                          Get.dialog(const CustomTimePickerWidget());
+                        onTap: () async {
+                          final DateTime? pickedDate = await showDatePicker(
+                            context: context,
+                            firstDate: DateTime.now(),
+                            initialDate: DateTime.now(),
+                            lastDate: DateTime(2100),
+                          );
+
+                          if (pickedDate != null) {
+                            restaurantRegistrationController.setTinExpireDate(pickedDate);
+                          }
                         },
                         child: Stack(
                           clipBehavior: Clip.none,
@@ -1135,10 +1553,10 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                               padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
                               child: Row(children: [
                                 Expanded(child: Text(
-                                  '${restaurantRegistrationController.storeMinTime} : ${restaurantRegistrationController.storeMaxTime} ${restaurantRegistrationController.storeTimeUnit}',
+                                  restaurantRegistrationController.tinExpireDate ?? 'select_date'.tr,
                                   style: robotoMedium,
                                 )),
-                                Icon(Icons.access_time_filled, color: Theme.of(context).primaryColor,)
+                                Icon(Icons.calendar_month, color: Theme.of(context).primaryColor),
                               ]),
                             ),
 
@@ -1149,654 +1567,266 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                                   color: Theme.of(context).cardColor,
                                 ),
                                 padding: const EdgeInsets.all(5),
-                                child: Row(
-                                  children: [
-                                    Text('select_time'.tr, style: robotoRegular.copyWith(color: Theme.of(context).disabledColor)),
-                                    Text(' *', style: robotoRegular.copyWith(color: Colors.red)),
-                                  ],
-                                ),
+                                child: Text('expire_date'.tr, style: robotoRegular.copyWith(color: Theme.of(context).disabledColor)),
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ])),
 
-                    Expanded(child:  Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-                      Expanded(flex: 4, child:  Align(alignment: Alignment.center, child: Stack(children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                          child: restaurantRegistrationController.pickedLogo != null ? GetPlatform.isWeb ? Image.network(
-                            restaurantRegistrationController.pickedLogo!.path, width: 160, height: 120, fit: BoxFit.cover,
-                          ) : Image.file(
-                            File(restaurantRegistrationController.pickedLogo!.path), width: 160, height: 120, fit: BoxFit.cover,
-                          ) : SizedBox(
-                            width: 160, height: 120,
-                            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                              Icon(CupertinoIcons.camera_fill, color: Theme.of(context).disabledColor.withValues(alpha: 0.8), size: 38),
-                              const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                    ]),
+                  ),
+                  const Gap.horizontal(Dimensions.paddingSizeLarge),
 
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text('upload_store_logo'.tr, style: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeExtraSmall)),
+                  Expanded(
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
 
-                                  Text('*'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Colors.red)),
-                                ],
-                              ),
-                              const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+                      Row(children: [
+                        Text('tin_certificate'.tr, style: robotoSemiBold),
+                        const Gap.horizontal(Dimensions.paddingSizeExtraSmall),
 
-                              Text(
-                                'upload_jpg_png_gif_maximum_2_mb'.tr,
-                                style: robotoRegular.copyWith(color: Theme.of(context).disabledColor.withValues(alpha: 0.6), fontSize: 10),
-                                textAlign: TextAlign.center,
-                              ),
-                            ]),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 0, right: 0, top: 0, left: 0,
-                          child: InkWell(
-                            onTap: () => restaurantRegistrationController.pickImage(true, false),
-                            child: DottedBorder(
-                              options: RoundedRectDottedBorderOptions(
-                                color: Theme.of(context).primaryColor,
-                                strokeWidth: 1,
-                                strokeCap: StrokeCap.butt,
-                                dashPattern: const [5, 5],
-                                padding: const EdgeInsets.all(0),
-                                radius: const Radius.circular(Dimensions.radiusDefault),
-                              ),
-                              child: Center(
-                                child: Visibility(
-                                  visible: restaurantRegistrationController.pickedLogo != null,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(25),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(width: 2, color: Colors.white),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(Icons.camera_alt, color: Colors.white),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ])),),
-                      const SizedBox(width: Dimensions.paddingSizeSmall),
-
-                      Expanded(flex: 6, child: Stack(children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                          child: restaurantRegistrationController.pickedCover != null ? GetPlatform.isWeb ? Image.network(
-                            restaurantRegistrationController.pickedCover!.path, width: context.width, height: 120, fit: BoxFit.cover,
-                          ) : Image.file(
-                            File(restaurantRegistrationController.pickedCover!.path), width: context.width, height: 120, fit: BoxFit.cover,
-                          ) : SizedBox(
-                            width: context.width, height: 120,
-                            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-
-                              Icon(CupertinoIcons.camera_fill, color: Theme.of(context).disabledColor.withValues(alpha: 0.8), size: 38),
-                              const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text('upload_store_cover'.tr, style: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeExtraSmall)),
-
-                                  Text('*'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault, color: Colors.red)),
-                                ],
-                              ),
-                              const SizedBox(height: Dimensions.paddingSizeExtraSmall),
-
-                              Text(
-                                'upload_jpg_png_gif_maximum_2_mb'.tr,
-                                style: robotoRegular.copyWith(color: Theme.of(context).disabledColor.withValues(alpha: 0.6), fontSize: 10),
-                                textAlign: TextAlign.center,
-                              ),
-                            ]),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 0, right: 0, top: 0, left: 0,
-                          child: InkWell(
-                            onTap: () => restaurantRegistrationController.pickImage(false, false),
-                            child: DottedBorder(
-                              options: RoundedRectDottedBorderOptions(
-                                color: Theme.of(context).primaryColor,
-                                strokeWidth: 1,
-                                strokeCap: StrokeCap.butt,
-                                dashPattern: const [5, 5],
-                                padding: const EdgeInsets.all(0),
-                                radius: const Radius.circular(Dimensions.radiusDefault),
-                              ),
-                              child: Center(
-                                child: Visibility(
-                                  visible: restaurantRegistrationController.pickedCover != null,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(25),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(width: 3, color: Colors.white),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: const Icon(Icons.camera_alt, color: Colors.white, size: 50),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ])),
-                    ])),
-                  ]),
-
-                ]),
-              ),
-
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                  boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
-                ),
-                padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
-                margin: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
-                child: Column(children: [
-
-                  Row(children: [
-                    const Icon(Icons.business),
-                    const SizedBox(width: Dimensions.paddingSizeSmall),
-                    Text('business_tin'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault)),
-                  ]),
-                  const Divider(),
-                  const SizedBox(height: Dimensions.paddingSizeLarge),
-                  
-                  Row(crossAxisAlignment: CrossAxisAlignment.center, children: [
-                    Expanded(
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
-
-                        CustomTextFieldWidget(
-                          hintText: 'taxpayer_identification_number_tin'.tr,
-                          labelText: 'tin'.tr,
-                          controller: _tinNumberController,
-                          inputAction: TextInputAction.done,
-                          inputType: TextInputType.number,
-                          validator: (value) => ValidateCheck.validateEmptyText(value, "restaurant_tin_field_is_required".tr),
-                        ),
-                        const SizedBox(height: Dimensions.paddingSizeExtraOverLarge),
-                  
-                        InkWell(
-                          onTap: () async {
-                            final DateTime? pickedDate = await showDatePicker(
-                              context: context,
-                              firstDate: DateTime.now(),
-                              initialDate: DateTime.now(),
-                              lastDate: DateTime(2100),
-                            );
-                  
-                            if (pickedDate != null) {
-                              restaurantRegistrationController.setTinExpireDate(pickedDate);
-                            }
-                          },
-                          child: Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              Container(
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context).cardColor,
-                                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                                  border: Border.all(color: Theme.of(context).disabledColor, width: 0.5),
-                                ),
-                                padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge),
-                                child: Row(children: [
-                                  Expanded(child: Text(
-                                    restaurantRegistrationController.tinExpireDate ?? 'select_date'.tr,
-                                    style: robotoMedium,
-                                  )),
-                                  Icon(Icons.calendar_month, color: Theme.of(context).primaryColor),
-                                ]),
-                              ),
-                  
-                              Positioned(
-                                left: 10, top: -15,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Theme.of(context).cardColor,
-                                  ),
-                                  padding: const EdgeInsets.all(5),
-                                  child: Text('expire_date'.tr, style: robotoRegular.copyWith(color: Theme.of(context).disabledColor)),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                  
+                        Text('(${'doc_format'.tr})', style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeExtraSmall, color: Theme.of(context).disabledColor)),
                       ]),
-                    ),
-                    const SizedBox(width: Dimensions.paddingSizeExtraLarge),
-                  
-                    Expanded(
-                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  
-                        Row(children: [
-                          Text('tin_certificate'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeLarge)),
-                          Text('(${'doc_format'.tr})', style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).disabledColor)),
-                  
-                        ]),
-                  
-                        const SizedBox(height: Dimensions.paddingSizeLarge),
+                      const Gap(Dimensions.paddingSizeSmall),
 
-                        restaurantRegistrationController.tinFiles!.isEmpty ? InkWell(
-                          onTap: () {
-                            restaurantRegistrationController.pickFiles();
-                          },
-                          child: DottedBorder(
-                            options: RoundedRectDottedBorderOptions(
-                              radius: const Radius.circular(Dimensions.radiusDefault),
-                              dashPattern: const [8, 4],
-                              strokeWidth: 1,
-                              color: Get.isDarkMode ? Colors.white.withValues(alpha: 0.2) : const Color(0xFFE5E5E5),
-                            ),
-                            child: Container(
-                              height: 120,
-                              width: double.infinity,
-                              decoration: BoxDecoration(
-                                color: Get.isDarkMode ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFFAFAFA),
-                                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const SizedBox(width: Dimensions.paddingSizeSmall),
-                                  CustomAssetImageWidget(Images.uploadIcon, height: 40, width: 40, color: Get.isDarkMode ? Colors.grey : null),
-                                  const SizedBox(width: Dimensions.paddingSizeSmall),
-                                  RichText(
-                                    textAlign: TextAlign.center,
-                                    text: TextSpan(
-                                      children: [
-                                        TextSpan(
-                                          text: 'click_to_upload'.tr,
-                                          style: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall, color: Colors.blue),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ) : DottedBorder(
+                      restaurantRegistrationController.tinFiles!.isEmpty ? InkWell(
+                        onTap: () {
+                          restaurantRegistrationController.pickFiles();
+                        },
+                        child: DottedBorder(
                           options: RoundedRectDottedBorderOptions(
                             radius: const Radius.circular(Dimensions.radiusDefault),
                             dashPattern: const [8, 4],
                             strokeWidth: 1,
-                            color: const Color(0xFFE5E5E5),
+                            color: Get.isDarkMode ? Colors.white.withValues(alpha: 0.2) : const Color(0xFFE5E5E5),
                           ),
-                          child: SizedBox(
-                            height: 120,
+                          child: Container(
+                            height: 100,
                             width: double.infinity,
-                            child: Stack(
+                            decoration: BoxDecoration(
+                              color: Get.isDarkMode ? Colors.white.withValues(alpha: 0.05) : const Color(0xFFFAFAFA),
+                              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Container(
-                                  padding: const EdgeInsets.only(left: Dimensions.paddingSizeDefault),
-                                  height: 120,
-                                  width: double.infinity,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFFAFAFA),
-                                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                                  ),
-                                  child: Row(
+                                const Gap.horizontal(Dimensions.paddingSizeSmall),
+                                CustomAssetImageWidget(Images.uploadIcon, height: 40, width: 40, color: Get.isDarkMode ? Colors.grey : null),
+                                const Gap.horizontal(Dimensions.paddingSizeSmall),
+                                RichText(
+                                  textAlign: TextAlign.center,
+                                  text: TextSpan(
                                     children: [
-                                      Flexible(
-                                        child: SizedBox(
-                                          height: 120,
-                                          child: Column(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Builder(
-                                                builder: (context) {
-                                                  final file = restaurantRegistrationController.tinFiles![0].files[0];
-                                                  final fileName = file.name.toLowerCase();
-                  
-                                                  if (fileName.endsWith('.pdf')) {
-                                                    // Show PDF preview
-                                                    return Row(
-                                                      children: [
-                                                        const Icon(Icons.picture_as_pdf, size: 40, color: Colors.red),
-                                                        const SizedBox(width: 10),
-                                                        Expanded(
-                                                          child: Text(
-                                                            fileName,
-                                                            overflow: TextOverflow.ellipsis,
-                                                          ),
-                                                        ),
-                                                        const SizedBox(width: 35),
-                                                      ],
-                                                    );
-                                                  } else if (fileName.endsWith('.doc') || fileName.endsWith('.docx')) {
-                                                    // Show Word document preview
-                                                    return Row(
-                                                      children: [
-                                                        const Icon(Icons.description, size: 40, color: Colors.blue),
-                                                        const SizedBox(width: 10),
-                                                        Expanded(
-                                                          child: Text(
-                                                            fileName,
-                                                            overflow: TextOverflow.ellipsis,
-                                                          ),
-                                                        ),
-                                                        const SizedBox(width: 35),
-                                                      ],
-                                                    );
-                                                  } else {
-                                                    // Show generic file preview
-                                                    return Row(
-                                                      children: [
-                                                        const Icon(Icons.insert_drive_file, size: 40, color: Colors.grey),
-                                                        const SizedBox(width: 10),
-                                                        Expanded(
-                                                          child: Text(
-                                                            fileName,
-                                                            overflow: TextOverflow.ellipsis,
-                                                          ),
-                                                        ),
-                                                        const SizedBox(width: 35),
-                                                      ],
-                                                    );
-                                                  }
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                        ),
+                                      TextSpan(
+                                        text: 'click_to_upload'.tr,
+                                        style: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall, color: Colors.blue),
                                       ),
                                     ],
-                                  ),
-                                ),
-                                Positioned(
-                                  right: 0,
-                                  top: 0,
-                                  child: InkWell(
-                                    onTap: () {
-                                      restaurantRegistrationController.removeFile(0);
-                                    },
-                                    child: const Padding(
-                                      padding: EdgeInsets.all(Dimensions.paddingSizeSmall),
-                                      child: Icon(Icons.delete_forever, color: Colors.red),
-                                    ),
                                   ),
                                 ),
                               ],
                             ),
                           ),
                         ),
-                  
-                      ]),
-                    ),
-                  ]),
-                  
-                ]),
-              ),
+                      ) : DottedBorder(
+                        options: RoundedRectDottedBorderOptions(
+                          radius: const Radius.circular(Dimensions.radiusDefault),
+                          dashPattern: const [8, 4],
+                          strokeWidth: 1,
+                          color: const Color(0xFFE5E5E5),
+                        ),
+                        child: SizedBox(
+                          height: 100,
+                          width: double.infinity,
+                          child: Stack(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.only(left: Dimensions.paddingSizeDefault),
+                                height: 100,
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFAFAFA),
+                                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Flexible(
+                                      child: SizedBox(
+                                        height: 100,
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Builder(
+                                              builder: (context) {
+                                                final file = restaurantRegistrationController.tinFiles![0].files[0];
+                                                final fileName = file.name.toLowerCase();
 
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                  boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
-                ),
-                padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
-                margin: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
-                child: Column(children: [
-
-                  Row(children: [
-                    const Icon(Icons.person),
-                    const SizedBox(width: Dimensions.paddingSizeSmall),
-                    Text('owner_information'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault)),
-                  ]),
-                  const Divider(),
-                  const SizedBox(height: Dimensions.paddingSizeLarge),
-
-                  Row(children: [
-                    Expanded(child: CustomTextFieldWidget(
-                      hintText: 'write_first_name'.tr,
-                      controller: _fNameController,
-                      focusNode: _fNameFocus,
-                      nextFocus: _lNameFocus,
-                      inputType: TextInputType.name,
-                      capitalization: TextCapitalization.words,
-                      prefixIcon: CupertinoIcons.person_crop_circle_fill,
-                      iconSize: 25,
-                      required: true,
-                      labelText: 'first_name'.tr,
-                      validator: (value) => ValidateCheck.validateEmptyText(value, "first_name_field_is_required".tr),
-                    )),
-                    const SizedBox(width: Dimensions.paddingSizeExtraOverLarge),
-
-                    Expanded(child: CustomTextFieldWidget(
-                      hintText: 'write_last_name'.tr,
-                      controller: _lNameController,
-                      focusNode: _lNameFocus,
-                      nextFocus: _phoneFocus,
-                      inputType: TextInputType.name,
-                      prefixIcon: CupertinoIcons.person_crop_circle_fill,
-                      iconSize: 25,
-                      capitalization: TextCapitalization.words,
-                      required: true,
-                      labelText: 'last_name'.tr,
-                      validator: (value) => ValidateCheck.validateEmptyText(value, "last_name_field_is_required".tr),
-                    )),
-                    const SizedBox(width: Dimensions.paddingSizeLarge),
-
-                    Expanded(
-                      child: CustomTextFieldWidget(
-                        hintText: ResponsiveHelper.isDesktop(context) ? 'phone'.tr : 'enter_phone_number'.tr,
-                        controller: _phoneController,
-                        focusNode: _phoneFocus,
-                        nextFocus: _emailFocus,
-                        inputType: TextInputType.phone,
-                        isPhone: true,
-                        onCountryChanged: (CountryCode countryCode) {
-                          _countryDialCode = countryCode.dialCode;
-                        },
-                        countryDialCode: _countryDialCode != null ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code
-                            : Get.find<LocalizationController>().locale.countryCode,
-                        required: false,
-                        labelText: 'phone'.tr,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return null; // Phone is optional
-                          }
-                          return null; // Validation will be done in validation logic if phone is provided
-                        },
-                      ),
-                    ),
-                  ]),
-                ]),
-              ),
-
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                  boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
-                ),
-                padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
-                margin: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
-                child: Column(children: [
-
-                  Row(children: [
-                    const Icon(Icons.lock),
-                    const SizedBox(width: Dimensions.paddingSizeSmall),
-                    Text('login_info'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault)),
-                  ]),
-                  const Divider(),
-                  const SizedBox(height: Dimensions.paddingSizeLarge),
-
-                  Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Expanded(
-                      child: CustomTextFieldWidget(
-                        hintText: 'write_email'.tr,
-                        controller: _emailController,
-                        focusNode: _emailFocus,
-                        nextFocus: _passwordFocus,
-                        inputType: TextInputType.emailAddress,
-                        prefixIcon: Icons.email,
-                        iconSize: 25,
-                        required: true,
-                        labelText: 'email'.tr,
-                        validator: (value) => ValidateCheck.validateEmail(value),
-                      ),
-                    ),
-                    const SizedBox(width: Dimensions.paddingSizeLarge),
-
-                    Expanded(
-                      child: GetBuilder<DeliverymanRegistrationController>(builder: (deliverymanRegiController) {
-                        return Column(children: [
-                          CustomTextFieldWidget(
-                            hintText: '8+characters'.tr,
-                            controller: _passwordController,
-                            focusNode: _passwordFocus,
-                            nextFocus: _confirmPasswordFocus,
-                            inputType: TextInputType.visiblePassword,
-                            prefixIcon: Icons.lock,
-                            iconSize: 25,
-                            isPassword: true,
-                            onChanged: (value){
-                              if(value != null && value.isNotEmpty){
-                                if(!deliverymanRegiController.showPassView){
-                                  deliverymanRegiController.showHidePassView();
-                                }
-                                deliverymanRegiController.validPassCheck(value);
-                              }else{
-                                if(deliverymanRegiController.showPassView){
-                                  deliverymanRegiController.showHidePassView();
-                                }
-                              }
-                            },
-                            required: true,
-                            labelText: 'password'.tr,
-                            validator: (value) => ValidateCheck.validateEmptyText(value, "password_field_is_required".tr),
+                                                if (fileName.endsWith('.pdf')) {
+                                                  // Show PDF preview
+                                                  return Row(
+                                                    children: [
+                                                      const Icon(Icons.picture_as_pdf, size: 40, color: Colors.red),
+                                                      const Gap.horizontal(10),
+                                                      Expanded(
+                                                        child: Text(
+                                                          fileName,
+                                                          overflow: TextOverflow.ellipsis,
+                                                        ),
+                                                      ),
+                                                      const Gap.horizontal(35),
+                                                    ],
+                                                  );
+                                                } else if (fileName.endsWith('.doc') || fileName.endsWith('.docx')) {
+                                                  // Show Word document preview
+                                                  return Row(
+                                                    children: [
+                                                      const Icon(Icons.description, size: 40, color: Colors.blue),
+                                                      const Gap.horizontal(10),
+                                                      Expanded(
+                                                        child: Text(
+                                                          fileName,
+                                                          overflow: TextOverflow.ellipsis,
+                                                        ),
+                                                      ),
+                                                      const Gap.horizontal(35),
+                                                    ],
+                                                  );
+                                                } else {
+                                                  // Show generic file preview
+                                                  return Row(
+                                                    children: [
+                                                      const Icon(Icons.insert_drive_file, size: 40, color: Colors.grey),
+                                                      const Gap.horizontal(10),
+                                                      Expanded(
+                                                        child: Text(
+                                                          fileName,
+                                                          overflow: TextOverflow.ellipsis,
+                                                        ),
+                                                      ),
+                                                      const Gap.horizontal(35),
+                                                    ],
+                                                  );
+                                                }
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Positioned(
+                                right: 0,
+                                top: 0,
+                                child: InkWell(
+                                  onTap: () {
+                                    restaurantRegistrationController.removeFile(0);
+                                  },
+                                  child: const Padding(
+                                    padding: EdgeInsets.all(Dimensions.paddingSizeSmall),
+                                    child: Icon(Icons.delete_forever, color: Colors.red),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          deliverymanRegiController.showPassView ? const PassViewWidget() : const SizedBox(),
+                        ),
+                      ),
 
-                        ]);
-                      }),
-                    ),
-                    const SizedBox(width: Dimensions.paddingSizeLarge),
-
-                    Expanded(child: CustomTextFieldWidget(
-                      titleText: '8+characters'.tr,
-                      controller: _confirmPasswordController,
-                      focusNode: _confirmPasswordFocus,
-                      inputType: TextInputType.visiblePassword,
-                      inputAction: TextInputAction.done,
-                      prefixIcon: Icons.lock,
-                      iconSize: 25,
-                      isPassword: true,
-                      required: true,
-                      labelText: 'confirm_password'.tr,
-                      validator: (value) => ValidateCheck.validateEmptyText(value, "password_field_is_required".tr),
-                    )),
-                  ]),
+                    ]),
+                  ),
                 ]),
+              ]),
+            ),
+            const Gap(Dimensions.paddingSizeExtraLarge),
+
+            restaurantRegistrationController.dataList!.isNotEmpty ? Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
               ),
+              padding: const EdgeInsets.all(Dimensions.paddingSizeDefault),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('additional_info'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault)),
+                const Gap(Dimensions.paddingSizeDefault),
 
-              Container(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).cardColor,
-                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                  boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
-                ),
-                padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
-                margin: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
-                child: Column(children: [
-
-                  restaurantRegistrationController.dataList!.isNotEmpty ? Row(children: [
-                    const Icon(Icons.person),
-                    const SizedBox(width: Dimensions.paddingSizeSmall),
-                    Text('additional_information'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault)),
-                  ]) : const SizedBox(),
-                  restaurantRegistrationController.dataList!.isNotEmpty ? const Divider() : const SizedBox(),
-
-                  restaurantRegistrationController.dataList!.isNotEmpty ? RestaurantAdditionalDataSectionWidget(restaurantRegiController: restaurantRegistrationController, scrollController: _scrollController) : const SizedBox(),
-
-                ]),
-              ),
-            ],
-          ) : const SizedBox(),
+                RestaurantAdditionalDataSectionWidget(restaurantRegiController: restaurantRegistrationController, scrollController: _scrollController),
+              ]),
+            ) : const SizedBox(),
+          ]) : const SizedBox(),
 
           restaurantRegistrationController.storeStatus == 0.9 ? const WebBusinessPlanWidget() : const SizedBox(),
-          SizedBox(height: 30),
+          Gap(30),
 
           Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                border: Border.all(color: Theme.of(context).hintColor),
-              ),
+            CustomButtonWidget(
               width: 165,
-              child: CustomButtonWidget(
-                transparent: true,
-                textColor: Theme.of(context).disabledColor,
-                radius: Dimensions.radiusSmall,
-                onPressed: () {
+              textColor: Theme.of(context).hintColor,
+              color: Theme.of(context).disabledColor.withValues(alpha: 0.2),
+              onPressed: () {
 
-                  if(restaurantRegistrationController.storeStatus == 0.9){
-                    restaurantRegistrationController.storeStatusChange(0.6);
-                  }else {
-                    _phoneController.text = '';
-                    _emailController.text = '';
-                    _fNameController.text = '';
-                    _lNameController.text = '';
-                    _lNameController.text = '';
-                    _tinNumberController.text = '';
-                    _passwordController.text = '';
-                    _confirmPasswordController.text = '';
-                    for (int i = 0; i < _nameController.length; i++) {
-                      _nameController[i].text = '';
-                    }
-                    for (int i = 0; i < _addressController.length; i++) {
-                      _addressController[i].text = '';
-                    }
-                    restaurantRegistrationController.resetRestaurantRegistration();
-
-                    restaurantRegistrationController.setRestaurantAdditionalJoinUsPageData(isUpdate: true);
+                if(restaurantRegistrationController.storeStatus == 0.9){
+                  restaurantRegistrationController.storeStatusChange(0.6);
+                }else {
+                  _phoneController.text = '';
+                  _emailController.text = '';
+                  _fNameController.text = '';
+                  _lNameController.text = '';
+                  _lNameController.text = '';
+                  _tinNumberController.text = '';
+                  _passwordController.text = '';
+                  _confirmPasswordController.text = '';
+                  for (int i = 0; i < _nameController.length; i++) {
+                    _nameController[i].text = '';
                   }
-                },
-                buttonText: restaurantRegistrationController.storeStatus == 0.9 ? 'back'.tr : 'reset'.tr,
-                isBold: false,
-                fontSize: Dimensions.fontSizeSmall,
-              ),
+                  for (int i = 0; i < _addressController.length; i++) {
+                    _addressController[i].text = '';
+                  }
+                  restaurantRegistrationController.resetRestaurantRegistration();
+
+                  restaurantRegistrationController.setRestaurantAdditionalJoinUsPageData(isUpdate: true);
+                }
+              },
+              buttonText: restaurantRegistrationController.storeStatus == 0.9 ? 'back'.tr : 'reset'.tr,
+              isBold: false,
+              fontSize: Dimensions.fontSizeSmall,
             ),
 
-            SizedBox(width: (restaurantRegistrationController.storeStatus == 0.9) && (Get.find<SplashController>().configModel!.commissionBusinessModel == 0) &&
+            Gap.horizontal((restaurantRegistrationController.storeStatus == 0.9) && (Get.find<SplashController>().configModel!.commissionBusinessModel == 0) &&
                 restaurantRegistrationController.packageModel!.packages!.isEmpty ? 0 : Dimensions.paddingSizeLarge),
 
             (restaurantRegistrationController.storeStatus == 0.9) && (Get.find<SplashController>().configModel!.commissionBusinessModel == 0) &&
-             restaurantRegistrationController.packageModel!.packages!.isEmpty ? const SizedBox() : SizedBox(width: 165, child: buttonView()),
+             restaurantRegistrationController.packageModel!.packages!.isEmpty ? const SizedBox() : SizedBox(width: 165, child: buttonView(isDesktop: isDesktop)),
           ]),
-
         ]),
       ),
     );
   }
 
-  Widget buttonView(){
+  Widget buttonView({bool isDesktop = false}){
     return GetBuilder<RestaurantRegistrationController>(builder: (restaurantRegiController){
-      return Column(
-        children: [
-          CustomButtonWidget(
-            radius: Dimensions.radiusSmall,
-            isBold: ResponsiveHelper.isDesktop(context) ? false : true,
-            fontSize: ResponsiveHelper.isDesktop(context) ? Dimensions.fontSizeSmall : Dimensions.fontSizeLarge,
+      return Column(children: [
+        isDesktop ? SizedBox() : LinearProgressIndicator(
+          backgroundColor: Theme.of(context).disabledColor.withValues(alpha: 0.5), minHeight: 3,
+          value: restaurantRegiController.storeStatus == 0.1 ? 0.3 : restaurantRegiController.storeStatus == 0.6 ? 0.6 : 1,
+        ),
+
+        Container(
+          padding: EdgeInsets.all(isDesktop ? 0 : Dimensions.paddingSizeDefault),
+          decoration: isDesktop ? null : BoxDecoration(
+            color: Theme.of(context).cardColor,
+            boxShadow: [BoxShadow(color: Colors.black12, spreadRadius: 1, blurRadius: 5)],
+          ),
+          child: CustomButtonWidget(
+            isBold: isDesktop ? false : true,
+            fontSize: isDesktop ? Dimensions.fontSizeSmall : Dimensions.fontSizeLarge,
             isLoading: restaurantRegiController.isLoading,
-            margin: EdgeInsets.all((ResponsiveHelper.isDesktop(context) || ResponsiveHelper.isWeb()) ? 0 : Dimensions.paddingSizeSmall),
-            buttonText: restaurantRegiController.storeStatus == 0.1 && !ResponsiveHelper.isDesktop(context) ? 'next'.tr : 'submit'.tr,
-            onPressed: (restaurantRegiController.storeStatus == 0.1 && !ResponsiveHelper.isDesktop(context) && !restaurantRegiController.inZone)
-                || (ResponsiveHelper.isDesktop(context) && !restaurantRegiController.inZone) ? null : () {
+            buttonText: restaurantRegiController.storeStatus == 0.1 && !isDesktop ? 'next'.tr : 'submit'.tr,
+            onPressed: (restaurantRegiController.storeStatus == 0.1 && !isDesktop && !restaurantRegiController.inZone)
+                || (isDesktop && !restaurantRegiController.inZone) ? null : () async {
               bool defaultNameNull = false;
               bool defaultAddressNull = false;
               bool customFieldEmpty = false;
@@ -1816,7 +1846,7 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
               List<FilePickerResult> additionalDocuments = [];
               List<String> additionalDocumentsInputType = [];
 
-              if(restaurantRegiController.storeStatus != 0.1 || ResponsiveHelper.isDesktop(context)){
+              if(restaurantRegiController.storeStatus != 0.1 || isDesktop){
                 for (DataModel data in restaurantRegiController.dataList!) {
                   bool isTextField = data.fieldType == 'text' || data.fieldType == 'number' || data.fieldType == 'email' || data.fieldType == 'phone';
                   bool isDate = data.fieldType == 'date';
@@ -1872,7 +1902,7 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
 
                   } else if(isFile) {
                     if (kDebugMode) {
-                      print('---check file : ${restaurantRegiController.additionalList![index]}');
+                      // print('---check file : ${restaurantRegiController.additionalList![index]}');
                     }
                     if(restaurantRegiController.additionalList![index].length == 0 && isRequired) {
                       customFieldEmpty = true;
@@ -1901,6 +1931,9 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
               String confirmPassword = _confirmPasswordController.text.trim();
               String phoneWithCountryCode = _countryDialCode != null ? _countryDialCode! + phone : phone;
               bool valid = false;
+              PhoneValid phoneValid = await CustomValidator.isPhoneValid(phoneWithCountryCode);
+              phoneWithCountryCode = phoneValid.phone;
+
               try {
                 double.parse(maxTime);
                 double.parse(minTime);
@@ -1910,13 +1943,15 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
               }
 
               if(restaurantRegiController.storeStatus == 0.1 || restaurantRegiController.storeStatus == 0.6) {
-                if(restaurantRegiController.storeStatus == 0.1 && !ResponsiveHelper.isDesktop(context)){
+                if(restaurantRegiController.storeStatus == 0.1 && !isDesktop){
                   if(_formKeyLogin!.currentState!.validate()){
                     if(defaultNameNull) {
                       showCustomSnackBar('enter_restaurant_name'.tr);
                     }else if(restaurantRegiController.pickedLogo == null){
+                      restaurantRegiController.setImageValidation(logo: true);
                       showCustomSnackBar('select_restaurant_logo'.tr);
                     }else if(restaurantRegiController.pickedCover == null) {
+                      restaurantRegiController.setImageValidation(cover: true);
                       showCustomSnackBar('select_restaurant_cover_photo'.tr);
                     }else if(defaultAddressNull) {
                       showCustomSnackBar('enter_restaurant_address'.tr);
@@ -1939,12 +1974,14 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                     }
                   }
                 }else{
-                  if(ResponsiveHelper.isDesktop(context)){
+                  if(isDesktop){
                     if(defaultNameNull) {
                       showCustomSnackBar('enter_restaurant_name'.tr);
                     }else if(restaurantRegiController.pickedLogo == null){
+                      restaurantRegiController.setImageValidation(logo: true);
                       showCustomSnackBar('select_restaurant_logo'.tr);
                     }else if(restaurantRegiController.pickedCover == null) {
+                      restaurantRegiController.setImageValidation(cover: true);
                       showCustomSnackBar('select_restaurant_cover_photo'.tr);
                     }else if(defaultAddressNull) {
                       showCustomSnackBar('enter_restaurant_address'.tr);
@@ -1964,9 +2001,11 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                       showCustomSnackBar('enter_your_first_name'.tr);
                     }else if(lName.isEmpty) {
                       showCustomSnackBar('enter_your_last_name'.tr);
-                    }else if(phone.isNotEmpty && !GetUtils.isPhoneNumber(phoneWithCountryCode)) {
+                    }else if(phone.isEmpty) {
+                      showCustomSnackBar('enter_phone_number'.tr);
+                    } else if (!phoneValid.isValid) {
                       showCustomSnackBar('invalid_phone_number'.tr);
-                    }else if(email.isEmpty) {
+                    } else if(email.isEmpty) {
                       showCustomSnackBar('enter_email_address'.tr);
                     }else if(!GetUtils.isEmail(email)) {
                       showCustomSnackBar('enter_a_valid_email_address'.tr);
@@ -1985,12 +2024,14 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
                       restaurantRegiController.storeStatusChange(0.9);
                     }
                   }
-                  if((restaurantRegiController.storeStatus == 0.6 && !ResponsiveHelper.isDesktop(context))){
+                  if((restaurantRegiController.storeStatus == 0.6 && !isDesktop)){
                     if(fName.isEmpty) {
                       showCustomSnackBar('enter_your_first_name'.tr);
                     }else if(lName.isEmpty) {
                       showCustomSnackBar('enter_your_last_name'.tr);
-                    }else if(phone.isNotEmpty && !GetUtils.isPhoneNumber(phoneWithCountryCode)) {
+                    }else if(phone.isEmpty) {
+                      showCustomSnackBar('enter_phone_number'.tr);
+                    }else if (!phoneValid.isValid) {
                       showCustomSnackBar('invalid_phone_number'.tr);
                     }else if(email.isEmpty) {
                       showCustomSnackBar('enter_email_address'.tr);
@@ -2054,8 +2095,8 @@ class _RestaurantRegistrationScreenState extends State<RestaurantRegistrationScr
 
             },
           ),
-        ],
-      );
+        ),
+      ]);
     });
   }
 }

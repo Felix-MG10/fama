@@ -45,8 +45,13 @@ class AddressController extends GetxController implements GetxService {
       _allAddressList = [];
       _addressList?.addAll(addressList);
       _allAddressList.addAll(addressList);
-      if (canInsertAddress) {
-        Get.find<CheckoutController>().insertAddresses(null);
+      if (canInsertAddress && (_addressList != null && _addressList!.isNotEmpty)) {
+        try{
+          AddressModel? addressModel = _addressList!.firstWhere((address) => address.isDefault!);
+          Get.find<CheckoutController>().insertAddresses(addressModel);
+        } catch (e){
+          Get.find<CheckoutController>().insertAddresses(_addressList!.first);
+        }
       }
     }
     update();
@@ -60,11 +65,6 @@ class AddressController extends GetxController implements GetxService {
     update();
     return responseModel;
   }
-
-  // Future<bool> saveAddressLocally(AddressModel address) async {
-  //   ResponseModel responseModel = await addressService.add(address);
-  //   return responseModel.isSuccess;
-  // }
 
   void filterAddresses(String queryText) {
     if (_addressList != null) {
@@ -84,4 +84,17 @@ class AddressController extends GetxController implements GetxService {
     update();
     return responseModel;
   }
+
+  Future<ResponseModel> markDefault(int id) async {
+    _isLoading = true;
+    update();
+    ResponseModel responseModel = await addressServiceInterface.markDefault(id);
+    if (responseModel.isSuccess) {
+     await getAddressList();
+    }
+    _isLoading = false;
+    update();
+    return responseModel;
+  }
+
 }

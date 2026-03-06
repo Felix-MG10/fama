@@ -18,6 +18,12 @@ class RestaurantRegistrationService implements RestaurantRegistrationServiceInte
     XFile? pLogo;
     XFile? pickLogo = await ImagePicker().pickImage(source: ImageSource.gallery);
     if(pickLogo != null) {
+      List<String> supportedFormat = ['image/jpg', 'image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+      if(!supportedFormat.contains(pickLogo.mimeType) && GetPlatform.isWeb) {
+        showCustomSnackBar('please_select_valid_image_file'.tr);
+        return null;
+      }
+
       await pickLogo.length().then((value) {
         if(value > 2000000) {
           pLogo = null;
@@ -47,8 +53,9 @@ class RestaurantRegistrationService implements RestaurantRegistrationServiceInte
 
     if(GetPlatform.isWeb){
       result = await FilePicker.platform.pickFiles(
-        withReadStream: true,
+        // withReadStream: false,
         allowMultiple: false,
+        // withData: true,
       );
     }else{
       result = await FilePicker.platform.pickFiles(
@@ -58,6 +65,13 @@ class RestaurantRegistrationService implements RestaurantRegistrationServiceInte
       );
     }
     if(result != null && result.files.isNotEmpty) {
+
+      List<String> supportedFormat = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'pdf', 'doc', 'docx'];
+      if(!supportedFormat.contains(result.files.single.extension) && GetPlatform.isWeb) {
+        showCustomSnackBar('please_select_valid_file'.tr);
+        return null;
+      }
+
       if(result.files.single.size > 2000000) {
         result = null;
         showCustomSnackBar('please_upload_lower_size_file'.tr);

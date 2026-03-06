@@ -23,8 +23,8 @@ class FavouriteRepository implements FavouriteRepositoryInterface<Response> {
   }
 
   @override
-  Future<Response> clearAll() async {
-    return await apiClient.postData(AppConstants.clearAllWishListUri, {"_method": "delete"});
+  Future<Response> clearAll({required bool isFood}) async {
+    return await apiClient.postData(AppConstants.clearAllWishListUri, {"_method": "delete", 'type': isFood ? 'food' : 'restaurant'});
   }
 
   @override

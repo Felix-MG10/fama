@@ -82,6 +82,18 @@ class AddressRepo implements AddressRepoInterface<AddressModel> {
   }
 
   @override
+  Future<ResponseModel> markDefault(int id) async {
+    ResponseModel responseModel;
+    Response response = await apiClient.postData(AppConstants.markDefaultUri, {"address_id": id}, handleError: false);
+    if (response.statusCode == 200) {
+      responseModel = ResponseModel(true, response.body['message']);
+    } else {
+      responseModel = ResponseModel(false, response.statusText);
+    }
+    return responseModel;
+  }
+
+  @override
   Future get(String? id) {
     throw UnimplementedError();
   }

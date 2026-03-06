@@ -34,23 +34,26 @@ class MessageCardWidget extends StatelessWidget {
 
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
 
-              Row(
-                children: [
-                  Text(userType, style: robotoMedium),
-                  const SizedBox(width: Dimensions.paddingSizeExtraSmall),
+              Flexible(
+                child: Row(
+                  children: [
+                    Flexible(child: Text(userType, style: robotoMedium, maxLines: 2, overflow: TextOverflow.ellipsis)),
+                    const SizedBox(width: Dimensions.paddingSizeExtraSmall),
 
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeExtraSmall),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeExtraSmall),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).primaryColor.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(Dimensions.radiusExtraLarge),
+                      ),
+                      child: Text(
+                        'admin'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).primaryColor),
+                      ),
                     ),
-                    child: Text(
-                      'admin'.tr, style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).primaryColor),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+              const SizedBox(width: Dimensions.paddingSizeExtraSmall),
 
               Align(
                 alignment: Alignment.centerRight,

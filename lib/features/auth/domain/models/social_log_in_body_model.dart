@@ -7,9 +7,8 @@ class SocialLogInBodyModel {
   String? loginType;
   String? verified;
   String? guestId;
-  String? idToken;
 
-  SocialLogInBodyModel({this.email, this.token, this.uniqueId, this.medium, this.accessToken, this.loginType, this.verified, this.guestId, this.idToken});
+  SocialLogInBodyModel({this.email, this.token, this.uniqueId, this.medium, this.accessToken, this.loginType, this.verified, this.guestId});
 
   SocialLogInBodyModel.fromJson(Map<String, dynamic> json) {
     email = json['email'];
@@ -20,7 +19,6 @@ class SocialLogInBodyModel {
     loginType = json['login_type'];
     verified = json['verified'];
     guestId = json['guest_id'];
-    idToken = json['id_token'];
   }
 
   Map<String, dynamic> toJson() {
@@ -38,16 +36,6 @@ class SocialLogInBodyModel {
     }
     if(guestId != null) {
       data['guest_id'] = guestId;
-    }
-    // Pour Apple Sign-In : le backend attend obligatoirement id_token (JWT). On envoie
-    // l'identity token en priorité, sinon l'authorization code, et on garantit que la clé existe.
-    final String? valueForIdToken = (idToken != null && idToken!.isNotEmpty) ? idToken : (token != null && token!.isNotEmpty ? token : null);
-    if (valueForIdToken != null) {
-      data['id_token'] = valueForIdToken;
-    }
-    // Certains backends lisent aussi la clé camelCase
-    if (valueForIdToken != null && medium == 'apple') {
-      data['idToken'] = valueForIdToken;
     }
     return data;
   }

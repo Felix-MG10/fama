@@ -1,5 +1,6 @@
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
 import 'package:stackfood_multivendor/features/wallet/controllers/wallet_controller.dart';
+import 'package:stackfood_multivendor/helper/price_converter.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:stackfood_multivendor/util/styles.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_button_widget.dart';
@@ -56,139 +57,157 @@ class _AddFundDialogueWidgetState extends State<AddFundDialogueWidget> {
         ),
         const SizedBox(height: Dimensions.paddingSizeSmall),
 
-        GetBuilder<WalletController>(
-          builder: (walletController) {
-            return Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                color: Theme.of(context).cardColor,
-              ),
-              width: context.width * 0.9,
-              constraints: BoxConstraints(minHeight: context.height * 0.34, maxHeight: context.height * 0.7),
-              padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
+        GetBuilder<WalletController>(builder: (walletController) {
+          return Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+              color: Theme.of(context).cardColor,
+            ),
+            width: context.width * 0.9,
+            constraints: BoxConstraints(minHeight: context.height * 0.34, maxHeight: context.height * 0.7),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
 
-                const SizedBox(height: Dimensions.paddingSizeLarge),
+              Flexible(
+                child: Padding(
+                  padding: const EdgeInsets.all(Dimensions.paddingSizeLarge),
+                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                    const SizedBox(height: Dimensions.paddingSizeLarge),
 
-                Text('add_fund_to_wallet'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
-                const SizedBox(height: Dimensions.paddingSizeSmall),
+                    Text('add_fund_to_wallet'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge)),
+                    const SizedBox(height: Dimensions.paddingSizeSmall),
 
-                Text('add_fund_form_secured_digital_payment_gateways'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall), textAlign: TextAlign.center),
-                const SizedBox(height: Dimensions.paddingSizeLarge),
+                    Text('add_fund_form_secured_digital_payment_gateways'.tr, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall), textAlign: TextAlign.center),
+                    const SizedBox(height: Dimensions.paddingSizeLarge),
 
-                Container(
-                  padding: EdgeInsets.all(Dimensions.paddingSizeLarge),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                    color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
-                  ),
-                  child: Column(
-                    children: [
+                    Container(
+                      padding: EdgeInsets.all(Dimensions.paddingSizeLarge),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                        color: Theme.of(context).disabledColor.withValues(alpha: 0.1),
+                      ),
+                      child: Column(mainAxisSize: MainAxisSize.min, children: [
+                        Text('${'enter_amount'.tr} (${Get.find<SplashController>().configModel?.currencySymbol!})', style: robotoRegular),
+                        SizedBox(height: Dimensions.paddingSizeDefault),
 
-                      Text('${'enter_amount'.tr} (${Get.find<SplashController>().configModel?.currencySymbol!})', style: robotoRegular),
-                      SizedBox(height: Dimensions.paddingSizeDefault),
-
-                      CustomTextFieldWidget(
-                        hintText: 'ex_100'.tr,
-                        showLabelText: false,
-                        isAmount: true,
-                        inputType: TextInputType.number,
-                        focusNode: focusNode,
-                        inputAction: TextInputAction.done,
-                        controller: inputAmountController,
-                        textAlign: TextAlign.center,
-                        onChanged: (String value){
-                          try{
-                            if(double.parse(value) > 0){
-                              walletController.isTextFieldEmpty(value);
+                        CustomTextFieldWidget(
+                          hintText: 'ex_100'.tr,
+                          showLabelText: false,
+                          isAmount: true,
+                          inputType: TextInputType.number,
+                          focusNode: focusNode,
+                          inputAction: TextInputAction.done,
+                          controller: inputAmountController,
+                          textAlign: TextAlign.center,
+                          onChanged: (String value){
+                            try{
+                              if(double.parse(value) > 0){
+                                walletController.isTextFieldEmpty(value);
+                              }
+                            }catch(e) {
+                              walletController.isTextFieldEmpty('');
                             }
-                          }catch(e) {
-                            walletController.isTextFieldEmpty('');
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: Dimensions.paddingSizeLarge),
+                          },
+                        ),
+                        const SizedBox(height: 8),
 
-                Flexible(
-                  child: RichText(
-                    text: TextSpan(children: [
-                      TextSpan(text: 'choose_payment_method'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge, color: Theme.of(context).textTheme.bodyLarge!.color)),
-                      const TextSpan(text: ' '),
-                      TextSpan(
-                        text: 'faster_and_secure_way_to_pay_bill'.tr,
-                        style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).hintColor),
-                      ),
-                    ]),
-                  ),
-                ),
+                        Text('${'deposit_limit_min'.tr} ${PriceConverter.convertPrice(Get.find<SplashController>().configModel?.customerAddFundMinAmount ?? 0)}', style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Colors.red)),
+                      ]),
+                    ),
+                    const SizedBox(height: Dimensions.paddingSizeLarge),
 
-                Flexible(
-                  child: SingleChildScrollView(
-                    child: Column(mainAxisSize: MainAxisSize.min, children: [
-
-                      const SizedBox(height: Dimensions.paddingSizeSmall),
-
-                      ListView.builder(
-                        itemCount: Get.find<SplashController>().configModel!.activePaymentMethodList!.length,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemBuilder: (context, index){
-                          bool isSelected = Get.find<SplashController>().configModel!.activePaymentMethodList![index].getWay! == walletController.digitalPaymentName;
-                          return InkWell(
-                            onTap: (){
-                              walletController.changeDigitalPaymentName(Get.find<SplashController>().configModel!.activePaymentMethodList![index].getWay!);
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  color: isSelected ? Theme.of(context).primaryColor.withValues(alpha: 0.05) : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault)
+                    Flexible(
+                      child: Container(
+                        padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Theme.of(context).disabledColor.withValues(alpha: 0.2)),
+                          borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                        ),
+                        child: Column(mainAxisSize: MainAxisSize.min, children: [
+                          RichText(
+                            text: TextSpan(children: [
+                              TextSpan(text: 'choose_payment_method'.tr, style: robotoBold.copyWith(color: Theme.of(context).textTheme.bodyLarge!.color)),
+                              const TextSpan(text: ' '),
+                              TextSpan(
+                                text: 'faster_and_secure_way_to_add_bill'.tr,
+                                style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).hintColor),
                               ),
-                              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeLarge),
-                              child: Row(children: [
-                                Container(
-                                  height: 20, width: 20,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle, color: isSelected ? Colors.green : Theme.of(context).cardColor,
-                                    border: Border.all(color: Theme.of(context).disabledColor),
-                                  ),
-                                  child: Icon(Icons.check, color: Theme.of(context).cardColor, size: 16),
-                                ),
-                                const SizedBox(width: Dimensions.paddingSizeDefault),
+                            ]),
+                          ),
+                          const SizedBox(height: Dimensions.paddingSizeSmall),
 
-                                CustomImageWidget(
-                                  height: 20, fit: BoxFit.contain,
-                                  image: '${Get.find<SplashController>().configModel!.activePaymentMethodList![index].getWayImageFullUrl}',
-                                ),
-                                const SizedBox(width: Dimensions.paddingSizeSmall),
+                          Flexible(
+                            child: SingleChildScrollView(
+                              child: ListView.builder(
+                                itemCount: Get.find<SplashController>().configModel!.activePaymentMethodList!.length,
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                padding: EdgeInsets.zero,
+                                itemBuilder: (context, index){
+                                  bool isSelected = Get.find<SplashController>().configModel!.activePaymentMethodList![index].getWay! == walletController.digitalPaymentName;
+                                  return InkWell(
+                                    onTap: (){
+                                      walletController.changeDigitalPaymentName(Get.find<SplashController>().configModel!.activePaymentMethodList![index].getWay!);
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: isSelected ? Theme.of(context).primaryColor.withValues(alpha: 0.05) : Colors.transparent,
+                                        borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall, vertical: Dimensions.paddingSizeLarge),
+                                      child: Row(children: [
+                                        Container(
+                                          height: 20, width: 20,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle, color: isSelected ? Colors.green : Theme.of(context).cardColor,
+                                            border: Border.all(color: Theme.of(context).disabledColor),
+                                          ),
+                                          child: Icon(Icons.check, color: Theme.of(context).cardColor, size: 16),
+                                        ),
+                                        const SizedBox(width: Dimensions.paddingSizeDefault),
 
-                                Text(
-                                  Get.find<SplashController>().configModel!.activePaymentMethodList![index].getWayTitle!,
-                                  style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault),
-                                ),
-                              ]),
+                                        CustomImageWidget(
+                                          height: 20, fit: BoxFit.contain,
+                                          image: '${Get.find<SplashController>().configModel!.activePaymentMethodList![index].getWayImageFullUrl}',
+                                        ),
+                                        const SizedBox(width: Dimensions.paddingSizeSmall),
+
+                                        Text(
+                                          Get.find<SplashController>().configModel!.activePaymentMethodList![index].getWayTitle!,
+                                          style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault),
+                                        ),
+                                      ]),
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
-                          );
-                        },
+                          ),
+                        ]),
                       ),
-                      const SizedBox(height: Dimensions.paddingSizeLarge),
-
-                    ]),
-                  ),
+                    ),
+                  ]),
                 ),
+              ),
 
-                CustomButtonWidget(
+              Container(
+                padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(Dimensions.radiusDefault),
+                    bottomRight: Radius.circular(Dimensions.radiusDefault),
+                  ),
+                  color: Theme.of(context).cardColor,
+                  boxShadow: [BoxShadow( color: Colors.black12, blurRadius: 5, spreadRadius: 0)],
+                ),
+                child: CustomButtonWidget(
                   buttonText: 'add_fund'.tr,
                   isLoading: walletController.isLoading,
                   onPressed: () => _onAddFundButtonClicked(walletController),
                 ),
-
-              ]),
-            );
-          }
-        )
+              ),
+            ]),
+          );
+        }),
       ]),
     );
   }
@@ -198,6 +217,8 @@ class _AddFundDialogueWidgetState extends State<AddFundDialogueWidget> {
       showCustomSnackBar('please_provide_transfer_amount'.tr);
     }else if(inputAmountController.text == '0'){
       showCustomSnackBar('you_can_not_add_zero_amount_in_wallet'.tr);
+    }else if((Get.find<SplashController>().configModel?.customerAddFundMinAmount ?? 0) > double.parse(inputAmountController.text)){
+      showCustomSnackBar('${'you_can_not_add_less_than'.tr} ${PriceConverter.convertPrice(Get.find<SplashController>().configModel?.customerAddFundMinAmount ?? 0)}'.tr);
     }else if(walletController.digitalPaymentName == ''){
       showCustomSnackBar('please_select_payment_method'.tr);
     }else{

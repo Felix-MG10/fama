@@ -1,5 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.dakarapps.fama">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- io.flutter.app.FlutterApplication is an android.app.Application that
          calls FlutterMain.startInitialization(this); in its onCreate method.
          In most cases you can leave this as-is, but you if you want to provide
@@ -22,11 +21,6 @@
             <action android:name="android.intent.action.VIEW" />
             <data android:scheme="https" />
         </intent>
-        <!-- Permet à l'app de détecter et ouvrir Wave pour le paiement -->
-        <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="wave" />
-        </intent>
         <intent>
             <action android:name="android.intent.action.DIAL" />
             <data android:scheme="tel" />
@@ -48,11 +42,11 @@
         android:usesCleartextTraffic="true"
         android:icon="@mipmap/ic_launcher">
         <meta-data android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyCCS07RK0AYTELxJJ6CtxnDZjU2jSRGul4"/>
+            android:value="AIzaSyDUDEfxlI5sfTaeN-wOKphkht1ma2kgalY"/>
 
         <activity
             android:name=".MainActivity"
-            android:launchMode="singleTask"
+            android:launchMode="singleTop"
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
@@ -83,15 +77,15 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
 
-            <!-- Deep link paiement Wave : fama://stackfood.com/payment-callback?status=...&order_id=... -->
+            <!-- Deep Links -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Accepts URIs that begin with YOUR_SCHEME://YOUR_HOST -->
                 <data
-                    android:scheme="fama"
-                    android:host="stackfood.com"
-                    android:pathPrefix="/payment-callback" />
+                    android:scheme="StackFood"
+                    android:host="stackfood.com" />
             </intent-filter>
 
         </activity>

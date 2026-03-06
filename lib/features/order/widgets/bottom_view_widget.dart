@@ -9,7 +9,6 @@ import 'package:stackfood_multivendor/features/order/domain/models/order_details
 import 'package:stackfood_multivendor/features/order/domain/models/order_model.dart';
 import 'package:stackfood_multivendor/helper/address_helper.dart';
 import 'package:stackfood_multivendor/helper/price_converter.dart';
-import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/helper/route_helper.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:stackfood_multivendor/util/images.dart';
@@ -30,9 +29,6 @@ class BottomViewWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
-    bool isDesktop = ResponsiveHelper.isDesktop(context);
-
     bool subscription = order.subscription != null;
     bool pending = order.orderStatus == OrderStatus.pending.name;
     bool accepted = order.orderStatus == OrderStatus.accepted.name;
@@ -47,7 +43,7 @@ class BottomViewWidget extends StatelessWidget {
 
     return Column(children: [
       !orderController.showCancelled ? Container(
-        padding: EdgeInsets.all(!isDesktop ? Dimensions.paddingSizeDefault : 0),
+        padding: EdgeInsets.all(Dimensions.paddingSizeDefault),
         child: Center(
           child: SizedBox(
             width: Dimensions.webMaxWidth + 20,

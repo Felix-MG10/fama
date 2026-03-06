@@ -53,7 +53,19 @@ class AddressCardWidget extends StatelessWidget {
 
                   Flexible(
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text(address?.addressType?.tr ?? '', style: robotoMedium),
+                      Row(children: [
+                        Text(address?.addressType?.tr ?? '', style: robotoMedium),
+
+                        (address?.isDefault ?? false) ? Container(
+                          margin: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
+                          padding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraSmall),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                          ),
+                          child: Text('default'.tr, style: robotoRegular.copyWith(color: Colors.blue, fontSize: Dimensions.fontSizeExtraSmall)),
+                        ) : const SizedBox(),
+                      ]),
                     
                       Text(
                         address?.address ?? '',
@@ -70,6 +82,16 @@ class AddressCardWidget extends StatelessWidget {
             fromAddress ? PopupMenuButton(
               itemBuilder: (context) {
                 return <PopupMenuEntry>[
+                  PopupMenuItem(
+                    value: 'is_default',
+                    child: Row(children: [
+                      Expanded(child: Text('mark_as_default'.tr, style: robotoRegular)),
+                      SizedBox(width: 20),
+
+                      Icon(CupertinoIcons.checkmark_alt_circle_fill, color: Colors.green, size: 20),
+                    ]),
+                  ),
+
                   PopupMenuItem(
                     value: 'edit',
                     child: Row(children: [
@@ -109,8 +131,24 @@ class AddressCardWidget extends StatelessWidget {
                       });
                     },
                   ));
-                }else{
+                }else if (value == 'edit'){
                   Get.toNamed(RouteHelper.getEditAddressRoute(address));
+                }else if (value == 'is_default'){
+                  if(Get.isSnackbarOpen) {
+                    Get.back();
+                  }
+                  Get.dialog(AddressConfirmDialogueWidget(
+                    isDefault: true,
+                    icon: Images.locationConfirm,
+                    title: 'are_you_sure'.tr,
+                    description: 'you_want_to_default_this_location'.tr,
+                    onYesPressed: () {
+                      Get.find<AddressController>().markDefault(address!.id!).then((response) {
+                        Get.back();
+                        showCustomSnackBar(response.message, isError: !response.isSuccess);
+                      });
+                    },
+                  ));
                 }
               },
             ) : const SizedBox(),

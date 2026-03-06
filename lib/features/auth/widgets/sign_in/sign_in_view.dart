@@ -14,7 +14,6 @@ import 'package:stackfood_multivendor/features/auth/widgets/sign_in/otp_login_wi
 import 'package:stackfood_multivendor/features/auth/widgets/social_login_widget.dart';
 import 'package:stackfood_multivendor/features/favourite/controllers/favourite_controller.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
-import 'package:stackfood_multivendor/common/enums/data_source_enum.dart';
 import 'package:stackfood_multivendor/features/splash/domain/models/config_model.dart';
 import 'package:stackfood_multivendor/features/verification/screens/verification_screen.dart';
 import 'package:stackfood_multivendor/helper/centralize_login_helper.dart';
@@ -71,7 +70,9 @@ class _SignInViewState extends State<SignInView> {
 
     if (!kIsWeb) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        FocusScope.of(context).requestFocus(_phoneFocus);
+        Future.delayed(const Duration(milliseconds: 800), () {
+          FocusScope.of(Get.context!).requestFocus(_phoneFocus);
+        });
       });
     }
   }
@@ -237,15 +238,9 @@ class _SignInViewState extends State<SignInView> {
       List<int> encoded = utf8.encode(password);
       String data = base64Encode(encoded);
       String token = status.authResponseModel!.token??'';
-      // FORCER le rechargement de la config depuis l'API avant de vérifier
-      await Get.find<SplashController>().getConfigData(source: DataSourceEnum.client);
-      bool? firebaseOtpEnabled = Get.find<SplashController>().configModel?.firebaseOtpVerification;
-      debugPrint('🔥 DEBUG OTP - firebaseOtpVerification = $firebaseOtpEnabled');
-      if(firebaseOtpEnabled == true) {
-        debugPrint('✅ Appel Firebase verifyPhoneNumber pour: $phone');
+      if(Get.find<SplashController>().configModel!.firebaseOtpVerification!) {
         Get.find<AuthController>().firebaseVerifyPhoneNumber(phone, token, CentralizeLoginType.manual.name, fromSignUp: true);
       } else {
-        debugPrint('❌ Firebase OTP désactivé (valeur: $firebaseOtpEnabled) - Utilisation méthode alternative sans SMS');
         Get.toNamed(RouteHelper.getVerificationRoute(
             phone, null, token, RouteHelper.signUp, data, CentralizeLoginType.manual.name),
         );
@@ -278,11 +273,21 @@ class _SignInViewState extends State<SignInView> {
       await Get.find<FavouriteController>().getFavouriteList();
     }
     if(response.authResponseModel != null && !response.authResponseModel!.isPhoneVerified!) {
-      // SOLUTION FORCEE: Appeler Firebase DIRECTEMENT pour OTP login
-      // Ignorer la config et forcer Firebase si is_phone_verified = 0
-      debugPrint('🔥 FORCE FIREBASE - is_phone_verified = 0, appel Firebase directement');
-      debugPrint('✅ Appel Firebase verifyPhoneNumber pour OTP login: ${countryDialCode + phone}');
-      Get.find<AuthController>().firebaseVerifyPhoneNumber(countryDialCode + phone, '', CentralizeLoginType.otp.name, fromSignUp: true);
+      if(Get.find<SplashController>().configModel!.firebaseOtpVerification!) {
+        Get.find<AuthController>().firebaseVerifyPhoneNumber(countryDialCode + phone, '', CentralizeLoginType.otp.name, fromSignUp: true);
+      } else {
+        if(ResponsiveHelper.isDesktop(Get.context)) {
+          Get.back();
+          Get.dialog(VerificationScreen(
+            number: countryDialCode + phone, email: null, token: '', fromSignUp: true,
+            fromForgetPassword: false, loginType: CentralizeLoginType.otp.name, password: '',
+          ));
+        } else {
+          Get.toNamed(RouteHelper.getVerificationRoute(
+            countryDialCode + phone, null, '', RouteHelper.signUp, null, CentralizeLoginType.otp.name,
+          ));
+        }
+      }
     } else {
       if(widget.backFromThis) {
         if(ResponsiveHelper.isDesktop(Get.context)){

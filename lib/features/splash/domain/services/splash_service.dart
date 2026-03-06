@@ -44,6 +44,16 @@ class SplashService implements SplashServiceInterface {
   }
 
   @override
+  bool showLoginSuggestion() {
+    return splashRepositoryInterface.showLoginSuggestion();
+  }
+
+  @override
+  void disableLoginSuggestion() {
+    splashRepositoryInterface.disableLoginSuggestion();
+  }
+
+  @override
   Future<void> saveCookiesData(bool data) async {
     return await splashRepositoryInterface.saveCookiesData(data);
   }

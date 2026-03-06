@@ -71,8 +71,8 @@ class CheckoutButtonWidget extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('subtotal'.tr, style: robotoMedium.copyWith(color: Theme.of(context).primaryColor)),
-                  PriceConverter.convertAnimationPrice(cartController.subTotal, textStyle: robotoRegular.copyWith(color: Theme.of(context).primaryColor)),
+                  Text('subtotal'.tr, style: robotoSemiBold.copyWith(color: Theme.of(context).textTheme.bodyLarge?.color)),
+                  PriceConverter.convertAnimationPrice(cartController.subTotal, textStyle: robotoSemiBold.copyWith(color: Theme.of(context).textTheme.bodyLarge?.color)),
                 ],
               ),
             ) : const SizedBox(),

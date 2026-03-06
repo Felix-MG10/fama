@@ -20,7 +20,6 @@ import 'package:stackfood_multivendor/util/styles.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_app_bar_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_button_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_snackbar_widget.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
@@ -117,7 +116,7 @@ class VerificationScreenState extends State<VerificationScreen> {
               CustomAssetImageWidget(Images.otpVerification, height: 100),
               const SizedBox(height: Dimensions.paddingSizeOverLarge),
 
-              (!kReleaseMode && Get.find<SplashController>().configModel!.demo!) ? Text(
+              Get.find<SplashController>().configModel!.demo! ? Text(
                 'for_demo_purpose'.tr, style: robotoMedium,
               ) : SizedBox(
                 width: 250,
@@ -298,8 +297,7 @@ class VerificationScreenState extends State<VerificationScreen> {
         if(ResponsiveHelper.isDesktop(context)) {
           Get.offAllNamed(RouteHelper.getInitialRoute());
         } else {
-          // offAllNamed pour vider la pile (SignUp, Verification) et rediriger proprement
-          Get.offAllNamed(RouteHelper.getAccessLocationRoute('verification'));
+          Get.offNamed(RouteHelper.getAccessLocationRoute('verification'));
         }
       }
     }

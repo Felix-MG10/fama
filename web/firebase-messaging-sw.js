@@ -2,13 +2,13 @@ importScripts("https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js");
 importScripts("https://www.gstatic.com/firebasejs/8.10.1/firebase-messaging.js");
 
 firebase.initializeApp({
-  apiKey: "AIzaSyB7yN1-LVdNqMksmHj8gVEJLGtNvvD6c1U",
-  authDomain: "fama-7db84.firebaseapp.com",
-  projectId: "fama-7db84",
-  storageBucket: "fama-7db84.firebasestorage.app",
-  messagingSenderId: "888957940076",
-  appId: "1:888957940076:web:e739d75fd1630e74ca8349",
-  measurementId: "G-X5WNYB3DZ6"
+  apiKey: "AIzaSyCeaw_gVN0iQwFHyuF8pQ6PbVDmSVQw8AY",
+  authDomain: "stackfood-bd3ee.firebaseapp.com",
+  projectId: "stackfood-bd3ee",
+  storageBucket: "stackfood-bd3ee.appspot.com",
+  messagingSenderId: "1049699819506",
+  appId: "1:1049699819506:web:a4b5e3bedc729aab89956b",
+  databaseURL: "...",
 });
 
 const messaging = firebase.messaging();
@@ -28,7 +28,7 @@ messaging.setBackgroundMessageHandler(function (payload) {
         .then(() => {
             const title = payload.notification.title;
             const options = {
-                body: payload.notification.body
+                body: payload.notification.score
               };
             return registration.showNotification(title, options);
         });

@@ -22,8 +22,8 @@ class FavouriteService implements FavouriteServiceInterface {
   }
 
   @override
-  Future<Response> clearAll() async {
-    return await favouriteRepositoryInterface.clearAll();
+  Future<Response> clearAll({required bool isFood}) async {
+    return await favouriteRepositoryInterface.clearAll(isFood: isFood);
   }
 
 }

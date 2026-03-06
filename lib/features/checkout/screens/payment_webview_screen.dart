@@ -45,8 +45,7 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
   void initState() {
     super.initState();
     if(widget.addFundUrl == '' && widget.addFundUrl!.isEmpty && widget.subscriptionUrl == '' && widget.subscriptionUrl!.isEmpty){
-      final callbackUrl = Uri.encodeComponent('${AppConstants.baseUrl}/payment-success');
-      selectedUrl = '${AppConstants.baseUrl}/payment-mobile?customer_id=${widget.orderModel.userId == 0 ? widget.guestId : widget.orderModel.userId}&order_id=${widget.orderModel.id}&payment_method=${widget.paymentMethod}&payment_platform=app&callback=$callbackUrl';
+      selectedUrl = '${AppConstants.baseUrl}/payment-mobile?customer_id=${widget.orderModel.userId == 0 ? widget.guestId : widget.orderModel.userId}&order_id=${widget.orderModel.id}&payment_method=${widget.paymentMethod}';
     } else if(widget.subscriptionUrl != '' && widget.subscriptionUrl!.isNotEmpty){
       selectedUrl = widget.subscriptionUrl!;
     } else {
@@ -105,24 +104,11 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
               },
               shouldOverrideUrlLoading: (controller, navigationAction) async {
                 Uri uri = navigationAction.request.url!;
-                final url = uri.toString();
                 if (!["http", "https", "file", "chrome", "data", "javascript", "about"].contains(uri.scheme)) {
                   if (await canLaunchUrl(uri)) {
                     await launchUrl(uri, mode: LaunchMode.externalApplication);
                     return NavigationActionPolicy.CANCEL;
                   }
-                }
-                // Ouvrir l'app Wave directement sur le téléphone (pas dans la WebView)
-                if (url.contains('wave.com') || url.contains('wave://')) {
-                  if (await canLaunchUrl(uri)) {
-                    await launchUrl(uri, mode: LaunchMode.externalApplication);
-                  }
-                  return NavigationActionPolicy.CANCEL;
-                }
-                // Intercepter callbacks paiement
-                if (url.contains('payment-success') || url.contains('payment-fail') || url.contains('payment.wave.callback')) {
-                  _redirect(url, widget.contactNumber, widget.restaurantId, widget.packageId);
-                  return NavigationActionPolicy.CANCEL;
                 }
                 return NavigationActionPolicy.ALLOW;
               },
@@ -168,22 +154,10 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
 
   }
 
-  static bool _isWaveCallbackSuccess(String url) {
-    if (!url.contains('payment.wave.callback')) return false;
-    final status = Uri.tryParse(url)?.queryParameters['status'];
-    return status?.toLowerCase() == 'success';
-  }
-
-  static bool _isWaveCallbackFail(String url) {
-    if (!url.contains('payment.wave.callback')) return false;
-    final status = Uri.tryParse(url)?.queryParameters['status'];
-    return status?.toLowerCase() == 'fail' || status?.toLowerCase() == 'failed';
-  }
-
   void _redirect(String url, String? contactNumber, int? restaurantId, int? packageId) {
     if(_canRedirect) {
-      bool isSuccess = (url.contains('success') && url.startsWith(AppConstants.baseUrl)) || url.contains('payment-success') || _isWaveCallbackSuccess(url);
-      bool isFailed = (url.contains('fail') && url.startsWith(AppConstants.baseUrl)) || url.contains('payment-fail') || _isWaveCallbackFail(url);
+      bool isSuccess = url.contains('success') && url.startsWith(AppConstants.baseUrl);
+      bool isFailed = url.contains('fail') && url.startsWith(AppConstants.baseUrl);
       bool isCancel = url.contains('cancel') && url.startsWith(AppConstants.baseUrl);
       if (isSuccess || isFailed || isCancel) {
         _canRedirect = false;

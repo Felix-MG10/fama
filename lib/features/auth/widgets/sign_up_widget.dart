@@ -8,6 +8,7 @@ import 'package:stackfood_multivendor/features/auth/domain/centralize_login_enum
 import 'package:stackfood_multivendor/features/auth/widgets/auth_dialog_widget.dart';
 import 'package:stackfood_multivendor/features/cart/controllers/cart_controller.dart';
 import 'package:stackfood_multivendor/features/language/controllers/localization_controller.dart';
+import 'package:stackfood_multivendor/features/loyalty/controllers/loyalty_controller.dart';
 import 'package:stackfood_multivendor/features/profile/controllers/profile_controller.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
@@ -157,7 +158,7 @@ class SignUpWidgetState extends State<SignUpWidget> {
                         hintText: 'xxx-xxx-xxxxx'.tr,
                         labelText: 'phone'.tr,
                         showLabelText: true,
-                        required: false,
+                        required: true,
                         controller: _phoneController,
                         focusNode: _phoneFocus,
                         nextFocus: isDesktop ? _passwordFocus : _emailFocus,
@@ -168,12 +169,7 @@ class SignUpWidgetState extends State<SignUpWidget> {
                         },
                         countryDialCode: _countryDialCode != null ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code
                             : Get.find<LocalizationController>().locale.countryCode,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return null; // Phone is optional
-                          }
-                          return ValidateCheck.validateEmptyText(value, "please_enter_phone_number".tr);
-                        },
+                        validator: (value) => ValidateCheck.validateEmptyText(value, "please_enter_phone_number".tr),
                       ),
                     ),
 
@@ -331,18 +327,15 @@ class SignUpWidgetState extends State<SignUpWidget> {
 
   void _handleResponse(ResponseModel status, String countryCode) {
     String password = _passwordController.text.trim();
-    String? numberWithCountryCode;
-    String phoneNumber = _phoneController.text.trim();
-    if (phoneNumber.isNotEmpty) {
-      numberWithCountryCode = countryCode + phoneNumber;
-    }
+    String numberWithCountryCode = countryCode + _phoneController.text.trim();
     String email = _emailController.text.trim();
 
     if (status.isSuccess) {
+      Get.find<LoyaltyController>().saveEarningPoint('');
       if(ResponsiveHelper.isDesktop(context)) {
         Get.find<CartController>().getCartDataOnline();
       }
-      if(status.authResponseModel != null && !status.authResponseModel!.isPhoneVerified! && numberWithCountryCode != null) {
+      if(status.authResponseModel != null && !status.authResponseModel!.isPhoneVerified!) {
         List<int> encoded = utf8.encode(password);
         String data = base64Encode(encoded);
         if(Get.find<SplashController>().configModel!.firebaseOtpVerification!) {
@@ -404,13 +397,9 @@ class SignUpWidgetState extends State<SignUpWidget> {
 
     bool isDesktop = ResponsiveHelper.isDesktop(context);
 
-    String? numberWithCountryCode;
-    PhoneValid phoneValid = PhoneValid(isValid: true, countryCode: countryCode, phone: '');
-    if (number.isNotEmpty) {
-      final rawPhone = countryCode + number;
-      phoneValid = await CustomValidator.isPhoneValid(rawPhone);
-      numberWithCountryCode = phoneValid.isValid ? phoneValid.phone : rawPhone;
-    }
+    String numberWithCountryCode = countryCode + number;
+    PhoneValid phoneValid = await CustomValidator.isPhoneValid(numberWithCountryCode);
+    numberWithCountryCode = phoneValid.phone;
 
     if(isDesktop){
       if(_formKeySignUp!.currentState!.validate()){
@@ -432,7 +421,9 @@ class SignUpWidgetState extends State<SignUpWidget> {
         showCustomSnackBar('enter_email_address'.tr);
       } else if (!GetUtils.isEmail(email)) {
         showCustomSnackBar('enter_a_valid_email_address'.tr);
-      } else if (number.isNotEmpty && !phoneValid.isValid) {
+      } else if (number.isEmpty) {
+        showCustomSnackBar('enter_phone_number'.tr);
+      } else if (!phoneValid.isValid) {
         showCustomSnackBar('invalid_phone_number'.tr);
       } else if (password.isEmpty) {
         showCustomSnackBar('enter_password'.tr);
@@ -446,7 +437,7 @@ class SignUpWidgetState extends State<SignUpWidget> {
         SignUpBodyModel signUpBody = SignUpBodyModel(
           name: name,
           email: email,
-          phone: number.isEmpty ? null : numberWithCountryCode,
+          phone: numberWithCountryCode,
           password: password,
           refCode: referCode,
         );

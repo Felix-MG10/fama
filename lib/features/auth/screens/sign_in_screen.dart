@@ -71,18 +71,12 @@ class SignInScreenState extends State<SignInScreen> {
           icon: Icon(Icons.arrow_back_ios_rounded, color: Theme.of(context).textTheme.bodyLarge!.color),
         ), elevation: 0, backgroundColor: Theme.of(context).cardColor) : null,
         body: SafeArea(child: Align(
-          alignment: Alignment.center,
+          alignment: Alignment.topCenter,
           child: Container(
-            width: ResponsiveHelper.isTablet(context) 
-              ? 700  // Plus large sur iPad pour éviter l'encombrement
-              : (context.width > 700 ? 500 : context.width),
-            padding: ResponsiveHelper.isTablet(context)
-              ? const EdgeInsets.all(48)  // Plus de padding sur iPad (12 points de plus)
-              : (context.width > 700 ? const EdgeInsets.all(50) : const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraLarge)),
-            margin: ResponsiveHelper.isTablet(context)
-              ? const EdgeInsets.symmetric(horizontal: 120, vertical: 60)  // Encore plus de marge sur iPad
-              : (context.width > 700 ? const EdgeInsets.all(50) : EdgeInsets.zero),
-            decoration: (context.width > 700 || ResponsiveHelper.isTablet(context)) ? BoxDecoration(
+            width: context.width > 700 ? 500 : context.width,
+            padding: context.width > 700 ? const EdgeInsets.all(50) : const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraLarge),
+            margin: context.width > 700 ? const EdgeInsets.all(50) : EdgeInsets.zero,
+            decoration: context.width > 700 ? BoxDecoration(
               color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
               boxShadow: ResponsiveHelper.isDesktop(context) ? null : [BoxShadow(color: Colors.grey[Get.isDarkMode ? 700 : 300]!, blurRadius: 5, spreadRadius: 1)],
             ) : null,
@@ -99,13 +93,9 @@ class SignInScreenState extends State<SignInScreen> {
 
                 CustomImageWidget(
                   image: Get.find<SplashController>().configModel?.logoFullUrl ?? '',
-                  height: ResponsiveHelper.isTablet(context) ? 70 : 50,  // Plus grand sur iPad
-                  width: ResponsiveHelper.isTablet(context) ? 280 : 200,  // Plus large sur iPad
-                  fit: BoxFit.contain,
+                  height: 50, width: 200, fit: BoxFit.contain,
                 ),
-                SizedBox(height: ResponsiveHelper.isTablet(context) 
-                  ? Dimensions.paddingSizeOverLarge * 2  // Encore plus d'espace sur iPad
-                  : Dimensions.paddingSizeOverLarge),
+                const SizedBox(height: Dimensions.paddingSizeOverLarge),
 
                 SignInView(exitFromApp: widget.exitFromApp, backFromThis: widget.backFromThis, fromResetPassword: widget.fromResetPassword, isOtpViewEnable: (v){},),
 

@@ -95,6 +95,12 @@ class RestaurantRegistrationController extends GetxController implements GetxSer
   String? _tinExpireDate;
   String? get tinExpireDate => _tinExpireDate;
 
+  bool _showLogoValidation = false;
+  bool get showLogoValidation => _showLogoValidation;
+
+  bool _showCoverValidation = false;
+  bool get showCoverValidation => _showCoverValidation;
+
   void setRestaurantAdditionalJoinUsPageData({bool isUpdate = true}){
     _dataList = [];
     _additionalList = [];
@@ -230,8 +236,10 @@ class RestaurantRegistrationController extends GetxController implements GetxSer
     }else {
       if (isLogo) {
         _pickedLogo = await restaurantRegistrationServiceInterface.picLogoFromGallery();
+        _showLogoValidation = false; // Clear validation when image is selected
       } else {
         _pickedCover = await restaurantRegistrationServiceInterface.picLogoFromGallery();
+        _showCoverValidation = false; // Clear validation when image is selected
       }
       update();
     }
@@ -243,6 +251,16 @@ class RestaurantRegistrationController extends GetxController implements GetxSer
     _storeMinTime = '--';
     _storeMaxTime = '--';
     _storeTimeUnit = 'minute';
+    update();
+  }
+
+  void setImageValidation({bool? logo, bool? cover}) {
+    if (logo != null) {
+      _showLogoValidation = logo;
+    }
+    if (cover != null) {
+      _showCoverValidation = cover;
+    }
     update();
   }
 
@@ -261,6 +279,18 @@ class RestaurantRegistrationController extends GetxController implements GetxSer
 
     for (FilePickerResult result in tinFiles) {
       multiPartsDocuments.add(MultipartDocument('tin_certificate_image', result));
+    }
+
+    double size = 0;
+    for(var element in multiPartsDocuments){
+      size = size + element.file!.files.first.size;
+    }
+    debugPrint(' Total document size: $size');
+    if(size > 1000000) {
+      showCustomSnackBar('please_upload_lower_size_file'.tr);
+      _isLoading = false;
+      update();
+      return;
     }
 
     //List<MultipartDocument> multiPartsDocuments = restaurantRegistrationServiceInterface.prepareMultipartDocuments(inputTypeList, additionalDocuments);
@@ -315,8 +345,9 @@ class RestaurantRegistrationController extends GetxController implements GetxSer
 
     if(GetPlatform.isWeb){
       result = await FilePicker.platform.pickFiles(
-        withReadStream: true,
+        withReadStream: false,
         allowMultiple: false,
+        // withData: true,
       );
     }else{
       result = await FilePicker.platform.pickFiles(
@@ -327,6 +358,13 @@ class RestaurantRegistrationController extends GetxController implements GetxSer
     }
 
     if (result != null && result.files.isNotEmpty) {
+
+      List<String> supportedFormat = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'pdf', 'doc', 'docx'];
+      if(!supportedFormat.contains(result.files.single.extension) && GetPlatform.isWeb) {
+        showCustomSnackBar('please_select_valid_file'.tr);
+        return;
+      }
+
       for (var file in result.files) {
         if (file.size > 2000000) {
           showCustomSnackBar('please_upload_lower_size_file'.tr);
@@ -354,6 +392,14 @@ class RestaurantRegistrationController extends GetxController implements GetxSer
     _storeMinTime = '--';
     _storeMaxTime = '--';
     _storeTimeUnit = 'minute';
+    _showLogoValidation = false;
+    _showCoverValidation = false;
+  }
+
+  String camelCaseToSentence(String text) {
+    var result = text.replaceAll('_', " ");
+    var finalResult = result[0].toUpperCase() + result.substring(1);
+    return finalResult;
   }
 
 }

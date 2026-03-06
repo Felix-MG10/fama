@@ -131,6 +131,16 @@ class _SavedAddressBottomSheetState extends State<SavedAddressBottomSheet> {
                                   address.addressType!.tr,
                                   style: robotoMedium.copyWith(fontSize: Dimensions.fontSizeDefault),
                                 ),
+
+                                (address.isDefault ?? false) ? Container(
+                                  margin: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
+                                  padding: EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeExtraSmall),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                                  ),
+                                  child: Text('default'.tr, style: robotoRegular.copyWith(color: Colors.blue, fontSize: Dimensions.fontSizeExtraSmall)),
+                                ) : const SizedBox(),
                               ]),
                               const SizedBox(height: Dimensions.paddingSizeExtraSmall),
 

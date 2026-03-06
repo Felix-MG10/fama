@@ -224,7 +224,7 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => chatRepositoryInterface);
   ChatServiceInterface chatServiceInterface = ChatService(chatRepositoryInterface: Get.find());
   Get.lazyPut(() => chatServiceInterface);
-  CuisineRepositoryInterface cuisineRepositoryInterface = CuisineRepository(apiClient: Get.find());
+  CuisineRepositoryInterface cuisineRepositoryInterface = CuisineRepository(apiClient: Get.find(), sharedPreferences: Get.find());
   Get.lazyPut(() => cuisineRepositoryInterface);
   CuisineServiceInterface cuisineServiceInterface = CuisineService(cuisineRepositoryInterface: Get.find());
   Get.lazyPut(() => cuisineServiceInterface);

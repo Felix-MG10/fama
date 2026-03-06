@@ -68,7 +68,7 @@ class ProductWidget extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
           color: Theme.of(context).cardColor,
-          boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.1), spreadRadius: 1, blurRadius: 10, offset: const Offset(0, 1))],
+          boxShadow: [BoxShadow(color: Colors.grey.withValues(alpha: 0.2), spreadRadius: 1, blurRadius: 10, offset: const Offset(1, 2))],
         ),
         child: CustomInkWellWidget(
           onTap: () {
@@ -170,7 +170,7 @@ class ProductWidget extends StatelessWidget {
 
                       if(isRestaurant && restaurant!.ratingCount! > 0)
                         Row(children: [
-                          Icon(Icons.star, size: 16, color: Theme.of(context).textTheme.bodyLarge?.color),
+                          Icon(Icons.star, size: 20, color: Theme.of(context).primaryColor),
                           const SizedBox(width: Dimensions.paddingSizeExtraSmall),
 
                           Text(isRestaurant ? restaurant!.avgRating!.toStringAsFixed(1) : product!.avgRating!.toStringAsFixed(1), style: robotoMedium),

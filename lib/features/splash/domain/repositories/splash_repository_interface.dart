@@ -7,6 +7,8 @@ abstract class SplashRepositoryInterface extends RepositoryInterface {
   Future<bool> initSharedData();
   void disableIntro();
   bool? showIntro();
+  bool showLoginSuggestion();
+  void disableLoginSuggestion();
   bool getSavedCookiesData();
   Future<void> saveCookiesData(bool data);
   void cookiesStatusChange(String? data);

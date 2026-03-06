@@ -287,7 +287,7 @@ class WebMenuBar extends StatelessWidget implements PreferredSizeWidget {
               ]),
             ),
 
-            const SizedBox(width: 20),
+            const SizedBox(width: Dimensions.paddingSizeLarge),
 
             Row(
               children: [
@@ -344,10 +344,10 @@ class WebMenuBar extends StatelessWidget implements PreferredSizeWidget {
             const Expanded(child: SizedBox()),
 
             MenuIconButton(icon: CupertinoIcons.search, onTap: () => Get.toNamed(RouteHelper.getSearchRoute())),
-            const SizedBox(width: 20),
+            const SizedBox(width: Dimensions.paddingSizeLarge),
 
             MenuIconButton(icon: CupertinoIcons.bell_fill, onTap: () => Get.toNamed(RouteHelper.getNotificationRoute())),
-            const SizedBox(width: 20),
+            const SizedBox(width: Dimensions.paddingSizeLarge),
 
             MenuIconButton(icon: Icons.shopping_cart, isCart: true, onTap: () {
               if(Get.currentRoute.contains(RouteHelper.checkout)) {
@@ -356,7 +356,7 @@ class WebMenuBar extends StatelessWidget implements PreferredSizeWidget {
                 return Get.toNamed(RouteHelper.getCartRoute(fromDineIn: fromDineIn));
               }
             }),
-            const SizedBox(width: 20),
+            const SizedBox(width: Dimensions.paddingSizeLarge),
 
             GetBuilder<AuthController>(builder: (authController) {
               return InkWell(
@@ -388,6 +388,7 @@ class WebMenuBar extends StatelessWidget implements PreferredSizeWidget {
           ]),
           )),
         ),
+
       ],
     );
   }

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:app_links/app_links.dart';
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
 import 'package:stackfood_multivendor/features/cart/controllers/cart_controller.dart';
 import 'package:stackfood_multivendor/features/language/controllers/localization_controller.dart';
@@ -20,8 +19,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'dart:ui' as ui;
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
@@ -33,23 +30,6 @@ final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterL
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  // Masquer temporairement les erreurs overflow dans la console
-  RenderErrorBox.backgroundColor = Colors.transparent;
-  RenderErrorBox.textStyle = ui.TextStyle(color: ui.Color(0x00000000));
-  
-  // Intercepter et ignorer les erreurs overflow
-  FlutterError.onError = (FlutterErrorDetails details) {
-    if (details.exception.toString().contains('overflowed') || 
-        details.exception.toString().contains('RenderFlex')) {
-      // Ignorer silencieusement les erreurs overflow
-      debugPrint('Overflow ignored: ${details.exception}');
-      return;
-    }
-    // Afficher les autres erreurs normalement
-    FlutterError.presentError(details);
-  };
-  
   if (kIsWeb) {
     usePathUrlStrategy();
   }
@@ -65,49 +45,33 @@ Future<void> main() async {
   // };
 
   DeepLinkBody? linkBody;
-  String? paymentOrderId;
-  String? paymentStatus;
 
-  if (GetPlatform.isMobile && !ResponsiveHelper.isWeb()) {
-    try {
-      final appLinks = AppLinks();
-      final uri = await appLinks.getInitialLink();
-      final parsed = _parsePaymentCallbackUri(uri);
-      if (parsed != null) {
-        paymentOrderId = parsed.$1;
-        paymentStatus = parsed.$2;
-      }
-      appLinks.uriLinkStream.listen((Uri u) {
-        final p = _parsePaymentCallbackUri(u);
-        if (p != null) {
-          final status = (p.$2.toLowerCase() == 'success') ? 'success' : 'fail';
-          // Délai pour laisser l'app restaurer la stack (retour Wave/Orange, possible cold start)
-          Future.delayed(const Duration(milliseconds: 1500), () {
-            try {
-              if (Get.key.currentState?.mounted == true) {
-                Get.offAllNamed(RouteHelper.getOrderSuccessRoute(p.$1, status, null, null, isDeliveryOrder: false));
-              }
-            } catch (_) {}
-          });
-        }
-      });
-    } catch (_) {}
-  }
-
+  // Projet Firebase: fama-7db84 — Pour le web, ajouter une app Web dans la console Firebase et remplacer appId.
   if(GetPlatform.isWeb) {
     await Firebase.initializeApp(options: const FirebaseOptions(
-      apiKey: "AIzaSyB7yN1-LVdNqMksmHj8gVEJLGtNvvD6c1U",
+      apiKey: "AIzaSyDKFPeONsJTzc9OcNRnexNCItpqVX41UhE",
       authDomain: "fama-7db84.firebaseapp.com",
       projectId: "fama-7db84",
       storageBucket: "fama-7db84.firebasestorage.app",
       messagingSenderId: "888957940076",
-      appId: "1:888957940076:web:e739d75fd1630e74ca8349",
+      appId: "1:888957940076:web:REPLACE_AFTER_ADDING_WEB_APP_IN_FIREBASE_CONSOLE",
     ));
-  }else if(GetPlatform.isAndroid) {
+  } else if(GetPlatform.isAndroid) {
     await Firebase.initializeApp(
       options: const FirebaseOptions(
         apiKey: 'AIzaSyDKFPeONsJTzc9OcNRnexNCItpqVX41UhE',
         appId: '1:888957940076:android:3be42b0f67a1a5c3ca8349',
+        messagingSenderId: '888957940076',
+        projectId: 'fama-7db84',
+        storageBucket: 'fama-7db84.firebasestorage.app',
+      ),
+    );
+  } else if(GetPlatform.isIOS) {
+    // Remplacer appId par GOOGLE_APP_ID du GoogleService-Info.plist (app iOS FAMA dans Firebase).
+    await Firebase.initializeApp(
+      options: const FirebaseOptions(
+        apiKey: 'AIzaSyDKFPeONsJTzc9OcNRnexNCItpqVX41UhE',
+        appId: '1:888957940076:ios:REPLACE_WITH_IOS_APP_ID',
         messagingSenderId: '888957940076',
         projectId: 'fama-7db84',
         storageBucket: 'fama-7db84.firebasestorage.app',
@@ -139,25 +103,14 @@ Future<void> main() async {
       version: "v13.0",
     );
   }
-  runApp(MyApp(languages: languages, body: body, linkBody: linkBody, paymentOrderId: paymentOrderId, paymentStatus: paymentStatus));
-}
-
-/// Parse un deep link paiement Wave : Fama://stackfood.com/payment-callback?status=success&order_id=123
-(String, String)? _parsePaymentCallbackUri(Uri? uri) {
-  if (uri == null || !uri.path.contains('payment-callback')) return null;
-  final orderId = uri.queryParameters['order_id'];
-  final status = uri.queryParameters['status'];
-  if (orderId == null || orderId.isEmpty || status == null || status.isEmpty) return null;
-  return (orderId, status);
+  runApp(MyApp(languages: languages, body: body, linkBody: linkBody));
 }
 
 class MyApp extends StatefulWidget {
   final Map<String, Map<String, String>>? languages;
   final NotificationBodyModel? body;
   final DeepLinkBody? linkBody;
-  final String? paymentOrderId;
-  final String? paymentStatus;
-  const MyApp({super.key, required this.languages, required this.body, required this.linkBody, this.paymentOrderId, this.paymentStatus});
+  const MyApp({super.key, required this.languages, required this.body, required this.linkBody});
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -206,7 +159,7 @@ class _MyAppState extends State<MyApp> {
             locale: localizeController.locale,
             translations: Messages(languages: widget.languages),
             fallbackLocale: Locale(AppConstants.languages[0].languageCode!, AppConstants.languages[0].countryCode),
-            initialRoute: GetPlatform.isWeb ? RouteHelper.getInitialRoute() : RouteHelper.getSplashRoute(widget.body, widget.linkBody, paymentOrderId: widget.paymentOrderId, paymentStatus: widget.paymentStatus),
+            initialRoute: GetPlatform.isWeb ? RouteHelper.getInitialRoute() : RouteHelper.getSplashRoute(widget.body, widget.linkBody),
             getPages: RouteHelper.routes,
             defaultTransition: Transition.topLevel,
             transitionDuration: const Duration(milliseconds: 500),

@@ -86,13 +86,8 @@ class _GuestTrackOrderInputViewWidgetState extends State<GuestTrackOrderInputVie
                     countryDialCode: _countryDialCode != null ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code :
                     Get.find<LocalizationController>().locale.countryCode,
                     labelText: 'phone'.tr,
-                    required: false,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return null; // Phone is optional
-                      }
-                      return null; // Validation will be done in onPressed if phone is provided
-                    },
+                    required: true,
+                    validator: (value) => ValidateCheck.validateEmptyText(value, "phone_number_field_is_required".tr),
                   ),
                   const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
@@ -105,26 +100,23 @@ class _GuestTrackOrderInputViewWidgetState extends State<GuestTrackOrderInputVie
                           onPressed: () async {
                             String phone = _phoneNumberController.text.trim();
                             String orderId = _orderIdController.text.trim();
-                            String? numberWithCountryCode;
-                            PhoneValid phoneValid = PhoneValid(isValid: true, countryCode: _countryDialCode ?? '', phone: '');
-                            
-                            if (phone.isNotEmpty) {
-                              numberWithCountryCode = _countryDialCode! + phone;
-                              phoneValid = await CustomValidator.isPhoneValid(numberWithCountryCode);
-                              numberWithCountryCode = phoneValid.phone;
-                            }
+                            String numberWithCountryCode = _countryDialCode! + phone;
+                            PhoneValid phoneValid = await CustomValidator.isPhoneValid(numberWithCountryCode);
+                            numberWithCountryCode = phoneValid.phone;
 
                             if(_formKeyOrder!.currentState!.validate()) {
                               if (orderId.isEmpty) {
                                 showCustomSnackBar('please_enter_order_id'.tr);
-                              } else if (phone.isNotEmpty && !phoneValid.isValid) {
+                              } else if (phone.isEmpty) {
+                                showCustomSnackBar('enter_phone_number'.tr);
+                              } else if (!phoneValid.isValid) {
                                 showCustomSnackBar('invalid_phone_number'.tr);
                               } else {
                                 orderController.trackOrder(
                                     orderId, null, false, contactNumber: numberWithCountryCode, fromGuestInput: true)
                                     .then((response) {
                                   if (response.isSuccess) {
-                                    Get.toNamed(RouteHelper.getGuestTrackOrderScreen(orderId, numberWithCountryCode ?? ''));
+                                    Get.toNamed(RouteHelper.getGuestTrackOrderScreen(orderId, numberWithCountryCode));
                                   }
                                 });
                               }

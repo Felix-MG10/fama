@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_asset_image_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/paginated_list_view_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/web_page_title_widget.dart';
@@ -23,8 +24,7 @@ import 'package:stackfood_multivendor/common/widgets/web_menu_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-
-// enum PickItems { pick_files, pick_images }
+import 'package:flutter/foundation.dart' as foundation;
 
 class ChatScreen extends StatefulWidget {
   final NotificationBodyModel? notificationBody;
@@ -43,15 +43,12 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _inputMessageController = TextEditingController();
   final FocusNode _inputMessageFocus = FocusNode();
   StreamSubscription? _stream;
-  // PickItems? pickItems;
 
   @override
   void initState() {
     super.initState();
 
-
     _initCall();
-
   }
 
   void _initCall(){
@@ -136,7 +133,6 @@ class _ChatScreenState extends State<ChatScreen> {
               child: Column(
                 children: [
                   WebScreenTitleWidget(title: 'chat_with_restaurant'.tr),
-                  // SizedBox(height: isDesktop ? Dimensions.paddingSizeSmall : 0),
 
                   Expanded(
                     child: Container(
@@ -153,7 +149,6 @@ class _ChatScreenState extends State<ChatScreen> {
                           decoration: BoxDecoration(
                             color: Theme.of(context).primaryColor.withValues(alpha: 0.04),
                             borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                            // boxShadow: [BoxShadow(color: Theme.of(context).disabledColor.withValues(alpha: 0.2), blurRadius: 2)],
                           ),
                           padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
                           margin: const EdgeInsets.all(Dimensions.paddingSizeSmall),
@@ -292,7 +287,6 @@ class _ChatScreenState extends State<ChatScreen> {
                                     separatorBuilder: (context, index) => const SizedBox(width: Dimensions.paddingSizeDefault),
                                     itemCount: chatController.objWebFile.length,
                                     itemBuilder: (context, index){
-                                      // String fileSize = ImageSize.getImageSizeFromXFile(chatController.objFile![index]);
                                       return Container(
                                         width: 180,
                                         decoration: BoxDecoration(
@@ -311,10 +305,6 @@ class _ChatScreenState extends State<ChatScreen> {
                                               maxLines: 1, overflow: TextOverflow.ellipsis,
                                               style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault),
                                             ),
-
-                                            // Text(fileSize, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeDefault,
-                                            //   color: Theme.of(context).hintColor,
-                                            // )),
                                           ])),
 
 
@@ -516,6 +506,17 @@ class _ChatScreenState extends State<ChatScreen> {
                                     child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
                                       const SizedBox(width: Dimensions.paddingSizeSmall),
 
+                                      InkWell(
+                                        onTap: () {
+                                          _inputMessageFocus.unfocus();
+                                          chatController.toggleEmojiPicker();
+                                        },
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(bottom: Dimensions.paddingSizeSmall + 2, right: Dimensions.paddingSizeSmall),
+                                          child: Icon(Icons.emoji_emotions_outlined, color: Theme.of(context).hintColor),
+                                        ),
+                                      ),
+
                                       Expanded(
                                         child: TextField(
                                           inputFormatters: [LengthLimitingTextInputFormatter(Dimensions.messageInputLength)],
@@ -531,6 +532,11 @@ class _ChatScreenState extends State<ChatScreen> {
                                             hintText: 'type_a_massage'.tr,
                                             hintStyle: robotoRegular.copyWith(color: Theme.of(context).hintColor, fontSize: Dimensions.fontSizeLarge),
                                           ),
+                                          onTap: () {
+                                            if (chatController.isEmojiPickerVisible) {
+                                              chatController.toggleEmojiPicker();
+                                            }
+                                          },
                                           onSubmitted: (String newText) {
                                             if(newText.trim().isNotEmpty && !Get.find<ChatController>().isSendButtonActive) {
                                               Get.find<ChatController>().toggleSendButtonActivity();
@@ -638,6 +644,30 @@ class _ChatScreenState extends State<ChatScreen> {
 
                               ]),
                             ),
+
+                            if (chatController.isEmojiPickerVisible)
+                              SizedBox(
+                                height: 250,
+                                child: EmojiPicker(
+                                  onEmojiSelected: (category, emoji) {
+                                    if (!chatController.isSendButtonActive) {
+                                      chatController.toggleSendButtonActivity();
+                                    }
+                                  },
+                                  textEditingController: _inputMessageController,
+                                  config: Config(
+                                    checkPlatformCompatibility: true,
+                                    emojiViewConfig: EmojiViewConfig(
+                                      emojiSizeMax: 28 * (foundation.defaultTargetPlatform == TargetPlatform.iOS ?  1.20 :  1.0),
+                                    ),
+                                    skinToneConfig: const SkinToneConfig(),
+                                    categoryViewConfig: const CategoryViewConfig(),
+                                    bottomActionBarConfig: const BottomActionBarConfig(),
+                                    searchViewConfig: const SearchViewConfig(),
+                                  ),
+                                ),
+                              ),
+
                           ]),
                         ) : const SizedBox(),
                       ],

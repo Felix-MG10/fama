@@ -9,12 +9,13 @@ class CartWidget extends StatelessWidget {
   final Color? color;
   final double size;
   final bool fromRestaurant;
-  const CartWidget({super.key, required this.color, required this.size, this.fromRestaurant = false});
+  final String? imageIcon;
+  const CartWidget({super.key, required this.color, required this.size, this.fromRestaurant = false, this.imageIcon});
 
   @override
   Widget build(BuildContext context) {
     return Stack(clipBehavior: Clip.none, children: [
-      CustomAssetImageWidget(Images.orderIcon, height: size, width: size),
+      CustomAssetImageWidget(imageIcon ?? Images.orderIcon, height: size, width: size),
 
       GetBuilder<CartController>(builder: (cartController) {
         return cartController.cartList.isNotEmpty ? Positioned(

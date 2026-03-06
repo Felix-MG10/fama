@@ -15,9 +15,7 @@ import 'package:get/get.dart';
 class SplashScreen extends StatefulWidget {
   final NotificationBodyModel? notificationBody;
   final DeepLinkBody? linkBody;
-  final String? paymentOrderId;
-  final String? paymentStatus;
-  const SplashScreen({super.key, required this.notificationBody, required this.linkBody, this.paymentOrderId, this.paymentStatus});
+  const SplashScreen({super.key, required this.notificationBody, required this.linkBody});
 
   @override
   SplashScreenState createState() => SplashScreenState();
@@ -73,7 +71,7 @@ class SplashScreenState extends State<SplashScreen> {
   }
 
   void _route() {
-    Get.find<SplashController>().getConfigData(handleMaintenanceMode: false, notificationBody: widget.notificationBody, linkBody: widget.linkBody, paymentOrderId: widget.paymentOrderId, paymentStatus: widget.paymentStatus);
+    Get.find<SplashController>().getConfigData(handleMaintenanceMode: false, notificationBody: widget.notificationBody);
   }
 
   @override
@@ -90,7 +88,7 @@ class SplashScreenState extends State<SplashScreen> {
 
               Image.asset(Images.logoName, width: 150),
             ],
-          ) : NoInternetScreen(child: SplashScreen(notificationBody: widget.notificationBody, linkBody: widget.linkBody, paymentOrderId: widget.paymentOrderId, paymentStatus: widget.paymentStatus)),
+          ) : NoInternetScreen(child: SplashScreen(notificationBody: widget.notificationBody, linkBody: widget.linkBody)),
         );
       }),
     );

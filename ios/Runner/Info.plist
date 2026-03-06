@@ -27,29 +27,9 @@
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
-			<key>CFBundleURLName</key>
-			<string>Fama Payment</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>fama</string>
-			</array>
-		</dict>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLName</key>
-			<string>com.dakarapps.fama</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>Fama</string>
-			</array>
-		</dict>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>com.googleusercontent.apps.888957940076-6tc802adt6gtmlvpipcbr2hmstfk6igu</string>
+				<string>com.googleusercontent.apps.491987943015-8enep3h58pfk6da9oc17rv2iqostjvln</string>
 				<string>fb452131619626499</string>
 			</array>
 		</dict>
@@ -70,13 +50,17 @@
 	<string>This app requires access to the camera to upload customer profile picture.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app needs access to location to manage coverage of restaurant and when add a new address.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>The application does not use this feature</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app requires access to the gallery to upload customer profile picture.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>This app needs speech recognition to search by voice</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>This app needs microphone access for voice search</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
+
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>This app needs speech recognition to search by voice</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>This app needs microphone access for voice search</string>
+
 	<true/>
 	<key>UIBackgroundModes</key>
 	<array>

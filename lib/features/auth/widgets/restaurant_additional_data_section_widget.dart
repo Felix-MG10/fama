@@ -3,7 +3,6 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:stackfood_multivendor/common/widgets/validate_check.dart';
 import 'package:stackfood_multivendor/features/auth/controllers/restaurant_registration_controller.dart';
 import 'package:stackfood_multivendor/helper/date_converter.dart';
-import 'package:stackfood_multivendor/helper/extensions.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:stackfood_multivendor/util/images.dart';
@@ -33,8 +32,8 @@ class RestaurantAdditionalDataSectionWidget extends StatelessWidget {
       padding: EdgeInsets.only(
         left: isDesktop ? 0 : Dimensions.paddingSizeSmall,
         right: isDesktop ? 0 : Dimensions.paddingSizeSmall,
-        top: Dimensions.paddingSizeDefault,
-        bottom: isDesktop ? 0 : Dimensions.paddingSizeDefault,
+        top: Dimensions.paddingSizeSmall,
+        bottom: isDesktop ? 0 : Dimensions.paddingSizeSmall,
       ),
       child: ListView.builder(
         physics: const NeverScrollableScrollPhysics(),
@@ -42,45 +41,50 @@ class RestaurantAdditionalDataSectionWidget extends StatelessWidget {
         itemCount: restaurantRegiController.dataList!.length,
         itemBuilder: (context, index) {
           bool showTextField = restaurantRegiController.dataList![index].fieldType == 'text'
-              || restaurantRegiController.dataList![index].fieldType == 'number' || restaurantRegiController.dataList![index].fieldType == 'email'
-              || restaurantRegiController.dataList![index].fieldType == 'phone';
+            || restaurantRegiController.dataList![index].fieldType == 'number' || restaurantRegiController.dataList![index].fieldType == 'email'
+            || restaurantRegiController.dataList![index].fieldType == 'phone';
           bool showDate = restaurantRegiController.dataList![index].fieldType == 'date';
           bool showCheckBox = restaurantRegiController.dataList![index].fieldType == 'check_box';
           bool showFile = restaurantRegiController.dataList![index].fieldType == 'file';
           return Padding(
-            padding: EdgeInsets.only(bottom: isDesktop ? Dimensions.paddingSizeLarge : Dimensions.paddingSizeLarge),
+            padding: EdgeInsets.only(bottom: index == restaurantRegiController.dataList!.length - 1 ? 0 : Dimensions.paddingSizeLarge),
             child: showTextField ? CustomTextFieldWidget(
               hintText: restaurantRegiController.dataList![index].placeholderData ?? '',
               controller: restaurantRegiController.additionalList![index],
               inputType: restaurantRegiController.dataList![index].fieldType == 'number' ? TextInputType.number
-                  : restaurantRegiController.dataList![index].fieldType == 'phone' ? TextInputType.phone
-                  : restaurantRegiController.dataList![index].fieldType == 'email' ? TextInputType.emailAddress
-                  : TextInputType.text,
+                : restaurantRegiController.dataList![index].fieldType == 'phone' ? TextInputType.phone
+                : restaurantRegiController.dataList![index].fieldType == 'email' ? TextInputType.emailAddress
+                : TextInputType.text,
               isRequired: restaurantRegiController.dataList![index].isRequired == 1,
               capitalization: TextCapitalization.words,
               required: restaurantRegiController.dataList![index].isRequired == 1,
               labelText: restaurantRegiController.dataList![index].placeholderData,
               validator: restaurantRegiController.dataList![index].isRequired == 1 ? (value) => ValidateCheck.validateEmptyText(value, null) : null,
-            ) : showDate ? Container(
-              height: 50,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
-                color: Theme.of(context).cardColor,
-                border: Border.all(color: Theme.of(context).disabledColor, width: 0.3),
-              ),
-              padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
-              child: Row(children: [
-                Expanded(child: Text(
-                  restaurantRegiController.additionalList![index] ?? 'not_set_yet'.tr,
-                  style: robotoMedium,
-                )),
+            ) : showDate ? Column(children: [
+              Row(children: [
+                Text(restaurantRegiController.camelCaseToSentence(restaurantRegiController.dataList![index].inputData ?? ''), style: robotoMedium),
 
-                InkWell(
+                Text(
+                  restaurantRegiController.dataList![index].isRequired == 1 ? ' *' : '',
+                  style: robotoRegular.copyWith(color: Theme.of(context).colorScheme.error),
+                ),
+              ]),
+              const SizedBox(height: Dimensions.paddingSizeExtraSmall),
+
+              Container(
+                height: 50,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                  color: Theme.of(context).cardColor,
+                  border: Border.all(color: Theme.of(context).disabledColor.withValues(alpha: 0.3)),
+                ),
+                padding: const EdgeInsets.only(left: Dimensions.paddingSizeSmall, right: Dimensions.paddingSizeSmall),
+                child: InkWell(
                   onTap: () async {
                     DateTime? pickedDate = await showDatePicker(
                       context: context,
                       initialDate: DateTime.now(),
-                      firstDate: DateTime.now(),
+                      firstDate: DateTime(1900),
                       lastDate: DateTime(2100),
                     );
                     if (pickedDate != null) {
@@ -88,14 +92,25 @@ class RestaurantAdditionalDataSectionWidget extends StatelessWidget {
                       restaurantRegiController.setAdditionalDate(index, formattedDate);
                     }
                   },
-                  child: Icon(Icons.calendar_month, size: 22),
+                  child: Row(children: [
+                    Expanded(child: Text(restaurantRegiController.additionalList![index] ?? 'not_set_yet'.tr, style: robotoRegular.copyWith(color: Theme.of(context).hintColor))),
+
+                    Icon(Icons.calendar_month_rounded, color: Theme.of(context).disabledColor),
+                  ]),
+                ),
+              ),
+
+            ]) : showCheckBox ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+
+              Row(children: [
+                Text(restaurantRegiController.camelCaseToSentence(restaurantRegiController.dataList![index].inputData ?? ''), style: robotoMedium),
+
+                Text(
+                  restaurantRegiController.dataList![index].isRequired == 1 ? ' *' : '',
+                  style: robotoRegular.copyWith(color: Theme.of(context).colorScheme.error),
                 ),
               ]),
-            ) : showCheckBox ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(
-                restaurantRegiController.dataList![index].inputData?.replaceAll('_', ' ').toTitleCase() ?? '',
-                style: robotoMedium,
-              ),
+
               ListView.builder(
                 itemCount: restaurantRegiController.dataList![index].checkData!.length,
                 shrinkWrap: true,
@@ -116,13 +131,18 @@ class RestaurantAdditionalDataSectionWidget extends StatelessWidget {
                     ),
                   ]);
                 },
-              )
+              ),
 
             ]) : showFile ? Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(
-                restaurantRegiController.dataList![index].inputData?.replaceAll('_', ' ').toTitleCase() ?? '',
-                style: robotoMedium,
-              ),
+
+              Row(children: [
+                Text(restaurantRegiController.camelCaseToSentence(restaurantRegiController.dataList![index].inputData ?? ''), style: robotoMedium),
+
+                Text(
+                  restaurantRegiController.dataList![index].isRequired == 1 ? ' *' : '',
+                  style: robotoRegular.copyWith(color: Theme.of(context).colorScheme.error),
+                ),
+              ]),
               const SizedBox(height: Dimensions.paddingSizeSmall),
 
               Builder(

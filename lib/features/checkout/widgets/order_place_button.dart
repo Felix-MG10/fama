@@ -234,7 +234,7 @@ class OrderPlaceButton extends StatelessWidget {
         );
       }
       return true;
-    }else if(checkoutController.testAmountOverride == null && orderAmount < checkoutController.restaurant!.minimumOrder!) {
+    }else if(orderAmount < checkoutController.restaurant!.minimumOrder!) {
       showCustomSnackBar('${'minimum_order_amount_is'.tr} ${checkoutController.restaurant!.minimumOrder}');
       return true;
     }else if(checkoutController.subscriptionOrder && (!Get.find<SplashController>().configModel!.homeDelivery! || !checkoutController.restaurant!.delivery!)){

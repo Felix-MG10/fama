@@ -1,6 +1,5 @@
 import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:stackfood_multivendor/util/styles.dart';
-import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -23,16 +22,11 @@ class CustomButtonWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isTablet = ResponsiveHelper.isTablet(context);
-    
     final ButtonStyle flatButtonStyle = TextButton.styleFrom(
       backgroundColor: onPressed == null ? Theme.of(context).disabledColor.withValues(alpha: 0.6) : transparent
           ? Colors.transparent : color ?? Theme.of(context).primaryColor,
-      minimumSize: Size(width != null ? width! : Dimensions.webMaxWidth, height != null ? height! : (isTablet ? 56 : 50)),
-      padding: EdgeInsets.symmetric(
-        horizontal: isTablet ? Dimensions.paddingSizeDefault : Dimensions.paddingSizeSmall,
-        vertical: isTablet ? Dimensions.paddingSizeSmall : Dimensions.paddingSizeExtraSmall,
-      ),
+      minimumSize: Size(width != null ? width! : Dimensions.webMaxWidth, height != null ? height! : 50),
+      padding: EdgeInsets.zero,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius)),
     );
 
@@ -53,25 +47,18 @@ class CustomButtonWidget extends StatelessWidget {
 
           Text('loading'.tr, style: robotoMedium.copyWith(color: Colors.white)),
         ]),
-        ) : Row(mainAxisAlignment: MainAxisAlignment.center, mainAxisSize: MainAxisSize.min, children: [
+        ) : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           icon != null ? Padding(
-            padding: EdgeInsets.only(right: isTablet ? Dimensions.paddingSizeDefault : Dimensions.paddingSizeExtraSmall),
+            padding: const EdgeInsets.only(right: Dimensions.paddingSizeExtraSmall),
             child: Icon(icon, color: transparent ? Theme.of(context).primaryColor : Theme.of(context).cardColor),
           ) : const SizedBox(),
-          Flexible(
-            child: Text(
-              buttonText, 
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-              style: isBold ? robotoBold.copyWith(
-                color: textColor ?? (transparent ? Theme.of(context).primaryColor : Colors.white),
-                fontSize: fontSize ?? (isTablet ? Dimensions.fontSizeSmall : Dimensions.fontSizeLarge),
-              ) : robotoRegular.copyWith(
-                color: textColor ?? (transparent ? Theme.of(context).primaryColor : Colors.white),
-                fontSize: fontSize ?? (isTablet ? Dimensions.fontSizeSmall : Dimensions.fontSizeLarge),
-              )
-            ),
+          Text(buttonText, textAlign: TextAlign.center,  style: isBold ? robotoBold.copyWith(
+              color: textColor ?? (transparent ? Theme.of(context).primaryColor : Colors.white),
+              fontSize: fontSize ?? Dimensions.fontSizeLarge,
+            ) : robotoRegular.copyWith(
+              color: textColor ?? (transparent ? Theme.of(context).primaryColor : Colors.white),
+              fontSize: fontSize ?? Dimensions.fontSizeLarge,
+            )
           ),
         ]),
       ),

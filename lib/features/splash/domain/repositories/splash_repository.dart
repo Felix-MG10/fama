@@ -21,7 +21,7 @@ class SplashRepository implements SplashRepositoryInterface {
   @override
   Future<Response> getConfigData({required DataSourceEnum? source}) async {
     if (source == DataSourceEnum.local) {
-      String? cachedData = sharedPreferences.getString(AppConstants.configCacheKey);
+      String? cachedData = sharedPreferences.getString('${AppConstants.configCacheKey}-v${AppConstants.appVersion}');
       if (cachedData != null) {
         return Response(statusCode: 200, body: jsonDecode(cachedData));
       } else {
@@ -35,7 +35,7 @@ class SplashRepository implements SplashRepositoryInterface {
   Future<Response> getConfigDataFromApi() async {
     Response response = await apiClient.getData(AppConstants.configUri);
     if (response.statusCode == 200) {
-      sharedPreferences.setString(AppConstants.configCacheKey, jsonEncode(response.body));
+      sharedPreferences.setString('${AppConstants.configCacheKey}-v${AppConstants.appVersion}', jsonEncode(response.body));
     }
     return response;
   }
@@ -57,11 +57,17 @@ class SplashRepository implements SplashRepositoryInterface {
     if(!sharedPreferences.containsKey(AppConstants.searchHistory)) {
       sharedPreferences.setStringList(AppConstants.searchHistory, []);
     }
+    if(!sharedPreferences.containsKey(AppConstants.searchCuisineHistory)) {
+      sharedPreferences.setStringList(AppConstants.searchCuisineHistory, []);
+    }
     if(!sharedPreferences.containsKey(AppConstants.notification)) {
       sharedPreferences.setBool(AppConstants.notification, true);
     }
     if(!sharedPreferences.containsKey(AppConstants.intro)) {
       sharedPreferences.setBool(AppConstants.intro, true);
+    }
+    if(!sharedPreferences.containsKey(AppConstants.suggestLogin)) {
+      sharedPreferences.setBool(AppConstants.suggestLogin, true);
     }
     if(!sharedPreferences.containsKey(AppConstants.notificationCount)) {
       sharedPreferences.setInt(AppConstants.notificationCount, 0);
@@ -90,6 +96,16 @@ class SplashRepository implements SplashRepositoryInterface {
   @override
   bool? showIntro() {
     return sharedPreferences.getBool(AppConstants.intro);
+  }
+
+  @override
+  bool showLoginSuggestion() {
+    return sharedPreferences.getBool(AppConstants.suggestLogin) ?? false;
+  }
+
+  @override
+  void disableLoginSuggestion() {
+    sharedPreferences.setBool(AppConstants.suggestLogin, false);
   }
 
   @override

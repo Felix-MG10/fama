@@ -34,7 +34,6 @@ class ManualLoginWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isDesktop = ResponsiveHelper.isDesktop(context);
-    bool isTablet = ResponsiveHelper.isTablet(context);
     return GetBuilder<AuthController>(builder: (authController) {
       if(isDesktop) {
         return webView(isDesktop, context, authController);
@@ -42,11 +41,9 @@ class ManualLoginWidget extends StatelessWidget {
       return Column(mainAxisSize: MainAxisSize.min, children: [
         Align(
           alignment: Alignment.topLeft,
-          child: Text('login'.tr, style: robotoBold.copyWith(
-            fontSize: isTablet ? Dimensions.fontSizeLarge : Dimensions.fontSizeExtraLarge,  // Plus petit sur iPad
-          )),
+          child: Text('login'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeExtraLarge)),
         ),
-        SizedBox(height: isTablet ? Dimensions.paddingSizeLarge : Dimensions.paddingSizeDefault),  // Plus d'espace sur iPad
+        const SizedBox(height: Dimensions.paddingSizeDefault),
 
         CustomTextFieldWidget(
           onCountryChanged: (countryCode) => authController.countryDialCode = countryCode.dialCode!,
@@ -142,18 +139,18 @@ class ManualLoginWidget extends StatelessWidget {
         const SizedBox(height: Dimensions.paddingSizeLarge),
 
         TramsConditionsCheckBoxWidget(authController: authController),
-        SizedBox(height: isTablet ? Dimensions.paddingSizeLarge : Dimensions.paddingSizeExtraLarge),  // Plus d'espace sur iPad
+        const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
         CustomButtonWidget(
-          height: isTablet ? 56 : (isDesktop ? 50 : null),  // Plus grand sur iPad (56px minimum Apple HIG)
-          width:  isTablet ? double.infinity : (isDesktop ? 250 : null),  // Pleine largeur sur iPad
+          height: isDesktop ? 50 : null,
+          width:  isDesktop ? 250 : null,
           buttonText: 'login'.tr,
           radius: isDesktop ? Dimensions.radiusSmall : Dimensions.radiusDefault,
           isBold: isDesktop ? false : true,
           isLoading: authController.isLoading,
           onPressed: onClickLoginButton,
         ),
-        SizedBox(height: isTablet ? Dimensions.paddingSizeLarge * 1.5 : Dimensions.paddingSizeLarge),  // Plus d'espace sur iPad
+        const SizedBox(height: Dimensions.paddingSizeLarge),
 
         Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           Text('do_not_have_account'.tr, style: robotoRegular.copyWith(color: Theme.of(context).hintColor)),

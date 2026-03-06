@@ -3,17 +3,12 @@ class ZoneResponseModel {
   final List<int> _zoneIds;
   final String? _message;
   final List<ZoneData> _zoneData;
-  final int? _statusCode;
-  ZoneResponseModel(this._isSuccess, this._message, this._zoneIds, this._zoneData, [this._statusCode]);
+  ZoneResponseModel(this._isSuccess, this._message, this._zoneIds, this._zoneData);
 
   String? get message => _message;
   List<int> get zoneIds => _zoneIds;
   bool get isSuccess => _isSuccess;
   List<ZoneData> get zoneData => _zoneData;
-  int? get statusCode => _statusCode;
-  
-  /// Retourne true si l'erreur est due à une zone non disponible (404)
-  bool get isZoneNotAvailableError => _statusCode == 404;
 }
 
 class ZoneData {

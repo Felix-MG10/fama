@@ -6,7 +6,6 @@ import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:stackfood_multivendor/util/styles.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_app_bar_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/menu_drawer_widget.dart';
-import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -43,39 +42,13 @@ class RateReviewScreenState extends State<RateReviewScreen> with TickerProviderS
               labelColor: Theme.of(context).textTheme.bodyLarge!.color,
               indicatorColor: Theme.of(context).primaryColor,
               indicatorWeight: 3,
-              labelPadding: ResponsiveHelper.isTablet(context)
-                ? const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
-                : EdgeInsets.zero,
-              unselectedLabelStyle: robotoRegular.copyWith(
-                color: Theme.of(context).disabledColor, 
-                fontSize: ResponsiveHelper.isTablet(context) ? Dimensions.fontSizeExtraSmall : Dimensions.fontSizeSmall
-              ),
-              labelStyle: robotoMedium.copyWith(
-                fontSize: ResponsiveHelper.isTablet(context) ? Dimensions.fontSizeExtraSmall : Dimensions.fontSizeSmall
-              ),
+              unselectedLabelStyle: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeSmall),
+              labelStyle: robotoMedium.copyWith(fontSize: Dimensions.fontSizeSmall),
               tabs: widget.rateReviewModel.deliveryMan != null ? [
-                Tab(
-                  child: Text(
-                    widget.rateReviewModel.orderDetailsList!.length > 1 ? 'items'.tr : 'item'.tr,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                Tab(
-                  child: Text(
-                    'delivery_man'.tr,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+                Tab(text: widget.rateReviewModel.orderDetailsList!.length > 1 ? 'items'.tr : 'item'.tr),
+                Tab(text: 'delivery_man'.tr),
               ] : [
-                Tab(
-                  child: Text(
-                    widget.rateReviewModel.orderDetailsList!.length > 1 ? 'items'.tr : 'item'.tr,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+                Tab(text: widget.rateReviewModel.orderDetailsList!.length > 1 ? 'items'.tr : 'item'.tr),
               ],
             ),
           ),

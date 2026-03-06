@@ -68,39 +68,12 @@ class OrderScreenState extends State<OrderScreen> with TickerProviderStateMixin 
                         indicatorWeight: 3,
                         labelColor: Theme.of(context).primaryColor,
                         unselectedLabelColor: Theme.of(context).disabledColor,
-                        labelPadding: ResponsiveHelper.isTablet(context)
-                          ? const EdgeInsets.symmetric(horizontal: 16, vertical: 12)
-                          : EdgeInsets.zero,
-                        unselectedLabelStyle: robotoRegular.copyWith(
-                          color: Theme.of(context).disabledColor, 
-                          fontSize: ResponsiveHelper.isTablet(context) ? Dimensions.fontSizeExtraSmall : Dimensions.fontSizeSmall
-                        ),
-                        labelStyle: robotoBold.copyWith(
-                          fontSize: ResponsiveHelper.isTablet(context) ? Dimensions.fontSizeExtraSmall : Dimensions.fontSizeSmall, 
-                          color: Theme.of(context).primaryColor
-                        ),
+                        unselectedLabelStyle: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeSmall),
+                        labelStyle: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).primaryColor),
                         tabs: [
-                          Tab(
-                            child: Text(
-                              'running'.tr,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          Tab(
-                            child: Text(
-                              'subscription'.tr,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          Tab(
-                            child: Text(
-                              'history'.tr,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
+                          Tab(text: 'running'.tr),
+                          Tab(text: 'subscription'.tr),
+                          Tab(text: 'history'.tr),
                         ],
                       ),
                     ),

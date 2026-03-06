@@ -8,12 +8,14 @@ import 'package:get_thumbnail_video/index.dart';
 import 'package:get_thumbnail_video/video_thumbnail.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_ink_well_widget.dart';
+import 'package:stackfood_multivendor/common/widgets/custom_snackbar_widget.dart';
 import 'package:stackfood_multivendor/features/chat/controllers/chat_controller.dart';
 import 'package:stackfood_multivendor/features/chat/domain/models/message_model.dart';
 import 'package:stackfood_multivendor/features/chat/screens/preview_screen.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:stackfood_multivendor/util/images.dart';
 import 'package:stackfood_multivendor/util/styles.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PdfViewWidget extends StatefulWidget {
   final Message currentMessage;
@@ -90,7 +92,8 @@ class _PdfViewWidgetState extends State<PdfViewWidget> {
         margin: const EdgeInsets.only(bottom: Dimensions.paddingSizeSmall),
         child: InkWell(
           onTap: (){
-            Get.find<ChatController>().downloadPdf(url);
+            // Get.find<ChatController>().downloadPdf(url);
+            _openFile(url);
           },
           child: Center(
             child: Directionality(
@@ -126,5 +129,13 @@ class _PdfViewWidgetState extends State<PdfViewWidget> {
       borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
       child: Image.file(File(thumbnailList[index]!.path)),
     ) : const SizedBox();
+  }
+
+  void _openFile(String url) async {
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    } else {
+      showCustomSnackBar('could_not_open_file'.tr);
+    }
   }
 }

@@ -159,7 +159,7 @@ class _CouponBottomSheetState extends State<CouponBottomSheet> {
                       if(couponController.discount! < 1 && !couponController.freeDelivery) {
                         if(couponCode.isNotEmpty && !couponController.isLoading) {
                           couponController.applyCoupon(couponCode, (widget.price-widget.discount)+widget.addOns, widget.deliveryCharge,
-                              widget.charge, totalPrice, Get.find<RestaurantController>().restaurant!.id).then((discount) {
+                              widget.charge, totalPrice, Get.find<RestaurantController>().restaurant!.id, hideBottomSheet: true).then((discount) {
                             if (discount! > 0) {
                               showCustomSnackBar(
                                 '${'you_got_discount_of'.tr} ${PriceConverter.convertPrice(discount)}',
@@ -211,7 +211,7 @@ class _CouponBottomSheetState extends State<CouponBottomSheet> {
 
                     Padding(
                       padding: const EdgeInsets.only(left: Dimensions.paddingSizeDefault, right: Dimensions.paddingSizeDefault, top: Dimensions.paddingSizeDefault, bottom: Dimensions.paddingSizeSmall),
-                      child: Align(alignment: Alignment.centerLeft, child: Text('available_promo_for_this_order'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault))),
+                      child: Align(alignment: Alignment.centerLeft, child: Text('available_promo'.tr, style: robotoBold.copyWith(fontSize: Dimensions.fontSizeDefault))),
                     ),
 
                     GridView.builder(
@@ -303,7 +303,10 @@ class _CouponBottomSheetState extends State<CouponBottomSheet> {
                     ) : const SizedBox(),
                   ]),
                 ): Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
+
                     Image.asset(Images.noCoupon, height: 70),
                     const SizedBox(height: Dimensions.paddingSizeSmall),
 

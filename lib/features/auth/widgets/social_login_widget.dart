@@ -32,6 +32,7 @@ class SocialLoginWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final GoogleSignIn googleSignIn = GoogleSignIn.instance;
 
+    print('=====social: ${Get.find<SplashController>().configModel!.appleLogin!.isNotEmpty} && ${Get.find<SplashController>().configModel!.appleLogin![0].status!} && ${!GetPlatform.isAndroid} && ${!GetPlatform.isWeb}');
     bool canAppleLogin = Get.find<SplashController>().configModel!.appleLogin!.isNotEmpty && Get.find<SplashController>().configModel!.appleLogin![0].status!
         && !GetPlatform.isAndroid && !GetPlatform.isWeb;
 
@@ -48,7 +49,7 @@ class SocialLoginWidget extends StatelessWidget {
             const SizedBox(height: Dimensions.paddingSizeLarge),
 
             Get.find<SplashController>().configModel!.socialLogin![0].status! ? Container(
-              height: ResponsiveHelper.isTablet(context) ? 56 : 50,  // Plus grand sur iPad (56px minimum Apple HIG)
+              height: 50,
               padding: const EdgeInsets.all(1),
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
@@ -59,31 +60,20 @@ class SocialLoginWidget extends StatelessWidget {
                 onTap: ()=> _googleLogin(googleSignIn),
                 radius: Dimensions.radiusDefault,
                 child: Padding(
-                  padding: EdgeInsets.all(ResponsiveHelper.isTablet(context) ? Dimensions.paddingSizeDefault : Dimensions.paddingSizeSmall),  // Plus de padding sur iPad
+                  padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
                   child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Image.asset(Images.google, height: ResponsiveHelper.isTablet(context) ? 24 : 20, width: ResponsiveHelper.isTablet(context) ? 24 : 20),  // Plus grand sur iPad
-                    SizedBox(width: ResponsiveHelper.isTablet(context) ? Dimensions.paddingSizeDefault : Dimensions.paddingSizeSmall),  // Plus d'espace sur iPad
+                    Image.asset(Images.google, height: 20, width: 20),
+                    const SizedBox(width: Dimensions.paddingSizeSmall),
 
-                    Flexible(
-                      child: Text(
-                        'continue_with_google'.tr, 
-                        style: robotoMedium.copyWith(
-                          fontSize: ResponsiveHelper.isTablet(context) ? Dimensions.fontSizeSmall : null,  // Plus petit sur iPad
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                    ),
+                    Text('continue_with_google'.tr, style: robotoMedium.copyWith()),
                   ]),
                 ),
               ),
             ) : const SizedBox(),
-            SizedBox(height: Get.find<SplashController>().configModel!.socialLogin![0].status! 
-              ? (ResponsiveHelper.isTablet(context) ? Dimensions.paddingSizeLarge * 1.5 : Dimensions.paddingSizeLarge)  // Plus d'espace sur iPad
-              : 0),
+            SizedBox(height: Get.find<SplashController>().configModel!.socialLogin![0].status! ? Dimensions.paddingSizeLarge : 0),
 
             Get.find<SplashController>().configModel!.socialLogin![1].status! ? Container(
-              height: ResponsiveHelper.isTablet(context) ? 56 : 50,  // Plus grand sur iPad
+              height: 50,
               padding: const EdgeInsets.all(1),
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
@@ -94,31 +84,20 @@ class SocialLoginWidget extends StatelessWidget {
                 onTap: ()=> _facebookLogin(),
                 radius: Dimensions.radiusDefault,
                 child: Padding(
-                  padding: EdgeInsets.all(ResponsiveHelper.isTablet(context) ? Dimensions.paddingSizeDefault : Dimensions.paddingSizeSmall),  // Plus de padding sur iPad
+                  padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
                   child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Image.asset(Images.facebookIcon, height: ResponsiveHelper.isTablet(context) ? 24 : 20, width: ResponsiveHelper.isTablet(context) ? 24 : 20),  // Plus grand sur iPad
-                    SizedBox(width: ResponsiveHelper.isTablet(context) ? Dimensions.paddingSizeDefault : Dimensions.paddingSizeSmall),  // Plus d'espace sur iPad
+                    Image.asset(Images.facebookIcon, height: 20, width: 20),
+                    const SizedBox(width: Dimensions.paddingSizeSmall),
 
-                    Flexible(
-                      child: Text(
-                        'continue_with_facebook'.tr, 
-                        style: robotoMedium.copyWith(
-                          fontSize: ResponsiveHelper.isTablet(context) ? Dimensions.fontSizeSmall : null,  // Plus petit sur iPad
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                    ),
+                    Text('continue_with_facebook'.tr, style: robotoMedium.copyWith()),
                   ]),
                 ),
               ),
             ) : const SizedBox(),
-            SizedBox(height: Get.find<SplashController>().configModel!.socialLogin![1].status! 
-              ? (ResponsiveHelper.isTablet(context) ? Dimensions.paddingSizeLarge * 1.5 : Dimensions.paddingSizeLarge)  // Plus d'espace sur iPad
-              : 0),
+            SizedBox(height: Get.find<SplashController>().configModel!.socialLogin![1].status! ? Dimensions.paddingSizeLarge : 0),
 
             canAppleLogin ? Container(
-              height: ResponsiveHelper.isTablet(context) ? 56 : 50,  // Plus grand sur iPad
+              height: 50,
               padding: const EdgeInsets.all(1),
               decoration: BoxDecoration(
                 color: Theme.of(context).cardColor,
@@ -129,21 +108,12 @@ class SocialLoginWidget extends StatelessWidget {
                 onTap: ()=> _appleLogin(),
                 radius: Dimensions.radiusDefault,
                 child: Padding(
-                  padding: EdgeInsets.all(ResponsiveHelper.isTablet(context) ? Dimensions.paddingSizeDefault : Dimensions.paddingSizeSmall),  // Plus de padding sur iPad
+                  padding: const EdgeInsets.all(Dimensions.paddingSizeSmall),
                   child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                    Image.asset(Images.appleLogo, height: ResponsiveHelper.isTablet(context) ? 24 : 20, width: ResponsiveHelper.isTablet(context) ? 24 : 20),  // Plus grand sur iPad
-                    SizedBox(width: ResponsiveHelper.isTablet(context) ? Dimensions.paddingSizeDefault : Dimensions.paddingSizeSmall),  // Plus d'espace sur iPad
+                    Image.asset(Images.appleLogo, height: 20, width: 20),
+                    const SizedBox(width: Dimensions.paddingSizeSmall),
 
-                    Flexible(
-                      child: Text(
-                        'continue_with_apple'.tr, 
-                        style: robotoMedium.copyWith(
-                          fontSize: ResponsiveHelper.isTablet(context) ? Dimensions.fontSizeSmall : null,  // Plus petit sur iPad
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                    ),
+                    Text('continue_with_apple'.tr, style: robotoMedium.copyWith()),
                   ]),
                 ),
               ),
@@ -346,66 +316,31 @@ class SocialLoginWidget extends StatelessWidget {
   }
 
   void _appleLogin() async {
-    try {
-      final credential = await SignInWithApple.getAppleIDCredential(scopes: [
-        AppleIDAuthorizationScopes.email,
-        AppleIDAuthorizationScopes.fullName,
-      ]);
+    final credential = await SignInWithApple.getAppleIDCredential(scopes: [
+      AppleIDAuthorizationScopes.email,
+      AppleIDAuthorizationScopes.fullName,
+    ]);
 
-      // webAuthenticationOptions: WebAuthenticationOptions(
-      //   clientId: Get.find<SplashController>().configModel.appleLogin[0].clientId,
-      //   redirectUri: Uri.parse('https://6ammart-web.6amtech.com/apple'),
-      // ),
+    // webAuthenticationOptions: WebAuthenticationOptions(
+    //   clientId: Get.find<SplashController>().configModel.appleLogin[0].clientId,
+    //   redirectUri: Uri.parse('https://6ammart-web.6amtech.com/apple'),
+    // ),
 
-      // Extraire le nom complet depuis les credentials Apple
-      String? appleName;
-      final nameParts = <String>[];
-      if (credential.givenName != null && credential.givenName!.isNotEmpty) {
-        nameParts.add(credential.givenName!);
-      }
-      if (credential.familyName != null && credential.familyName!.isNotEmpty) {
-        nameParts.add(credential.familyName!);
-      }
-      if (nameParts.isNotEmpty) {
-        appleName = nameParts.join(' ');
-      }
+    SocialLogInBodyModel appleBodyModel = SocialLogInBodyModel(
+      email: credential.email, token: credential.authorizationCode, uniqueId: credential.authorizationCode,
+      medium: 'apple', loginType: CentralizeLoginType.social.name,
+    );
 
-      // Pour Apple : le backend a besoin du JWT (identityToken) pour vérifier la session.
-      // On envoie identityToken en priorité dans token et idToken.
-      final String? appleJwt = credential.identityToken;
-      final String? appleAuthCode = credential.authorizationCode;
-      SocialLogInBodyModel appleBodyModel = SocialLogInBodyModel(
-        email: credential.email,
-        token: appleJwt ?? appleAuthCode,
-        uniqueId: appleAuthCode ?? appleJwt,
-        idToken: appleJwt,
-        medium: 'apple',
-        loginType: CentralizeLoginType.social.name,
-      );
-
-      Get.find<AuthController>().loginWithSocialMedia(appleBodyModel).then((response) {
-        if (response.isSuccess) {
-          _processSocialSuccessSetup(response, null, appleBodyModel, null, appleName: appleName);
-        } else {
-          showCustomSnackBar(response.message);
-        }
-      });
-    } catch (e) {
-      // Gestion silencieuse de l'annulation par l'utilisateur
-      // Ne pas afficher de message d'erreur si l'utilisateur annule la connexion
-      if (e.toString().contains('The user canceled the sign-in flow') || 
-          e.toString().contains('authorizationErrorCode: 1001')) {
-        // L'utilisateur a annulé, ne rien afficher
-        debugPrint('Apple Sign-In canceled by user');
-        return;
+    Get.find<AuthController>().loginWithSocialMedia(appleBodyModel).then((response) {
+      if (response.isSuccess) {
+        _processSocialSuccessSetup(response, null, appleBodyModel, null);
+      } else {
+        showCustomSnackBar(response.message);
       }
-      // Pour les autres erreurs, afficher un message approprié
-      debugPrint('Error in Apple Sign-In: $e');
-      showCustomSnackBar('sorry_something_went_wrong'.tr);
-    }
+    });
   }
 
-  void _processSocialSuccessSetup(ResponseModel response, SocialLogInBodyModel? googleBodyModel, SocialLogInBodyModel? appleBodyModel, SocialLogInBodyModel? facebookBodyModel, {String? appleName}) {
+  void _processSocialSuccessSetup(ResponseModel response, SocialLogInBodyModel? googleBodyModel, SocialLogInBodyModel? appleBodyModel, SocialLogInBodyModel? facebookBodyModel) {
     String? email = googleBodyModel != null ? googleBodyModel.email : appleBodyModel != null ? appleBodyModel.email : facebookBodyModel?.email;
     if(response.isSuccess && response.authResponseModel != null && response.authResponseModel!.isExistUser != null) {
       if(appleBodyModel != null) {
@@ -430,16 +365,11 @@ class SocialLoginWidget extends StatelessWidget {
       if(appleBodyModel != null) {
         email = response.authResponseModel!.email;
       }
-      // Pour Sign in with Apple, utiliser le nom fourni par Apple au lieu d'une chaîne vide
-      String nameToUse = '';
-      if (appleBodyModel != null && appleName != null && appleName.isNotEmpty) {
-        nameToUse = appleName;
-      }
       if(ResponsiveHelper.isDesktop(Get.context)){
         Get.back();
-        Get.dialog(NewUserSetupScreen(name: nameToUse, loginType: CentralizeLoginType.social.name, phone: '', email: email));
+        Get.dialog(NewUserSetupScreen(name: '', loginType: CentralizeLoginType.social.name, phone: '', email: email));
       } else {
-        Get.toNamed(RouteHelper.getNewUserSetupScreen(name: nameToUse, loginType: CentralizeLoginType.social.name, phone: '', email: email));
+        Get.toNamed(RouteHelper.getNewUserSetupScreen(name: '', loginType: CentralizeLoginType.social.name, phone: '', email: email));
       }
     } else {
       Get.offAllNamed(RouteHelper.getAccessLocationRoute('sign-in'));

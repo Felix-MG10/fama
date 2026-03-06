@@ -3,6 +3,7 @@ import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_app_bar_widget.dart';
+import 'package:stackfood_multivendor/common/widgets/custom_bottom_sheet_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_loader_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/validate_check.dart';
 import 'package:stackfood_multivendor/features/auth/controllers/auth_controller.dart';
@@ -10,6 +11,7 @@ import 'package:stackfood_multivendor/features/order/controllers/order_controlle
 import 'package:stackfood_multivendor/features/profile/controllers/profile_controller.dart';
 import 'package:stackfood_multivendor/features/profile/domain/models/update_user_model.dart';
 import 'package:stackfood_multivendor/features/profile/widgets/account_deletion_bottom_sheet.dart';
+import 'package:stackfood_multivendor/features/profile/widgets/verification_bottom_sheet.dart';
 import 'package:stackfood_multivendor/features/splash/controllers/splash_controller.dart';
 import 'package:stackfood_multivendor/helper/custom_validator.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
@@ -213,7 +215,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                         isEnabled: !profileController.userInfoModel!.isPhoneVerified! || profileController.userInfoModel!.phone == null,
                         fromUpdateProfile: true,
                         labelText: 'phone'.tr,
-                        required: false,
+                        required: true,
                         isPhone: true,
                         onCountryChanged: (CountryCode countryCode) => _countryDialCode = countryCode.dialCode,
                         countryDialCode: _countryDialCode ?? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code,
@@ -225,8 +227,14 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                         child: !profileController.userInfoModel!.isPhoneVerified! && Get.find<SplashController>().configModel!.centralizeLoginSetup!.phoneVerificationStatus! ? InkWell(
                           onTap: () async {
                             if(!profileController.userInfoModel!.isPhoneVerified! && Get.find<SplashController>().configModel!.centralizeLoginSetup!.phoneVerificationStatus!) {
-                              Get.dialog(CustomLoaderWidget());
-                              await _updateProfile(profileController: profileController, fromButton: false, fromPhone: true);
+                              showCustomBottomSheet(child: VerificationBottomSheet(
+                                isEmail: false,
+                                onTap: () async {
+                                  Get.back();
+                                  Get.dialog(CustomLoaderWidget());
+                                  await _updateProfile(profileController: profileController, fromButton: false, fromPhone: true);
+                                },
+                              ));
                             }
                           },
                           child: Image.asset(Images.unVerifiedIcon, height: 20, width: 20, fit: BoxFit.cover),
@@ -251,8 +259,13 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                         ? Images.unVerifiedIcon : null,
                     suffixOnPressed: () async {
                       if(!profileController.userInfoModel!.isEmailVerified! || profileController.userInfoModel!.email != _emailController.text) {
-                        Get.dialog(CustomLoaderWidget());
-                        await _updateProfile(profileController: profileController, fromButton: false, fromPhone: false);
+                        showCustomBottomSheet(child: VerificationBottomSheet(
+                          onTap: () async {
+                            Get.back();
+                            Get.dialog(CustomLoaderWidget());
+                            await _updateProfile(profileController: profileController, fromButton: false, fromPhone: false);
+                          },
+                        ));
                       }
                     },
                   ),
@@ -417,7 +430,7 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
                                   isEnabled: !profileController.userInfoModel!.isPhoneVerified! || profileController.userInfoModel!.phone == null,
                                   fromUpdateProfile: true,
                                   labelText: 'phone'.tr,
-                                  required: false,
+                                  required: true,
                                   isPhone: true,
                                   onCountryChanged: (CountryCode countryCode) => _countryDialCode = countryCode.dialCode,
                                   countryDialCode: _countryDialCode ?? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code,
@@ -473,25 +486,21 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     String name = _nameController.text.trim();
     String email = _emailController.text.trim();
     String phoneNumber = _phoneController.text.trim();
-    String? numberWithCountryCode;
-    PhoneValid phoneValid = PhoneValid(isValid: true, countryCode: _countryDialCode ?? '', phone: '');
-    
-    if (phoneNumber.isNotEmpty && _countryDialCode != null) {
-      final rawPhone = _countryDialCode! + phoneNumber;
-      phoneValid = await CustomValidator.isPhoneValid(rawPhone);
-      // Ne pas écraser par phoneValid.phone (vide si format invalide) — garder la valeur saisie
-      numberWithCountryCode = phoneValid.isValid ? phoneValid.phone : rawPhone;
-    }
+    String numberWithCountryCode = _countryDialCode! + phoneNumber;
+    PhoneValid phoneValid = await CustomValidator.isPhoneValid(numberWithCountryCode);
+    numberWithCountryCode = phoneValid.phone;
 
     if (name.isEmpty) {
       showCustomSnackBar('enter_your_name'.tr);
-    } else if (email.isEmpty) {
-      showCustomSnackBar('enter_email_address'.tr);
-    } else if (!GetUtils.isEmail(email)) {
-      showCustomSnackBar('enter_a_valid_email_address'.tr);
-    } else if (phoneNumber.isNotEmpty && !phoneValid.isValid) {
+    }else if(!phoneValid.isValid) {
       showCustomSnackBar('invalid_phone_number'.tr);
-    } else if (phoneNumber.isNotEmpty && phoneNumber.length < 6) {
+    }else if (email.isEmpty) {
+      showCustomSnackBar('enter_email_address'.tr);
+    }else if (!GetUtils.isEmail(email)) {
+      showCustomSnackBar('enter_a_valid_email_address'.tr);
+    }else if (phoneNumber.isEmpty) {
+      showCustomSnackBar('enter_phone_number'.tr);
+    }else if (phoneNumber.length < 6) {
       showCustomSnackBar('enter_a_valid_phone_number'.tr);
     } else {
       UpdateUserModel updatedUser = UpdateUserModel(name: name, email: email, phone: numberWithCountryCode, buttonType: fromButton ? '' : fromPhone ? 'phone' : 'email');

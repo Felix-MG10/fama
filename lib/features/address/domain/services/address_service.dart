@@ -38,7 +38,6 @@ class AddressService implements AddressServiceInterface{
     }
     if (responseModel.isSuccess) {
       Get.find<AddressController>().getAddressList();
-      //Get.find<CheckoutController>().setAddressIndex(0);
     }
     return responseModel;
   }
@@ -51,6 +50,11 @@ class AddressService implements AddressServiceInterface{
   @override
   Future<ResponseModel> update(Map<String, dynamic> body, int? addressId) async {
     return await addressRepoInterface.update(body, addressId!);
+  }
+
+  @override
+  Future<ResponseModel> markDefault(int id) async {
+    return await addressRepoInterface.markDefault(id);
   }
 
 }

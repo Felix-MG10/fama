@@ -1,4 +1,5 @@
 import 'package:stackfood_multivendor/api/api_client.dart';
+import 'package:stackfood_multivendor/features/auth/domain/models/shift_model.dart';
 import 'package:stackfood_multivendor/features/auth/domain/models/vehicle_model.dart';
 import 'package:stackfood_multivendor/features/auth/domain/models/zone_model.dart';
 import 'package:stackfood_multivendor/features/auth/domain/reposotories/deliveryman_registration_repo_interface.dart';
@@ -44,6 +45,17 @@ class DeliverymanRegistrationRepo implements DeliverymanRegistrationRepoInterfac
       response.body.forEach((vehicle) => vehicles!.add(VehicleModel.fromJson(vehicle)));
     }
     return vehicles;
+  }
+
+  @override
+  Future<List<ShiftModel>?> getShiftList() async {
+    List<ShiftModel>? shifts;
+    Response response = await apiClient.getData(AppConstants.shiftsUri);
+    if (response.statusCode == 200) {
+      shifts = [];
+      response.body.forEach((shift) => shifts!.add(ShiftModel.fromJson(shift)));
+    }
+    return shifts;
   }
 
   @override

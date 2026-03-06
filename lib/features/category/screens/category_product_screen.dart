@@ -222,32 +222,11 @@ class CategoryProductScreenState extends State<CategoryProductScreen> with Ticke
                     indicatorWeight: 3,
                     labelColor: Theme.of(context).primaryColor,
                     unselectedLabelColor: Theme.of(context).disabledColor,
-                    labelPadding: ResponsiveHelper.isTablet(context)
-                      ? const EdgeInsets.symmetric(horizontal: 20, vertical: 12)
-                      : EdgeInsets.zero,
-                    unselectedLabelStyle: robotoRegular.copyWith(
-                      color: Theme.of(context).disabledColor, 
-                      fontSize: ResponsiveHelper.isTablet(context) ? Dimensions.fontSizeExtraSmall : Dimensions.fontSizeSmall
-                    ),
-                    labelStyle: robotoBold.copyWith(
-                      fontSize: ResponsiveHelper.isTablet(context) ? Dimensions.fontSizeExtraSmall : Dimensions.fontSizeSmall, 
-                      color: Theme.of(context).primaryColor
-                    ),
+                    unselectedLabelStyle: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeSmall),
+                    labelStyle: robotoBold.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).primaryColor),
                     tabs: [
-                      Tab(
-                        child: Text(
-                          'food'.tr,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      Tab(
-                        child: Text(
-                          'restaurants'.tr,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
+                      Tab(text: 'food'.tr),
+                      Tab(text: 'restaurants'.tr),
                     ],
                   ),
                 ),

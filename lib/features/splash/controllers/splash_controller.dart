@@ -50,22 +50,22 @@ class SplashController extends GetxController implements GetxService {
 
   DateTime get currentTime => DateTime.now();
 
-  Future<void> getConfigData({bool handleMaintenanceMode = false, DataSourceEnum source = DataSourceEnum.local, NotificationBodyModel? notificationBody, DeepLinkBody? linkBody, String? paymentOrderId, String? paymentStatus, bool fromMainFunction = false, bool fromDemoReset = false}) async {
+  Future<void> getConfigData({bool handleMaintenanceMode = false, DataSourceEnum source = DataSourceEnum.local, NotificationBodyModel? notificationBody, bool fromMainFunction = false, bool fromDemoReset = false}) async {
     _hasConnection = true;
     _savedCookiesData = getCookiesData();
     Response response;
     if(source == DataSourceEnum.local) {
       response = await splashServiceInterface.getConfigData(source: DataSourceEnum.local);
-      _handleConfigResponse(response, handleMaintenanceMode, fromMainFunction, fromDemoReset, notificationBody: notificationBody, linkBody: linkBody, paymentOrderId: paymentOrderId, paymentStatus: paymentStatus);
-      getConfigData(handleMaintenanceMode: handleMaintenanceMode, source: DataSourceEnum.client, notificationBody: notificationBody, linkBody: linkBody, paymentOrderId: paymentOrderId, paymentStatus: paymentStatus);
+      _handleConfigResponse(response, handleMaintenanceMode, fromMainFunction, fromDemoReset, notificationBody: notificationBody, linkBody: null);
+      getConfigData(handleMaintenanceMode: handleMaintenanceMode, source: DataSourceEnum.client);
     } else {
       response = await splashServiceInterface.getConfigData(source: DataSourceEnum.client);
-      _handleConfigResponse(response, handleMaintenanceMode, fromMainFunction, fromDemoReset, notificationBody: notificationBody, linkBody: linkBody, paymentOrderId: paymentOrderId, paymentStatus: paymentStatus);
+      _handleConfigResponse(response, handleMaintenanceMode, fromMainFunction, fromDemoReset, notificationBody: notificationBody, linkBody: null);
     }
 
   }
 
-  void _handleConfigResponse(Response response, bool handleMaintenanceMode, bool fromMainFunction, bool fromDemoReset, {required NotificationBodyModel? notificationBody, required DeepLinkBody? linkBody, String? paymentOrderId, String? paymentStatus}) {
+  void _handleConfigResponse(Response response, bool handleMaintenanceMode, bool fromMainFunction, bool fromDemoReset, {required NotificationBodyModel? notificationBody, required DeepLinkBody? linkBody}) {
     if(response.statusCode == 200) {
       _configModel = splashServiceInterface.prepareConfigData(response);
       if(_configModel != null) {
@@ -84,7 +84,7 @@ class SplashController extends GetxController implements GetxService {
         } else if (fromDemoReset) {
           Get.offAllNamed(RouteHelper.getInitialRoute(fromSplash: true));
         } else {
-          route(notificationBody: notificationBody, linkBody: linkBody, paymentOrderId: paymentOrderId, paymentStatus: paymentStatus);
+          route(notificationBody: notificationBody, linkBody: linkBody);
         }
         _onRemoveLoader();
       }
@@ -125,6 +125,15 @@ class SplashController extends GetxController implements GetxService {
   void disableIntro() {
     splashServiceInterface.disableIntro();
   }
+
+  bool showLoginSuggestion() {
+    return splashServiceInterface.showLoginSuggestion();
+  }
+
+  void disableLoginSuggestion() {
+    splashServiceInterface.disableLoginSuggestion();
+  }
+
 
   void setFirstTimeConnectionCheck(bool isChecked) {
     _firstTimeConnectionCheck = isChecked;

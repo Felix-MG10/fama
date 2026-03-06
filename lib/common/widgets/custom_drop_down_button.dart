@@ -4,43 +4,31 @@ import 'package:get/get.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:stackfood_multivendor/util/styles.dart';
 
-class CustomDropdownButton extends StatefulWidget {
+class CustomDropdownButton<T> extends StatefulWidget {
   final List<String>? items;
   final bool showTitle;
   final bool isBorder;
   final String? hintText;
   final double? borderRadius;
   final Color? backgroundColor;
-  final Function(String?)? onChanged;
-  final FormFieldValidator<String>? validator;
-  final FormFieldSetter<String>? onSaved;
+  final Function(T?)? onChanged;
+  final FormFieldValidator<T>? validator;
+  final FormFieldSetter<T>? onSaved;
   final FontWeight? titleFontWeight;
-  final String? selectedValue;
-  final List<DropdownMenuItem<String>>? dropdownMenuItems;
+  final T? selectedValue;
+  final List<DropdownMenuItem<T>>? dropdownMenuItems;
   final List<Widget> Function(BuildContext)? selectedItemBuilder;
+  final Widget? prefixIcon;
 
-  const CustomDropdownButton({
-    super.key,
-    this.items,
-    this.showTitle = true,
-    this.isBorder = true,
-    this.hintText,
-    this.borderRadius,
-    this.backgroundColor,
-    this.onChanged,
-    this.validator,
-    this.onSaved,
-    this.titleFontWeight,
-    this.selectedValue,
-    this.dropdownMenuItems,
-    this.selectedItemBuilder,
-  });
+  const CustomDropdownButton({super.key, this.items, this.showTitle = true, this.isBorder = true, this.hintText, this.borderRadius,
+    this.backgroundColor, this.onChanged, this.validator, this.onSaved, this.titleFontWeight, this.selectedValue,
+    this.dropdownMenuItems, this.selectedItemBuilder, this.prefixIcon});
 
   @override
-  State<CustomDropdownButton> createState() => _CustomDropdownButtonState();
+  State<CustomDropdownButton<T>> createState() => _CustomDropdownButtonState<T>();
 }
 
-class _CustomDropdownButtonState extends State<CustomDropdownButton> {
+class _CustomDropdownButtonState<T> extends State<CustomDropdownButton<T>> {
 
   @override
   Widget build(BuildContext context) {
@@ -49,9 +37,13 @@ class _CustomDropdownButtonState extends State<CustomDropdownButton> {
         color: widget.backgroundColor ?? Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(widget.borderRadius ?? Dimensions.radiusDefault),
       ),
-      child: DropdownButtonFormField2<String>(
+      child: DropdownButtonFormField2<T>(
         isExpanded: true,
         decoration: InputDecoration(
+          prefix: Padding(
+            padding: const EdgeInsets.only(top: 2.0, left: 5),
+            child: widget.prefixIcon,
+          ),
           contentPadding: const EdgeInsets.symmetric(vertical: Dimensions.paddingSizeSmall),
           focusedBorder: _border(),
           enabledBorder: _border(),
@@ -59,22 +51,15 @@ class _CustomDropdownButtonState extends State<CustomDropdownButton> {
           focusedErrorBorder: _border(),
           errorBorder: _border(),
         ),
-        hint: Text(
-          widget.hintText ?? 'select_an_option'.tr,
-          style: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeDefault),
-        ),
+        hint: Text(widget.hintText ?? 'select_an_option'.tr, style: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeDefault)),
         value: widget.selectedValue,
-        items: (widget.dropdownMenuItems ?? widget.items?.map((item) => DropdownMenuItem<String>(
-          value: item,
-          child: Text(
-            item.tr, style: robotoRegular.copyWith(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: Dimensions.fontSizeDefault),
-          ),
+        items: (widget.dropdownMenuItems ?? widget.items?.map((item) => DropdownMenuItem<T>(
+          value: item as T,
+          child: Text(item.tr, style: robotoRegular.copyWith(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: Dimensions.fontSizeDefault)),
         )).toList()) ?? [
-          DropdownMenuItem<String>(
+          DropdownMenuItem<T>(
             value: null,
-            child: Text(
-              'no_data_available'.tr,
-              style: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeDefault),
+            child: Text('no_data_available'.tr, style: robotoRegular.copyWith(color: Theme.of(context).disabledColor, fontSize: Dimensions.fontSizeDefault),
             ),
           )
         ],
@@ -87,21 +72,16 @@ class _CustomDropdownButtonState extends State<CustomDropdownButton> {
         onChanged: widget.onChanged,
         onSaved: widget.onSaved,
         selectedItemBuilder: widget.selectedItemBuilder,
-        buttonStyleData: const ButtonStyleData(
-          padding: EdgeInsets.only(right: 8),
-        ),
-        iconStyleData: IconStyleData(
-          icon: Icon(Icons.keyboard_arrow_down, color: Theme.of(context).disabledColor),
-        ),
+        buttonStyleData: const ButtonStyleData(padding: EdgeInsets.only(right: 8)),
+        iconStyleData: IconStyleData(icon: Icon(Icons.keyboard_arrow_down, color: Theme.of(context).disabledColor)),
         dropdownStyleData: DropdownStyleData(
           maxHeight: 300,
+          padding: EdgeInsets.symmetric(horizontal: 10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
           ),
         ),
-        menuItemStyleData: const MenuItemStyleData(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-        ),
+        menuItemStyleData: MenuItemStyleData(padding: EdgeInsets.symmetric(horizontal: widget.prefixIcon != null ? 0 : 5)),
       ),
     );
   }

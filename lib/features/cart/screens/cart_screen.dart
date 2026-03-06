@@ -156,7 +156,7 @@ class _CartScreenState extends State<CartScreen> {
                       child: Container(
                         constraints: const BoxConstraints.expand(height: 30),
                         decoration: BoxDecoration(
-                          color: Theme.of(context).disabledColor.withValues(alpha: 0.5),
+                          color: Theme.of(context).disabledColor.withValues(alpha: 0.3),
                           borderRadius: const BorderRadius.only(topLeft: Radius.circular(Dimensions.radiusDefault), topRight: Radius.circular(Dimensions.radiusDefault)),
                         ),
                         child: Icon(Icons.drag_handle, color: Theme.of(context).hintColor, size: 25),
@@ -394,7 +394,7 @@ class _CartScreenState extends State<CartScreen> {
                                                     icon: Icon(Icons.add_circle_outline_sharp, color: Theme.of(context).primaryColor),
                                                     label: Text(
                                                       isRestaurantOpen ? 'add_more_items'.tr : 'add_from_another_restaurants'.tr,
-                                                      style: robotoMedium.copyWith(color: Theme.of(context).primaryColor, fontSize: Dimensions.fontSizeDefault),
+                                                      style: robotoMedium.copyWith(color: Theme.of(context).textTheme.bodyLarge?.color, fontSize: Dimensions.fontSizeDefault),
                                                     ),
                                                   ),
                                                 ),

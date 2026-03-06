@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:stackfood_multivendor/features/cart/screens/cart_screen.dart';
 import 'package:stackfood_multivendor/features/checkout/widgets/congratulation_dialogue.dart';
+import 'package:stackfood_multivendor/features/dashboard/widgets/login_suggestion_bottomsheet.dart';
 import 'package:stackfood_multivendor/features/dashboard/widgets/registration_success_bottom_sheet.dart';
 import 'package:stackfood_multivendor/features/home/screens/home_screen.dart';
 import 'package:stackfood_multivendor/features/menu/screens/menu_screen.dart';
@@ -51,6 +52,13 @@ class DashboardScreenState extends State<DashboardScreen> {
     _isLogin = Get.find<AuthController>().isLoggedIn();
 
     _showRegistrationSuccessBottomSheet();
+    if(!_isLogin && Get.find<SplashController>().showLoginSuggestion() && (GetPlatform.isAndroid || GetPlatform.isIOS)) {
+      Future.delayed(const Duration(milliseconds: 3000), () {
+        Get.bottomSheet(LoginSuggestionBottomSheet(), isScrollControlled: true).then((v) {
+          Get.find<SplashController>().disableLoginSuggestion();
+        });
+      });
+    }
 
     if(_isLogin){
       if(Get.find<SplashController>().configModel!.loyaltyPointStatus! && Get.find<LoyaltyController>().getEarningPint().isNotEmpty && !ResponsiveHelper.isDesktop(Get.context)){

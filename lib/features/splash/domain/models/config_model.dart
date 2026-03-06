@@ -70,7 +70,7 @@ class ConfigModel {
   DigitalPaymentInfo? digitalPaymentInfo;
   bool? addFundStatus;
   bool? partialPaymentStatus;
-  String? partialPaymentMethod;
+  List<String>? partialPaymentMethod;
   bool? additionalChargeStatus;
   String? additionalChargeName;
   double? additionCharge;
@@ -97,6 +97,7 @@ class ConfigModel {
   AdminFreeDelivery? adminFreeDelivery;
   bool? isSmsActive;
   bool? isMailActive;
+  double? customerAddFundMinAmount;
 
   ConfigModel({
     this.businessName,
@@ -197,6 +198,7 @@ class ConfigModel {
     this.adminFreeDelivery,
     this.isSmsActive,
     this.isMailActive,
+    this.customerAddFundMinAmount,
   });
 
   ConfigModel.fromJson(Map<String, dynamic> json) {
@@ -296,7 +298,9 @@ class ConfigModel {
     digitalPaymentInfo = json['digital_payment_info'] != null ? DigitalPaymentInfo.fromJson(json['digital_payment_info']) : null;
     addFundStatus = json['add_fund_status'] == 1;
     partialPaymentStatus = json['partial_payment_status'] == 1;
-    partialPaymentMethod = json['partial_payment_method'];
+    if(json['partial_payment_methods'] != null) {
+      partialPaymentMethod = List<String>.from(json['partial_payment_methods']);
+    }
     additionalChargeStatus = json['additional_charge_status'] == 1;
     additionalChargeName = json['additional_charge_name'];
     additionCharge = json['additional_charge']?.toDouble() ?? 0;
@@ -323,6 +327,7 @@ class ConfigModel {
     adminFreeDelivery = json['admin_free_delivery'] != null ? AdminFreeDelivery.fromJson(json['admin_free_delivery']) : null;
     isSmsActive = json['is_sms_active'];
     isMailActive = json['is_mail_active'];
+    customerAddFundMinAmount = json['customer_add_fund_min_amount']?.toDouble() ?? 0;
   }
 
   Map<String, dynamic> toJson() {
@@ -404,7 +409,7 @@ class ConfigModel {
     }
     data['add_fund_status'] = addFundStatus;
     data['partial_payment_status'] = partialPaymentStatus;
-    data['partial_payment_method'] = partialPaymentMethod;
+    data['partial_payment_methods'] = partialPaymentMethod;
     data['additional_charge_status'] = additionalChargeStatus;
     data['additional_charge_name'] = additionalChargeName;
     data['additional_charge'] = additionCharge;
@@ -437,6 +442,7 @@ class ConfigModel {
     }
     data['is_sms_active'] = isSmsActive;
     data['is_mail_active'] = isMailActive;
+    data['customer_add_fund_min_amount'] = customerAddFundMinAmount;
     return data;
   }
 }

@@ -1,3 +1,4 @@
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_app_bar_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_snackbar_widget.dart';
 import 'package:stackfood_multivendor/features/location/widgets/animated_map_icon_extended.dart';
@@ -11,12 +12,12 @@ import 'package:stackfood_multivendor/features/location/widgets/permission_dialo
 import 'package:stackfood_multivendor/features/splash/controllers/theme_controller.dart';
 import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';
-import 'package:stackfood_multivendor/common/widgets/custom_button_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/web_menu_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:stackfood_multivendor/util/styles.dart';
 
 class PickMapScreen extends StatefulWidget {
   final bool fromSignUp;
@@ -161,7 +162,7 @@ class _PickMapScreenState extends State<PickMapScreen> {
               ]),
             ),
 
-            Positioned(
+            /*Positioned(
               bottom: Dimensions.paddingSizeLarge, left: Dimensions.paddingSizeLarge, right: Dimensions.paddingSizeLarge,
               child: CustomButtonWidget(
                 buttonText: locationController.inZone ? widget.fromAddAddress ? 'confirm_address'.tr : 'set_location'.tr
@@ -169,6 +170,29 @@ class _PickMapScreenState extends State<PickMapScreen> {
                 isLoading: locationController.isLoading,
                 onPressed: (locationController.buttonDisabled || locationController.loading) ? null
                     : () => _onPickAddressButtonPressed(locationController),
+              ),
+            ),*/
+
+            Positioned(
+              bottom: Dimensions.paddingSizeLarge, left: Dimensions.paddingSizeLarge, right: Dimensions.paddingSizeLarge,
+              child: InkWell(
+                highlightColor: Colors.transparent,
+                splashColor: Colors.transparent,
+                onTap: (locationController.buttonDisabled || locationController.loading) ? null : () => _onPickAddressButtonPressed(locationController),
+                child: Container(
+                  padding: EdgeInsets.all((locationController.buttonDisabled || locationController.loading) ? Dimensions.paddingSizeExtraSmall : Dimensions.paddingSizeDefault - 2),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: (locationController.buttonDisabled || locationController.loading) ? Theme.of(context).primaryColor.withValues(alpha: 0.8) : Theme.of(context).primaryColor,
+                    borderRadius: BorderRadius.circular(Dimensions.radiusDefault),
+                  ),
+                  child: (locationController.buttonDisabled || locationController.loading) ? Center(
+                    child: LoadingAnimationWidget.waveDots(color: Colors.white, size: 40),
+                  ) : Text(
+                    locationController.inZone ? widget.fromAddAddress ? 'confirm_address'.tr : 'set_location'.tr : 'service_not_available_in_this_area'.tr,
+                    style: robotoBold.copyWith(fontSize: Dimensions.fontSizeLarge, color: Colors.white),
+                  ),
+                ),
               ),
             ),
 

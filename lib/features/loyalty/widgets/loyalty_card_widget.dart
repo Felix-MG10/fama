@@ -115,7 +115,7 @@ class LoyaltyStepper extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text('convert_your_loyalty_point_to_wallet_money'.tr, style: robotoRegular),
-                  Text('${'minimun'.tr} ${Get.find<SplashController>().configModel!.loyaltyPointExchangeRate} ${'points_required_to_convert_into_currency'.tr}', style: robotoRegular),
+                  Text('${'Minimum'.tr} ${Get.find<SplashController>().configModel!.loyaltyPointExchangeRate} ${'points_required_to_convert_into_currency'.tr}', style: robotoRegular),
                 ],
               ),
             ),

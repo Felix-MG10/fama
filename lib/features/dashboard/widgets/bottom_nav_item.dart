@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stackfood_multivendor/helper/responsive_helper.dart';
 import 'package:stackfood_multivendor/util/dimensions.dart';
 import 'package:stackfood_multivendor/util/styles.dart';
 
@@ -12,7 +11,6 @@ class BottomNavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isTablet = ResponsiveHelper.isTablet(context);
     return Expanded(
       child: InkWell(
         borderRadius: BorderRadius.circular(Dimensions.radiusLarge),
@@ -20,22 +18,9 @@ class BottomNavItem extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              iconData, 
-              color: isSelected ? Theme.of(context).primaryColor : Colors.grey, 
-              size: isTablet ? 28 : 25,  // Plus grand sur iPad
-            ),
-            SizedBox(height: isTablet ? 4 : 2),  // Plus d'espace sur iPad
-            Text(
-              title, 
-              style: robotoRegular.copyWith(
-                fontSize: isTablet ? Dimensions.fontSizeExtraSmall : Dimensions.fontSizeSmall,  // Plus petit sur iPad
-                color: isSelected ? Theme.of(context).primaryColor : Colors.grey
-              ),
-              overflow: TextOverflow.ellipsis,  // Éviter le débordement
-              textAlign: TextAlign.center,
-              maxLines: 1,
-            ),
+            Icon(iconData, color: isSelected ? Theme.of(context).primaryColor : Colors.grey, size: 25),
+
+            Text(title, style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: isSelected ? Theme.of(context).primaryColor : Colors.grey)),
           ],
         ),
       ),

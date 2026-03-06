@@ -124,6 +124,14 @@ class ChatController extends GetxController implements GetxService {
   FilePickerResult? _pickedWebVideoFile ;
   FilePickerResult? get pickedWebVideoFile => _pickedWebVideoFile;
 
+  bool _isEmojiPickerVisible = false;
+  bool get isEmojiPickerVisible => _isEmojiPickerVisible;
+
+  void toggleEmojiPicker() {
+    _isEmojiPickerVisible = !_isEmojiPickerVisible;
+    update();
+  }
+
   void canShowFloatingButton(bool status) {
     _showFloatingButton = status;
     update();
@@ -165,6 +173,19 @@ class ChatController extends GetxController implements GetxService {
       }
     }
     _tabLoading = false;
+    update();
+  }
+
+  Future<void> getAdminConversationList() async {
+    ConversationsModel? conversationModel = await chatServiceInterface.getConversationList(1, 'admin');
+    if(conversationModel != null) {
+      for(int index=0; index<conversationModel.conversations!.length; index++) {
+        if(conversationModel.conversations![index]!.receiverType == UserType.admin.name) {
+          _adminConversationModel = conversationModel.conversations![index];
+          break;
+        }
+      }
+    }
     update();
   }
 

@@ -9,7 +9,6 @@ import 'package:stackfood_multivendor/helper/address_helper.dart';
 import 'package:stackfood_multivendor/helper/route_helper.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_snackbar_widget.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -45,7 +44,7 @@ class LocationService implements LocationServiceInterface{
   @override
   void handleTopicSubscription(AddressModel? savedAddress, AddressModel? address) {
     if(!GetPlatform.isWeb) {
-      if(!kReleaseMode && Get.find<SplashController>().configModel!.demo!) {
+      if(Get.find<SplashController>().configModel!.demo!) {
         FirebaseMessaging.instance.subscribeToTopic(AppConstants.demoResetTopic);
       } else {
         FirebaseMessaging.instance.unsubscribeFromTopic(AppConstants.demoResetTopic);

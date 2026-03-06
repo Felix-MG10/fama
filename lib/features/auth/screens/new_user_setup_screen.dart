@@ -51,16 +51,6 @@ class _NewUserSetupScreenState extends State<NewUserSetupScreen> {
     _isSocial = widget.loginType == CentralizeLoginType.social.name;
     _formKeyInfo = GlobalKey<FormState>();
     _countryDialCode = CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).dialCode;
-    
-    // Pré-remplir le nom si fourni (par exemple depuis Sign in with Apple)
-    if (widget.name.isNotEmpty) {
-      _nameController.text = widget.name;
-    }
-    
-    // Pré-remplir l'email si fourni (par exemple depuis Sign in with Apple)
-    if (widget.email != null && widget.email!.isNotEmpty) {
-      _emailController.text = widget.email!;
-    }
   }
 
   @override
@@ -107,8 +97,7 @@ class _NewUserSetupScreenState extends State<NewUserSetupScreen> {
                   hintText: 'ex_jhon'.tr,
                   labelText: 'user_name'.tr,
                   showLabelText: true,
-                  // Le nom n'est pas requis si déjà fourni par Sign in with Apple
-                  required: widget.name.isEmpty,
+                  required: true,
                   controller: _nameController,
                   focusNode: _nameFocus,
                   nextFocus: _isSocial ? _phoneFocus : _emailFocus,
@@ -116,10 +105,7 @@ class _NewUserSetupScreenState extends State<NewUserSetupScreen> {
                   capitalization: TextCapitalization.words,
                   prefixIcon: CupertinoIcons.person_alt_circle_fill,
                   levelTextSize: Dimensions.fontSizeDefault,
-                  // Si le nom est déjà fourni (par Apple), ne pas le valider comme requis
-                  validator: widget.name.isNotEmpty 
-                    ? null 
-                    : (value) => ValidateCheck.validateEmptyText(value, "please_enter_your_name".tr),
+                  validator: (value) => ValidateCheck.validateEmptyText(value, "please_enter_your_name".tr),
                 ),
                 const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
@@ -127,7 +113,7 @@ class _NewUserSetupScreenState extends State<NewUserSetupScreen> {
                   hintText: 'xxx-xxx-xxxxx'.tr,
                   labelText: 'phone'.tr,
                   showLabelText: true,
-                  required: false,
+                  required: true,
                   controller: _phoneController,
                   focusNode: _phoneFocus,
                   nextFocus: _referCodeFocus,
@@ -138,27 +124,18 @@ class _NewUserSetupScreenState extends State<NewUserSetupScreen> {
                   },
                   countryDialCode: _countryDialCode != null ? CountryCode.fromCountryCode(Get.find<SplashController>().configModel!.country!).code
                       : Get.find<LocalizationController>().locale.countryCode,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return null; // Phone is optional
-                    }
-                    return ValidateCheck.validateEmptyText(value, "please_enter_phone_number".tr);
-                  },
+                  validator: (value) => ValidateCheck.validateEmptyText(value, "please_enter_phone_number".tr),
                 ) : CustomTextFieldWidget(
                   hintText: 'enter_email'.tr,
                   labelText: 'email'.tr,
                   showLabelText: true,
-                  // L'email n'est pas requis si déjà fourni par Sign in with Apple
-                  required: widget.email == null || widget.email!.isEmpty,
+                  required: true,
                   controller: _emailController,
                   focusNode: _emailFocus,
                   nextFocus: _referCodeFocus,
                   inputType: TextInputType.emailAddress,
                   prefixIcon: CupertinoIcons.mail_solid,
-                  // Si l'email est déjà fourni (par Apple), ne pas le valider comme requis
-                  validator: (widget.email != null && widget.email!.isNotEmpty)
-                    ? null
-                    : (value) => ValidateCheck.validateEmail(value),
+                  validator: (value) => ValidateCheck.validateEmail(value),
                 ),
                 const SizedBox(height: Dimensions.paddingSizeExtraLarge),
 
@@ -192,28 +169,19 @@ class _NewUserSetupScreenState extends State<NewUserSetupScreen> {
                       String number = _phoneController.text.trim();
 
                       String? countryCode = _countryDialCode;
-                      // Valeur brute envoyée à l'API (préfixe + numéro saisi) — ne pas l'écraser par phoneValid.phone qui peut être vide si le format est jugé invalide
-                      String? rawPhoneForApi;
-                      PhoneValid phoneValid = PhoneValid(isValid: true, countryCode: countryCode ?? '', phone: '');
-                      if (number.isNotEmpty && countryCode != null) {
-                        rawPhoneForApi = countryCode + number;
-                        phoneValid = await CustomValidator.isPhoneValid(rawPhoneForApi);
-                      }
+                      String numberWithCountryCode = countryCode! + number;
+                      PhoneValid phoneValid = await CustomValidator.isPhoneValid(numberWithCountryCode);
+                      numberWithCountryCode = phoneValid.phone;
 
-                      if (_isSocial && number.isNotEmpty && !phoneValid.isValid && !_formKeyInfo!.currentState!.validate()) {
+                      if (_isSocial && number.isEmpty && !_formKeyInfo!.currentState!.validate()) {
+                        showCustomSnackBar('enter_phone_number'.tr);
+                      } else if (_isSocial && !phoneValid.isValid && !_formKeyInfo!.currentState!.validate()) {
                         showCustomSnackBar('invalid_phone_number'.tr);
                       } else if(referCode.isNotEmpty && referCode.length != 10){
                         showCustomSnackBar('invalid_refer_code'.tr);
-                      } else if(_formKeyInfo!.currentState!.validate()) {
-                        String? phoneValue;
-                        if (widget.phone != null && widget.phone!.isNotEmpty) {
-                          phoneValue = widget.phone;
-                        } else if (number.isNotEmpty && rawPhoneForApi != null && rawPhoneForApi.isNotEmpty) {
-                          // Toujours envoyer le numéro saisi (avec indicatif) pour éviter "phone field is required" côté backend
-                          phoneValue = phoneValid.isValid ? phoneValid.phone : rawPhoneForApi;
-                        }
+                      }else if(_formKeyInfo!.currentState!.validate()) {
                         authController.updatePersonalInfo(
-                          name: name.isNotEmpty ? name : widget.name, phone: phoneValue,
+                          name: name.isNotEmpty ? name : widget.name, phone: (widget.phone != null && widget.phone!.isNotEmpty) ?  widget.phone : _countryDialCode! + _phoneController.text.trim(),
                           loginType: widget.loginType, email: widget.email ?? _emailController.text.trim(),
                           referCode: _referCodeController.text.trim(),
                         ).then((response) {

@@ -57,25 +57,20 @@ class ProfileController extends GetxController implements GetxService {
   Future<void> _updateProfileResponseHandle(ResponseModel responseModel, UpdateUserModel updateUserModel, String token) async {
     updateUserModel.verificationOn = responseModel.updateProfileResponseModel?.verificationOn;
     updateUserModel.verificationMedium = responseModel.updateProfileResponseModel?.verificationMedium;
-    if(Get.isDialogOpen == true) {
+    if(Get.isDialogOpen!) {
       Get.back();
     }
     if(responseModel.isSuccess && responseModel.updateProfileResponseModel != null && responseModel.updateProfileResponseModel!.verificationOn != null && responseModel.updateProfileResponseModel!.verificationOn! == 'phone'){
-      final phone = updateUserModel.phone;
-      if (phone == null || phone.isEmpty) {
-        showCustomSnackBar('please_enter_phone_number'.tr);
-        return;
-      }
       if(responseModel.updateProfileResponseModel!.verificationMedium! == 'firebase') {
-        Get.find<AuthController>().firebaseVerifyPhoneNumber(phone, token, '', fromSignUp: false, updateUserModel: updateUserModel);
+        Get.find<AuthController>().firebaseVerifyPhoneNumber(updateUserModel.phone!, token, '', fromSignUp: false, updateUserModel: updateUserModel);
       } else {
         if(ResponsiveHelper.isDesktop(Get.context)) {
           Get.dialog(VerificationScreen(
-            number: phone, email: null, token: '', fromSignUp: false,
+            number: updateUserModel.phone!, email: null, token: '', fromSignUp: false,
             fromForgetPassword: false, loginType: '', password: '', userModel: updateUserModel,
           ));
         } else {
-          Get.toNamed(RouteHelper.getVerificationRoute(phone, null, '', '', null, '', updateUserModel: updateUserModel));
+          Get.toNamed(RouteHelper.getVerificationRoute(updateUserModel.phone!, null, '', '', null, '', updateUserModel: updateUserModel));
         }
       }
     } else if(responseModel.isSuccess && responseModel.updateProfileResponseModel != null && responseModel.updateProfileResponseModel!.verificationOn != null && responseModel.updateProfileResponseModel!.verificationOn! == 'email'){

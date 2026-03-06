@@ -35,7 +35,6 @@ import 'package:stackfood_multivendor/common/widgets/footer_view_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/menu_drawer_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/not_logged_in_screen.dart';
 import 'package:stackfood_multivendor/common/widgets/web_page_title_widget.dart';
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:just_the_tooltip/just_the_tooltip.dart';
 import 'package:flutter/material.dart';
@@ -136,10 +135,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
       if(Get.find<ProfileController>().userInfoModel == null && Get.find<ProfileController>().userInfoModel?.userInfo == null) {
         Get.find<ProfileController>().getUserInfo();
       }
-
-      if(Get.find<AddressController>().addressList == null) {
-        Get.find<AddressController>().getAddressList(canInsertAddress: true);
-      }
+      Get.find<AddressController>().getAddressList(canInsertAddress: true);
     }
 
     checkoutController.setRestaurantDetails(restaurantId: _cartList![0].product!.restaurantId);
@@ -395,9 +391,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
 
             checkoutController.setTotalAmount(total - (checkoutController.isPartialPay ? Get.find<ProfileController>().userInfoModel?.walletBalance ?? 0 : 0));
 
-            double effectiveTotal = checkoutController.testAmountOverride ?? total;
-
-            if(_payableAmount != checkoutController.viewTotalPrice && checkoutController.distance != null && isLoggedIn && Get.find<HomeController>().cashBackOfferList != null && Get.find<HomeController>().cashBackOfferList!.isNotEmpty) {
+            if(checkoutController.isFirstTime && _payableAmount != checkoutController.viewTotalPrice && checkoutController.distance != null && isLoggedIn && Get.find<HomeController>().cashBackOfferList != null && Get.find<HomeController>().cashBackOfferList!.isNotEmpty) {
               _payableAmount = checkoutController.viewTotalPrice;
               showCashBackSnackBar();
             }
@@ -427,7 +421,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                               locationController: locationController, tomorrowClosed: tomorrowClosed, todayClosed: todayClosed,
                               price: price, discount: discount, addOns: addOnsPrice, restaurantSubscriptionActive: restaurantSubscriptionActive,
                               showTips: showTips, isCashOnDeliveryActive: _isCashOnDeliveryActive!, isDigitalPaymentActive: _isDigitalPaymentActive!,
-                              isWalletActive: _isWalletActive, fromCart: widget.fromCart, total: effectiveTotal, tooltipController3: tooltipController3, tooltipController2: tooltipController2,
+                              isWalletActive: _isWalletActive, fromCart: widget.fromCart, total: total, tooltipController3: tooltipController3, tooltipController2: tooltipController2,
                               isOfflinePaymentActive: _isOfflinePaymentActive, loginTooltipController: loginTooltipController,
                               callBack: () => initCall(), deliveryChargeForView: _deliveryChargeForView, deliveryFeeTooltipController: deliveryFeeTooltipController,
                               badWeatherCharge: badWeatherChargeForToolTip, extraChargeForToolTip: extraChargeForToolTip, deliveryOptionScrollController: deliveryOptionScrollController,
@@ -443,7 +437,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                               flex: 4,
                               child: BottomSectionWidget(
                                 isCashOnDeliveryActive: _isCashOnDeliveryActive!, isDigitalPaymentActive: _isDigitalPaymentActive!, isWalletActive: _isWalletActive,
-                                total: effectiveTotal, subTotal: subTotal, discount: discount, couponController: couponController,
+                                total: total, subTotal: subTotal, discount: discount, couponController: couponController,
                                 taxIncluded: (checkoutController.taxIncluded == 1), tax: checkoutController.orderTax!, deliveryCharge: deliveryCharge, checkoutController: checkoutController, locationController: locationController,
                                 todayClosed: todayClosed, tomorrowClosed: tomorrowClosed, orderAmount: orderAmount, maxCodOrderAmount: maxCodOrderAmount,
                                 subscriptionQty: subscriptionQty, taxPercent: taxPercent!, fromCart: widget.fromCart, cartList: _cartList,
@@ -462,7 +456,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                             locationController: locationController, tomorrowClosed: tomorrowClosed, todayClosed: todayClosed,
                             price: price, discount: discount, addOns: addOnsPrice, restaurantSubscriptionActive: restaurantSubscriptionActive,
                             showTips: showTips, isCashOnDeliveryActive: _isCashOnDeliveryActive!, isDigitalPaymentActive: _isDigitalPaymentActive!,
-                            isWalletActive: _isWalletActive, fromCart: widget.fromCart, total: effectiveTotal, tooltipController3: tooltipController3, tooltipController2: tooltipController2,
+                            isWalletActive: _isWalletActive, fromCart: widget.fromCart, total: total, tooltipController3: tooltipController3, tooltipController2: tooltipController2,
                             isOfflinePaymentActive: _isOfflinePaymentActive, loginTooltipController: loginTooltipController,
                             callBack: () => initCall(), deliveryChargeForView: _deliveryChargeForView, deliveryFeeTooltipController: deliveryFeeTooltipController,
                             badWeatherCharge: badWeatherChargeForToolTip, extraChargeForToolTip: extraChargeForToolTip, deliveryOptionScrollController: deliveryOptionScrollController,
@@ -475,7 +469,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
 
                           BottomSectionWidget(
                             isCashOnDeliveryActive: _isCashOnDeliveryActive!, isDigitalPaymentActive: _isDigitalPaymentActive!, isWalletActive: _isWalletActive,
-                            total: effectiveTotal, subTotal: subTotal, discount: discount, couponController: couponController,
+                            total: total, subTotal: subTotal, discount: discount, couponController: couponController,
                             taxIncluded: (checkoutController.taxIncluded == 1), tax: checkoutController.orderTax!, deliveryCharge: deliveryCharge, checkoutController: checkoutController, locationController: locationController,
                             todayClosed: todayClosed, tomorrowClosed: tomorrowClosed, orderAmount: orderAmount, maxCodOrderAmount: maxCodOrderAmount,
                             subscriptionQty: subscriptionQty, taxPercent: taxPercent!, fromCart: widget.fromCart, cartList: _cartList,
@@ -498,11 +492,6 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                   child: Column(
                     children: [
-                      if (kDebugMode)
-                        _TestAmountOverrideSection(
-                          effectiveTotal: effectiveTotal,
-                          onChanged: (v) => checkoutController.setTestAmountOverride(v),
-                        ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeExtraSmall),
                         child: Row(children: [
@@ -519,7 +508,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                           const Expanded(child: SizedBox()),
 
                           PriceConverter.convertAnimationPrice(
-                            effectiveTotal * (checkoutController.subscriptionOrder ? (subscriptionQty == 0 ? 1 : subscriptionQty) : 1),
+                            total * (checkoutController.subscriptionOrder ? (subscriptionQty == 0 ? 1 : subscriptionQty) : 1),
                             textStyle: robotoMedium.copyWith(fontSize: Dimensions.fontSizeLarge, color: Theme.of(context).primaryColor),
                           ),
                         ]),
@@ -528,7 +517,7 @@ class CheckoutScreenState extends State<CheckoutScreen> {
                       OrderPlaceButton(
                         checkoutController: checkoutController, locationController: locationController,
                         todayClosed: todayClosed, tomorrowClosed: tomorrowClosed, orderAmount: orderAmount, deliveryCharge: deliveryCharge,
-                        discount: discount, total: effectiveTotal, maxCodOrderAmount: maxCodOrderAmount, subscriptionQty: subscriptionQty,
+                        discount: discount, total: total, maxCodOrderAmount: maxCodOrderAmount, subscriptionQty: subscriptionQty,
                         cartList: _cartList!, isCashOnDeliveryActive: _isCashOnDeliveryActive!, isDigitalPaymentActive: _isDigitalPaymentActive!,
                         isWalletActive: _isWalletActive, fromCart: widget.fromCart,
                         isOfflinePaymentActive: _isOfflinePaymentActive, subTotal: subTotal, couponController: couponController,
@@ -794,67 +783,4 @@ class CheckoutScreenState extends State<CheckoutScreen> {
     }
   }
 
-}
-
-class _TestAmountOverrideSection extends StatefulWidget {
-  final double effectiveTotal;
-  final void Function(double?) onChanged;
-
-  const _TestAmountOverrideSection({required this.effectiveTotal, required this.onChanged});
-
-  @override
-  State<_TestAmountOverrideSection> createState() => _TestAmountOverrideSectionState();
-}
-
-class _TestAmountOverrideSectionState extends State<_TestAmountOverrideSection> {
-  late TextEditingController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeLarge, vertical: Dimensions.paddingSizeSmall),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text('Mode test - Montant (XOF):', style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall)),
-          ),
-          SizedBox(
-            width: 100,
-            child: TextField(
-              controller: _controller,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(
-                hintText: '${widget.effectiveTotal.toInt()}',
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              ),
-              onChanged: (v) {
-                final parsed = double.tryParse(v.replaceAll(',', '.'));
-                widget.onChanged(parsed);
-              },
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              _controller.clear();
-              widget.onChanged(null);
-            },
-            child: Text('Reset', style: robotoRegular.copyWith(fontSize: Dimensions.fontSizeSmall)),
-          ),
-        ],
-      ),
-    );
-  }
 }

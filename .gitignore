@@ -30,7 +30,6 @@
 .pub-cache/
 .pub/
 /build/
-android/build/
 .firebaserc
 firebase.json
 .firebase
@@ -53,10 +52,3 @@ app.*.map.json
 /android/app/release
 
 .env
-
-# Android Keystore files (NE PAS COMMITER!)
-*.jks
-*.keystore
-android/key.properties
-android/upload-keystore.jks
-android/*.jks.backup.*

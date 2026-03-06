@@ -13,6 +13,7 @@ import 'package:stackfood_multivendor/features/checkout/screens/offline_payment_
 import 'package:stackfood_multivendor/features/checkout/screens/order_successful_screen.dart';
 import 'package:stackfood_multivendor/features/checkout/screens/payment_screen.dart';
 import 'package:stackfood_multivendor/features/checkout/screens/payment_webview_screen.dart';
+import 'package:stackfood_multivendor/features/cuisine/screens/cuisine_restaurant_search_screen.dart';
 import 'package:stackfood_multivendor/features/dine_in/screens/dine_in_restaurant_screen.dart';
 import 'package:stackfood_multivendor/features/favourite/screens/favourite_screen.dart';
 import 'package:stackfood_multivendor/features/home/screens/map_view_screen.dart';
@@ -136,6 +137,7 @@ class RouteHelper {
   static const String wallet = '/wallet';
   static const String loyalty = '/loyalty-point';
   static const String searchRestaurantItem = '/search-Restaurant-item';
+  static const String searchCuisineRestaurants = '/search-cuisine-restaurants';
   static const String productImages = '/product-images';
   static const String referAndEarn = '/refer-and-earn';
   static const String messages = '/messages';
@@ -157,7 +159,7 @@ class RouteHelper {
   static const String settings = '/settings';
 
   static String getInitialRoute({bool fromSplash = false}) => '$initial?from-splash=$fromSplash';
-  static String getSplashRoute(NotificationBodyModel? body, DeepLinkBody? linkBody, {String? paymentOrderId, String? paymentStatus}) {
+  static String getSplashRoute(NotificationBodyModel? body, DeepLinkBody? linkBody) {
     String data = 'null';
     String linkData = 'null';
     if(body != null) {
@@ -168,11 +170,7 @@ class RouteHelper {
       List<int> encoded = utf8.encode(jsonEncode(linkBody.toJson()));
       linkData = base64Encode(encoded);
     }
-    String suffix = '';
-    if (paymentOrderId != null && paymentOrderId.isNotEmpty && paymentStatus != null && paymentStatus.isNotEmpty) {
-      suffix = '&payment_order_id=$paymentOrderId&payment_status=$paymentStatus';
-    }
-    return '$splash?data=$data&link=$linkData$suffix';
+    return '$splash?data=$data&link=$linkData';
   }
   static String getLanguageRoute(String page) => '$language?page=$page';
   static String getOnBoardingRoute() => onBoarding;
@@ -201,20 +199,15 @@ class RouteHelper {
   static String getRestaurantRoute(int? id, {String? slug, bool fromDinIn = false}) {
     String urlSlug = slug ?? 'restaurant-$id';
 
-    // Clean the slug
     urlSlug = urlSlug
         .toLowerCase()
-        .replaceAll(RegExp(r'[^a-z0-9\s-]'), '') // Remove special characters
-        .replaceAll(RegExp(r'\s+'), '-')          // Replace spaces with hyphens
-        .replaceAll(RegExp(r'-+'), '-')           // Replace multiple hyphens with single
+        .replaceAll(RegExp(r'[^a-z0-9\s-]'), '')
+        .replaceAll(RegExp(r'\s+'), '-')
+        .replaceAll(RegExp(r'-+'), '-')
         .trim();
 
     return '$restaurant/$urlSlug?id=$id&from_dine_in=$fromDinIn';
   }
-
-/*  static String getRestaurantRoute(int? id, {String? slug, bool fromDinIn = false}) {
-    return '$restaurant?id=$id&from_dine_in=$fromDinIn';
-  }*/
   static String getOrderDetailsRoute(int? orderID, {bool? fromOffline, String? contactNumber, bool fromGuestTrack = false, bool fromNotification = false, bool? fromDineIn}) {
     return '$orderDetails?id=$orderID&from_offline=$fromOffline&contact=$contactNumber&from_guest_track=$fromGuestTrack&from_notification=$fromNotification&from_dine_in=$fromDineIn';
   }
@@ -251,35 +244,22 @@ class RouteHelper {
   static String getRefundPolicyRoute() => refundPolicy;
   static String getAboutUsRoute() => aboutUs;
   static String getCategoryRoute() => categories;
-
   static String getCategoryProductRoute(int? id, String name) {
     List<int> encoded = utf8.encode(name);
     String data = base64Encode(encoded);
 
-    // Create URL-friendly slug from name
     String slug = name.toLowerCase()
-        .replaceAll(RegExp(r'[^a-z0-9\s-]'), '') // Remove special characters
-        .replaceAll(RegExp(r'\s+'), '-')          // Replace spaces with hyphens
-        .replaceAll(RegExp(r'-+'), '-')           // Replace multiple hyphens with single
+        .replaceAll(RegExp(r'[^a-z0-9\s-]'), '')
+        .replaceAll(RegExp(r'\s+'), '-')
+        .replaceAll(RegExp(r'-+'), '-')
         .trim();
 
     return '$categoryProduct/$slug?id=$id&name=$data';
   }
-
-/*  static String getCategoryProductRoute(int? id, String name) {
-    List<int> encoded = utf8.encode(name);
-    String data = base64Encode(encoded);
-    return '$categoryProduct?id=$id&name=$data';
-  }*/
-
   static String getPopularFoodRoute(bool isPopular, {bool fromIsRestaurantFood = false, int? restaurantId}) {
-    // Use different base routes based on isPopular
     String baseRoute = isPopular ? popularFoods : bestReviewedFoods;
-
     return '$baseRoute?page=${isPopular ? 'popular' : 'reviewed'}&fromIsRestaurantFood=$fromIsRestaurantFood&restaurant_id=$restaurantId';
   }
-
-  //static String getPopularFoodRoute(bool isPopular, {bool fromIsRestaurantFood = false, int? restaurantId}) => '$popularFoods?page=${isPopular ? 'popular' : 'reviewed'}&fromIsRestaurantFood=$fromIsRestaurantFood&restaurant_id=$restaurantId';
   static String getItemCampaignRoute() => itemCampaign;
   static String getSupportRoute() => support;
   static String getReviewRoute(RateReviewModel rateReviewModel) {
@@ -300,7 +280,6 @@ class RouteHelper {
     String data = base64Url.encode(utf8.encode(jsonEncode(restaurant.toJson())));
     return '$restaurantReview?id=$restaurantID&restaurantName=$restaurantName&restaurant=$data';
   }
-
   static String getAllRestaurantRoute(String page) {
     String baseRoute;
     switch (page) {
@@ -322,11 +301,10 @@ class RouteHelper {
 
     return '$baseRoute?page=$page';
   }
-
-  //static String getAllRestaurantRoute(String page) => '$allRestaurants?page=$page';
   static String getWalletRoute({String? fundStatus, bool? fromMenuPage, bool fromNotification = false}) => '$wallet?payment_status=$fundStatus&from_menu_page=$fromMenuPage&from_notification=$fromNotification';
   static String getLoyaltyRoute() => loyalty;
   static String getSearchRestaurantProductRoute(int? productID) => '$searchRestaurantItem?id=$productID';
+  static String getSearchCuisineRestaurantsRoute(int? cuisineID) => '$searchCuisineRestaurants?id=$cuisineID';
   static String getItemImagesRoute(Product product) {
     String data = base64Url.encode(utf8.encode(jsonEncode(product.toJson())));
     return '$productImages?item=$data';
@@ -350,20 +328,16 @@ class RouteHelper {
   static String getRefundRequestRoute(String orderID) => '$refund?id=$orderID';
   static String getOrderRoute() => order;
   static String getCuisineRoute() => cuisine;
-
   static String getCuisineRestaurantRoute(int? cuisineId, String? name) {
-    // Create URL-friendly slug from name
     String slug = (name ?? '')
         .toLowerCase()
-        .replaceAll(RegExp(r'[^a-z0-9\s-]'), '') // Remove special characters
-        .replaceAll(RegExp(r'\s+'), '-')          // Replace spaces with hyphens
-        .replaceAll(RegExp(r'-+'), '-')           // Replace multiple hyphens with single
+        .replaceAll(RegExp(r'[^a-z0-9\s-]'), '')
+        .replaceAll(RegExp(r'\s+'), '-')
+        .replaceAll(RegExp(r'-+'), '-')
         .trim();
 
     return '$cuisineRestaurant/$slug?id=$cuisineId&name=$name';
   }
-
-  //static String getCuisineRestaurantRoute(int? cuisineId, String? name) => '$cuisineRestaurant?id=$cuisineId&name=$name';
   static String getSubscriptionSuccessRoute({String? status, required bool fromSubscription, int? restaurantId, int? packageId}) => '$subscriptionSuccess?flag=$status&from_subscription=$fromSubscription&restaurant_id=$restaurantId&package_id=$packageId';
   static String getSubscriptionPaymentRoute({required int? restaurantId, required int? packageId}) => '$subscriptionPayment?restaurant-id=$restaurantId&package-id=$packageId';
   static String getOfflinePaymentScreen({
@@ -396,9 +370,7 @@ class RouteHelper {
         List<int> decode = base64Decode(Get.parameters['link']!.replaceAll(' ', '+'));
         linkData = DeepLinkBody.fromJson(jsonDecode(utf8.decode(decode)));
       }
-      final paymentOrderId = Get.parameters['payment_order_id'];
-      final paymentStatus = Get.parameters['payment_status'];
-      return SplashScreen(notificationBody: data, linkBody: linkData, paymentOrderId: paymentOrderId, paymentStatus: paymentStatus);
+      return SplashScreen(notificationBody: data, linkBody: linkData);
     }),
     GetPage(name: language, page: () => LanguageScreen(fromMenu: Get.parameters['page'] == 'menu')),
     GetPage(name: onBoarding, page: () => OnBoardingScreen()),
@@ -488,14 +460,10 @@ class RouteHelper {
     }),
     GetPage(name: address, page: () => getRoute(const AddressScreen())),
     GetPage(name: orderSuccess, page: () {
-      final amountParam = Get.parameters['amount'];
-      final amount = (amountParam != null && amountParam != 'null' && amountParam.isNotEmpty)
-          ? (double.tryParse(amountParam) ?? 0.0)
-          : 0.0;
       return getRoute(OrderSuccessfulScreen(
         orderID: Get.parameters['id'],
         status: Get.parameters['status'] != null ? (Get.parameters['status']!.contains('success') ? 1 : 0) : (Get.parameters['flag'] == 'success' ? 1 : 0),
-        totalAmount: amount,
+        totalAmount: Get.parameters['amount'] != null ? double.parse(Get.parameters['amount']!) : 0.0,
         contactPersonNumber: Get.parameters['contact_number'] != null && Get.parameters['contact_number'] != 'null'
             ? Get.parameters['contact_number']
             : Get.find<AuthController>().isGuestLoggedIn() ? Get.find<AuthController>().getGuestNumber() : null,
@@ -561,22 +529,12 @@ class RouteHelper {
       page: () => const HtmlViewerScreen(htmlType: HtmlType.aboutUs),
     ),
     GetPage(name: categories, page: () => getRoute(const CategoryScreen())),
-
     GetPage(name: '$categoryProduct/:slug', page: () {
       List<int> decode = base64Decode(Get.parameters['name']!.replaceAll(' ', '+'));
       String data = utf8.decode(decode);
 
       return getRoute(CategoryProductScreen(categoryID: Get.parameters['id'], categoryName: data));
     }),
-
-    /*GetPage(name: categoryProduct, page: () {
-      List<int> decode = base64Decode(Get.parameters['name']!.replaceAll(' ', '+'));
-      String data = utf8.decode(decode);
-      return getRoute(CategoryProductScreen(categoryID: Get.parameters['id'], categoryName: data));
-    }),*/
-
-
-    // Popular Foods Route
     GetPage(name: popularFoods, page: () {
       return getRoute(PopularFoodScreen(
         isPopular: true,
@@ -586,8 +544,6 @@ class RouteHelper {
             : null,
       ));
     }),
-
-// Best Reviewed Foods Route
     GetPage(name: bestReviewedFoods, page: () {
       return getRoute(PopularFoodScreen(
         isPopular: false,
@@ -623,8 +579,6 @@ class RouteHelper {
       return getRoute(RateReviewScreen(rateReviewModel: data));
     }),
     GetPage(name: restaurantReview, page: () => getRoute(ReviewScreen(restaurantID: Get.parameters['id'], restaurantName: Get.parameters['restaurantName'], restaurant: Restaurant.fromJson(jsonDecode(utf8.decode(base64Url.decode(Get.parameters['restaurant']!.replaceAll(' ', '+')))))))),
-
-    // Popular Restaurants
     GetPage(name: popularRestaurants, page: () => getRoute(
       const AllRestaurantScreen(
         isPopular: true,
@@ -632,8 +586,6 @@ class RouteHelper {
         isOrderAgain: false,
       ),
     )),
-
-   // Recently Viewed Restaurants
     GetPage(name: recentlyViewedRestaurants, page: () => getRoute(
       const AllRestaurantScreen(
         isPopular: false,
@@ -641,8 +593,6 @@ class RouteHelper {
         isOrderAgain: false,
       ),
     )),
-
-   // Order Again Restaurants
     GetPage(name: orderAgainRestaurants, page: () => getRoute(
       const AllRestaurantScreen(
         isPopular: false,
@@ -650,8 +600,6 @@ class RouteHelper {
         isOrderAgain: true,
       ),
     )),
-
-    // New On Restaurants
     GetPage(name: newOnRestaurants, page: () => getRoute(
       const AllRestaurantScreen(
         isPopular: false,
@@ -659,8 +607,6 @@ class RouteHelper {
         isOrderAgain: false,
       ),
     )),
-
-   // All Restaurants (default)
     GetPage(name: allRestaurants, page: () => getRoute(
       AllRestaurantScreen(
         isPopular: Get.parameters['page'] == 'popular',
@@ -668,12 +614,12 @@ class RouteHelper {
         isOrderAgain: Get.parameters['page'] == 'order_again',
       ),
     )),
-
     GetPage(name: wallet, page: () {
       return getRoute(WalletScreen(fundStatus: Get.parameters['flag'] ?? Get.parameters['payment_status'], fromMenuPage: Get.parameters['from_menu_page'] == 'true', fromNotification: Get.parameters['from_notification'] == 'true'));
     }),
     GetPage(name: loyalty, page: () => getRoute(const LoyaltyScreen())),
     GetPage(name: searchRestaurantItem, page: () => getRoute(RestaurantProductSearchScreen(storeID: Get.parameters['id']))),
+    GetPage(name: searchCuisineRestaurants, page: () => getRoute(CuisineRestaurantSearchScreen(cuisineId: int.parse(Get.parameters['id']!)))),
     GetPage(name: productImages, page: () => getRoute(ImageViewerScreenWidget(
       product: Product.fromJson(jsonDecode(utf8.decode(base64Url.decode(Get.parameters['item']!.replaceAll(' ', '+'))))),
     ))),
@@ -700,13 +646,10 @@ class RouteHelper {
     GetPage(name: refund, page: () => RefundRequestScreen(orderId: Get.parameters['id'])),
     GetPage(name: order, page: () => getRoute(const OrderScreen())),
     GetPage(name: cuisine, page: () => getRoute(const CuisineScreen())),
-
     GetPage(
       name: '$cuisineRestaurant/:slug',
       page: () => getRoute(CuisineRestaurantScreen(cuisineId: int.parse(Get.parameters['id']!), name: Get.parameters['name'])),
     ),
-
-    //GetPage(name: cuisineRestaurant, page: () => getRoute(CuisineRestaurantScreen(cuisineId: int.parse(Get.parameters['id']!), name: Get.parameters['name']))),
     GetPage(name: subscriptionSuccess, page: () => getRoute(SubscriptionSuccessOrFailedScreen(
       success: Get.parameters['flag'] == 'success',
       fromSubscription: Get.parameters['from_subscription'] == 'true',

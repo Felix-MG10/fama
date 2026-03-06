@@ -19,7 +19,6 @@ import 'package:stackfood_multivendor/util/images.dart';
 import 'package:stackfood_multivendor/util/styles.dart';
 import 'package:stackfood_multivendor/common/widgets/confirmation_dialog_widget.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_image_widget.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
@@ -110,7 +109,7 @@ class _MenuScreenState extends State<MenuScreen> {
                     SizedBox(
                       width: 130,
                       child: CustomButtonWidget(
-                        buttonText: 'login'.tr,
+                        buttonText: '${'login'.tr}/ ${'signup'.tr}',
                         height: 40, color: Colors.white.withValues(alpha: 0.9),
                         textColor: Theme.of(context).primaryColor,
                         onPressed: () async {

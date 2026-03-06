@@ -56,14 +56,14 @@ class CongratulationDialogue extends StatelessWidget {
 
             Positioned(
               top: 5, right: 5,
-                child: InkWell(
-                  onTap: (){
-                    Get.find<LoyaltyController>().saveEarningPoint('');
-                    Get.back();
-                  },
-                    child: const Icon(Icons.clear, size: 18),
-                ),
-            )
+              child: InkWell(
+                onTap: (){
+                  Get.find<LoyaltyController>().saveEarningPoint('');
+                  Get.back();
+                },
+                child: const Icon(Icons.clear, size: 18),
+              ),
+            ),
           ],
         ),
       ),

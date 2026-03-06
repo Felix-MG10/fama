@@ -19,42 +19,10 @@ class LocationRepo implements LocationRepoInterface {
       ZoneResponseModel responseModel;
       List<int>? zoneIds = ZoneModel.fromJson(response.body).zoneIds;
       List<ZoneData>? zoneData = ZoneModel.fromJson(response.body).zoneData;
-      responseModel = ZoneResponseModel(true, '' , zoneIds ?? [], zoneData??[], 200);
+      responseModel = ZoneResponseModel(true, '' , zoneIds ?? [], zoneData??[]);
       return responseModel;
     } else {
-      // Extraire le message d'erreur depuis le body
-      String errorMessage = response.statusText ?? '';
-      
-      // Si le body contient des erreurs structurées, les extraire
-      if(response.body != null && response.body is Map) {
-        try {
-          Map<String, dynamic> body = response.body as Map<String, dynamic>;
-          
-          // Vérifier si c'est le format {errors: [{code: "...", message: "..."}]}
-          if(body.containsKey('errors') && body['errors'] is List) {
-            List errors = body['errors'];
-            if(errors.isNotEmpty && errors[0] is Map) {
-              Map<String, dynamic> firstError = errors[0];
-              if(firstError.containsKey('message')) {
-                errorMessage = firstError['message'].toString();
-              }
-            }
-          } 
-          // Sinon, chercher directement un champ "message"
-          else if(body.containsKey('message')) {
-            errorMessage = body['message'].toString();
-          }
-        } catch(e) {
-          // Si le parsing échoue, utiliser le statusText par défaut
-        }
-      }
-      
-      // Si c'est une erreur 404, utiliser le message traduit par défaut
-      if(response.statusCode == 404 && errorMessage.isEmpty) {
-        errorMessage = 'service_not_available_in_this_area'.tr;
-      }
-      
-      return ZoneResponseModel(false, errorMessage, [], [], response.statusCode);
+      return ZoneResponseModel(false, response.statusText, [], []);
     }
   }
 

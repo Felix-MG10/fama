@@ -8,4 +8,5 @@ abstract class AddressServiceInterface{
   Future<ResponseModel> update(Map<String, dynamic> body, int? addressId);
   Future<ResponseModel> delete(int id);
   List<AddressModel> filterAddresses(List<AddressModel> addresses, String queryText);
+  Future<ResponseModel> markDefault(int id);
 }
