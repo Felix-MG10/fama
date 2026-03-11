@@ -193,7 +193,7 @@ class OrderModel {
     cancellationNote = json['cancellation_note'];
     subscriptionId = json['subscription_id'];
     subscription = json['subscription'] != null ? SubscriptionModel.fromJson(json['subscription']) : null;
-    cutlery = json['cutlery'];
+    cutlery = json['cutlery'] == null ? null : (json['cutlery'] == 1 || json['cutlery'] == true);
     unavailableItemNote = json['unavailable_item_note'];
     deliveryInstruction = json['delivery_instruction'];
     additionalCharge = json['additional_charge']?.toDouble() ?? 0;
@@ -220,7 +220,7 @@ class OrderModel {
     orderReference = json['order_reference'] != null ? OrderReference.fromJson(json['order_reference']) : null;
     bringChangeAmount = json['bring_change_amount']?.toDouble();
     itemCampaignId = json['item_campaign_id'];
-    isPos = json['is_pos'];
+    isPos = json['is_pos'] == null ? null : (json['is_pos'] == 1 || json['is_pos'] == true);
   }
 
   Map<String, dynamic> toJson() {

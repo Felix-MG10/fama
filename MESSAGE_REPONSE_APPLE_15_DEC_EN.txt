@@ -1,0 +1,20 @@
+Hello,
+
+Thank you for your feedback. We have identified the issue with the screenshots.
+
+We will immediately update all screenshots for iPhone 6.5" and iPad 13" in App Store Connect to accurately reflect the current app interface with all recent UI changes and corrections.
+
+The new screenshots will:
+- Show the current interface with all UI fixes applied
+- Highlight the app's main features and functionality
+- Use the correct device frames (iPhone frame for iPhone, iPad frame for iPad)
+- Accurately represent the app in use on each supported device
+
+We will upload the updated screenshots in App Store Connect → "View All Sizes in Media Manager" for both iPhone 6.5" Display and iPad Pro (12.9-inch) before resubmission.
+
+Thank you for your patience.
+
+Best regards,
+Fama Development Team
+December 15, 2025
+

@@ -1,0 +1,11 @@
+# Copiez ce fichier en key.properties et remplissez avec votre keystore de release.
+# Ne commitez PAS key.properties dans Git (il est dans .gitignore).
+#
+# Pour obtenir le SHA1 de votre keystore:
+# keytool -list -v -keystore chemin/vers/votre-keystore.jks -alias votre_alias
+# Le SHA1 doit être: 08:95:79:DD:FF:35:25:22:CB:1F:23:3A:F1:3D:9F:D4:F8:6C:C2:ED
+
+storePassword=votre_mot_de_passe
+keyPassword=votre_mot_de_passe
+keyAlias=votre_alias
+storeFile=../chemin/vers/upload-keystore.jks

@@ -1,0 +1,46 @@
+Hello,
+
+Thank you for your feedback. We have fixed all issues from your December 13, 2025 review on iPad Air 11-inch (M3) with iPadOS 26.1.
+
+1. Guideline 4.0 - Design (iPad UI)
+
+Issue: Text within buttons was overlapping with button frames.
+
+Corrections:
+- Login screen: Container width 700px, padding 48px, margins increased
+- Social login buttons: Minimum height 56px, increased padding, TextOverflow.ellipsis to prevent text overlap, font size adapted for iPad
+- Responsive layout: Automatic iPad detection (isTablet method), minimum 16 points spacing
+- All tabs: TextOverflow.ellipsis, adapted font size, increased padding
+- Fixed screens: Login, Dashboard, Order, Favourite, Search, Category, Chat, Review
+
+Result: Interface no longer cluttered, all text readable without overlap, buttons easily clickable (56x56 points minimum), compliant with Apple HIG.
+
+2. Guideline 2.1 - Payment Model
+
+1. Do individual customers pay? Yes, customers pay directly for services through the app.
+2. Pay directly to merchants/delivery? No, all payments go through the app's integrated payment system.
+3. Company/organization pays? Not applicable - customers pay directly.
+4. Payment location/method? Payments made in-app when finalizing orders. Methods: Credit cards, Apple Pay, Google Pay, other electronic payments.
+5. Account creation fees? No, account creation is free.
+6. Subscriptions involve fees? Yes, subscriptions are optional In-App Purchases managed through Apple's system with additional fees.
+7. Steps to locate IAP: Open app → Sign in → Profile/Settings tab → Select "Subscriptions" → View plans and purchase via Apple IAP.
+
+All IAP are managed through Apple's system and comply with Apple guidelines.
+
+3. Guideline 2.3.3 - iPad Screenshots
+
+Issue: iPad 13" screenshots showed iPhone frame instead of iPad frame.
+
+Fixed: New iPad 13" screenshots uploaded to App Store Connect with native iPad frame (not iPhone), showing current interface with all UI corrections applied.
+
+Testing Instructions:
+- iPad Interface: Install on iPad Air 11-inch (M3), verify login screen, check text doesn't overlap buttons, verify buttons are clickable (56x56 points minimum).
+- IAP: Sign in → Profile → Subscriptions → Verify plans display correctly.
+- Screenshots: Verify in App Store Connect → "View All Sizes in Media Manager" → iPad 13" Display.
+
+We are confident all corrections meet Apple's requirements. The app is optimized for iPad with clear interface where text no longer overlaps button frames. iPad 13" screenshots updated in App Store Connect. All payment model information provided.
+
+Best regards,
+Fama Development Team
+December 13, 2025
+
