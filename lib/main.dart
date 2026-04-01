@@ -46,39 +46,34 @@ Future<void> main() async {
 
   DeepLinkBody? linkBody;
 
-  // Projet Firebase: fama-7db84 — Pour le web, ajouter une app Web dans la console Firebase et remplacer appId.
-  if(GetPlatform.isWeb) {
-    await Firebase.initializeApp(options: const FirebaseOptions(
-      apiKey: "AIzaSyDKFPeONsJTzc9OcNRnexNCItpqVX41UhE",
-      authDomain: "fama-7db84.firebaseapp.com",
-      projectId: "fama-7db84",
-      storageBucket: "fama-7db84.firebasestorage.app",
-      messagingSenderId: "888957940076",
-      appId: "1:888957940076:web:REPLACE_AFTER_ADDING_WEB_APP_IN_FIREBASE_CONSOLE",
-    ));
-  } else if(GetPlatform.isAndroid) {
-    await Firebase.initializeApp(
-      options: const FirebaseOptions(
-        apiKey: 'AIzaSyDKFPeONsJTzc9OcNRnexNCItpqVX41UhE',
-        appId: '1:888957940076:android:3be42b0f67a1a5c3ca8349',
-        messagingSenderId: '888957940076',
-        projectId: 'fama-7db84',
-        storageBucket: 'fama-7db84.firebasestorage.app',
-      ),
-    );
-  } else if(GetPlatform.isIOS) {
-    // Remplacer appId par GOOGLE_APP_ID du GoogleService-Info.plist (app iOS FAMA dans Firebase).
-    await Firebase.initializeApp(
-      options: const FirebaseOptions(
-        apiKey: 'AIzaSyDKFPeONsJTzc9OcNRnexNCItpqVX41UhE',
-        appId: '1:888957940076:ios:REPLACE_WITH_IOS_APP_ID',
-        messagingSenderId: '888957940076',
-        projectId: 'fama-7db84',
-        storageBucket: 'fama-7db84.firebasestorage.app',
-      ),
-    );
-  } else {
-    await Firebase.initializeApp();
+  // iOS is initialized natively in AppDelegate (FirebaseApp.configure()).
+  // Avoid duplicate default-app initialization that causes a white screen.
+  if (GetPlatform.isIOS) {
+    // No-op on iOS: Firebase is already configured natively.
+  } else if (Firebase.apps.isEmpty) {
+    // Projet Firebase: fama-7db84 — Pour le web, ajouter une app Web dans la console Firebase et remplacer appId.
+    if(GetPlatform.isWeb) {
+      await Firebase.initializeApp(options: const FirebaseOptions(
+        apiKey: "AIzaSyDKFPeONsJTzc9OcNRnexNCItpqVX41UhE",
+        authDomain: "fama-7db84.firebaseapp.com",
+        projectId: "fama-7db84",
+        storageBucket: "fama-7db84.firebasestorage.app",
+        messagingSenderId: "888957940076",
+        appId: "1:888957940076:web:REPLACE_AFTER_ADDING_WEB_APP_IN_FIREBASE_CONSOLE",
+      ));
+    } else if(GetPlatform.isAndroid) {
+      await Firebase.initializeApp(
+        options: const FirebaseOptions(
+          apiKey: 'AIzaSyDKFPeONsJTzc9OcNRnexNCItpqVX41UhE',
+          appId: '1:888957940076:android:3be42b0f67a1a5c3ca8349',
+          messagingSenderId: '888957940076',
+          projectId: 'fama-7db84',
+          storageBucket: 'fama-7db84.firebasestorage.app',
+        ),
+      );
+    } else {
+      await Firebase.initializeApp();
+    }
   }
 
   Map<String, Map<String, String>> languages = await di.init();
