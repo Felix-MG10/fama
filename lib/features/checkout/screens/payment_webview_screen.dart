@@ -48,8 +48,7 @@ class PaymentWebViewScreen extends StatefulWidget {
 }
 
 class PaymentScreenState extends State<PaymentWebViewScreen> {
-  static const String _clientCallbackPrefix =
-      'fama://stackfood.com/payment-callback';
+  static const String _callbackPrefix = 'fama://stackfood.com/payment-callback';
   late String selectedUrl;
   bool _isLoading = true;
   bool _canRedirect = true;
@@ -175,6 +174,10 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
       }
 
       final dynamic body = jsonDecode(response.body);
+      if (body is Map &&
+          body['status']?.toString().toLowerCase() != 'success') {
+        return null;
+      }
       return _extractCheckoutUrlFromBody(body);
     } catch (_) {
       return null;
@@ -625,7 +628,7 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
   }
 
   bool _isClientPaymentCallback(Uri uri) =>
-      uri.toString().startsWith(_clientCallbackPrefix);
+      uri.toString().startsWith(_callbackPrefix);
 }
 
 enum PaymentResultStatus { success, fail, cancel, none }

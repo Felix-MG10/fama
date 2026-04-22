@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
+import 'package:app_links/app_links.dart';
 import 'helper/get_di.dart' as di;
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_web_plugins/url_strategy.dart';
@@ -112,12 +113,21 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  StreamSubscription<Uri?>? _uriLinkSubscription;
+  AppLinks? _appLinks;
 
   @override
   void initState() {
     super.initState();
 
     _route();
+    _initDeepLinks();
+  }
+
+  @override
+  void dispose() {
+    _uriLinkSubscription?.cancel();
+    super.dispose();
   }
 
   Future<void> _route() async {
@@ -135,6 +145,133 @@ class _MyAppState extends State<MyApp> {
         await Get.find<FavouriteController>().getFavouriteList();
       }
     }
+  }
+
+  Future<void> _initDeepLinks() async {
+    if (GetPlatform.isWeb) {
+      return;
+    }
+
+    try {
+      _appLinks ??= AppLinks();
+      final Uri? initialUri = await _appLinks!.getInitialLink();
+      if (initialUri != null) {
+        _handleIncomingUri(initialUri);
+      }
+    } catch (_) {}
+
+    _uriLinkSubscription = _appLinks!.uriLinkStream.listen((Uri? uri) {
+      if (uri != null) {
+        _handleIncomingUri(uri);
+      }
+    }, onError: (_) {});
+  }
+
+  void _handleIncomingUri(Uri uri) {
+    final String? targetRoute = _resolvePaymentRouteFromUri(uri);
+    if (targetRoute == null) {
+      return;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      Get.offAllNamed(targetRoute);
+    });
+  }
+
+  String? _resolvePaymentRouteFromUri(Uri uri) {
+    final String path = uri.path.toLowerCase();
+    final String host = uri.host.toLowerCase();
+    final String scheme = uri.scheme.toLowerCase();
+
+    final bool isCustomPaymentCallback = scheme == 'fama'
+        && host == 'stackfood.com'
+        && path.contains('/payment-callback');
+    final bool isHttpsPaymentCallback =
+        (scheme == 'https' && (host == 'fama' || host.contains('hostingersite.com')))
+        && (path.contains('/payment-success')
+            || path.contains('/payment-fail')
+            || path.contains('/payment-cancel'));
+
+    if (!isCustomPaymentCallback && !isHttpsPaymentCallback) {
+      return null;
+    }
+
+    final String? status = _extractPaymentStatus(uri, path);
+    final String? orderId = _extractOrderId(uri);
+
+    if (status == null || orderId == null || orderId.isEmpty) {
+      return null;
+    }
+
+    final double? amount = double.tryParse(uri.queryParameters['amount'] ?? '');
+    final String? contactNumber = uri.queryParameters['contact_number'];
+    final bool isDeliveryOrder = uri.queryParameters['is_delivery_order'] == 'true';
+
+    return RouteHelper.getOrderSuccessRoute(
+      orderId,
+      status,
+      amount,
+      contactNumber,
+      isDeliveryOrder: isDeliveryOrder,
+    );
+  }
+
+  String? _extractPaymentStatus(Uri uri, String path) {
+    final String? rawStatus = uri.queryParameters['flag'] ?? uri.queryParameters['status'];
+    final String? normalized = _normalizeStatus(rawStatus);
+    if (normalized != null) {
+      return normalized;
+    }
+
+    if (path.contains('/payment-success')) {
+      return 'success';
+    }
+    if (path.contains('/payment-fail')) {
+      return 'fail';
+    }
+    if (path.contains('/payment-cancel')) {
+      return 'cancel';
+    }
+    return null;
+  }
+
+  String? _extractOrderId(Uri uri) {
+    final String? queryOrderId =
+        uri.queryParameters['order_id'] ?? uri.queryParameters['id'] ?? uri.queryParameters['ref'];
+    if (queryOrderId != null && queryOrderId.isNotEmpty) {
+      return queryOrderId;
+    }
+
+    final List<String> segments = uri.pathSegments.where((String s) => s.isNotEmpty).toList();
+    if (segments.isNotEmpty) {
+      final String lastSegment = segments.last;
+      if (!lastSegment.contains('payment-success')
+          && !lastSegment.contains('payment-fail')
+          && !lastSegment.contains('payment-cancel')) {
+        return lastSegment;
+      }
+    }
+    return null;
+  }
+
+  String? _normalizeStatus(String? status) {
+    if (status == null || status.isEmpty) {
+      return null;
+    }
+    final String value = status.toLowerCase();
+    if (value == 'success' || value == 'succeeded' || value == 'paid') {
+      return 'success';
+    }
+    if (value == 'fail' || value == 'failed' || value == 'failure' || value == 'error') {
+      return 'fail';
+    }
+    if (value == 'cancel' || value == 'cancelled' || value == 'canceled') {
+      return 'cancel';
+    }
+    return null;
   }
 
   @override

@@ -57,7 +57,8 @@ class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
       endDrawer: const MenuDrawerWidget(), endDrawerEnableOpenDragGesture: false,
       body: GetBuilder<OrderController>(builder: (orderController) {
         double total = 0;
-        bool success = true;
+        // Respect callback status so success/fail/cancel pages stay explicit.
+        bool success = widget.status == 1;
         double? maximumCodOrderAmount;
         if(orderController.trackModel != null) {
           final address = AddressHelper.getAddressFromSharedPref();
@@ -70,7 +71,6 @@ class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
           }
 
           total = ((orderController.trackModel!.orderAmount! / 100) * Get.find<SplashController>().configModel!.loyaltyPointItemPurchasePoint!);
-          success = orderController.trackModel!.paymentStatus == 'paid' || orderController.trackModel!.paymentMethod == 'cash_on_delivery' || orderController.trackModel!.paymentMethod == 'partial_payment';
 
           if (!success && !Get.isDialogOpen! && orderController.trackModel!.orderStatus != 'canceled' && Get.currentRoute.startsWith(RouteHelper.orderSuccess)) {
             Future.delayed(const Duration(seconds: 1), () {

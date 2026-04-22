@@ -29,6 +29,8 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
+				<string>fama</string>
+				<string>stackfood</string>
 				<string>com.googleusercontent.apps.491987943015-8enep3h58pfk6da9oc17rv2iqostjvln</string>
 				<string>fb452131619626499</string>
 			</array>

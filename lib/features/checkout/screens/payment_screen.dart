@@ -206,6 +206,10 @@ class PaymentScreenState extends State<PaymentScreen> {
       }
 
       final dynamic body = jsonDecode(response.body);
+      if (body is Map &&
+          body['status']?.toString().toLowerCase() != 'success') {
+        return null;
+      }
       return _extractCheckoutUrlFromBody(body);
     } catch (_) {
       return null;
@@ -367,8 +371,7 @@ class PaymentScreenState extends State<PaymentScreen> {
 }
 
 class MyInAppBrowser extends InAppBrowser {
-  static const String _clientCallbackPrefix =
-      'fama://stackfood.com/payment-callback';
+  static const String _callbackPrefix = 'fama://stackfood.com/payment-callback';
   final String orderID;
   final double? orderAmount;
   final double? maxCodOrderAmount;
@@ -604,7 +607,7 @@ class MyInAppBrowser extends InAppBrowser {
       !_isNullOrEmpty(subscriptionUrl) && _isNullOrEmpty(addFundUrl);
 
   bool _isClientPaymentCallback(Uri uri) =>
-      uri.toString().startsWith(_clientCallbackPrefix);
+      uri.toString().startsWith(_callbackPrefix);
 
   PaymentRedirectResult _resolvePaymentStatus(
     String url, {

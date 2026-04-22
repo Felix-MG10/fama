@@ -105,6 +105,12 @@
                 <data android:scheme="https" android:host="aliceblue-herring-852976.hostingersite.com" android:pathPrefix="/subscription-success" />
                 <data android:scheme="https" android:host="aliceblue-herring-852976.hostingersite.com" android:pathPrefix="/subscription-fail" />
                 <data android:scheme="https" android:host="aliceblue-herring-852976.hostingersite.com" android:pathPrefix="/subscription-cancel" />
+                <data android:scheme="https" android:host="fama" android:pathPrefix="/payment-success" />
+                <data android:scheme="https" android:host="fama" android:pathPrefix="/payment-fail" />
+                <data android:scheme="https" android:host="fama" android:pathPrefix="/payment-cancel" />
+                <data android:scheme="https" android:host="fama" android:pathPrefix="/subscription-success" />
+                <data android:scheme="https" android:host="fama" android:pathPrefix="/subscription-fail" />
+                <data android:scheme="https" android:host="fama" android:pathPrefix="/subscription-cancel" />
             </intent-filter>
 
         </activity>
