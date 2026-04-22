@@ -166,11 +166,7 @@ class PaymentScreenState extends State<PaymentScreen> {
 
   Future<String> _resolveCheckoutUrl(String fallbackUrl) async {
     if (_isOrderPaymentFlow() && _isOrangePaymentMethod()) {
-      final String orangeEndpointUrl =
-          '${AppConstants.baseUrl}/payment/orange-money/pay?payment_id=${widget.orderModel.id}&payment_platform=app';
-      final String? orangeCheckoutUrl = await _resolveFromJsonEndpoint(
-        orangeEndpointUrl,
-      );
+      final String? orangeCheckoutUrl = await _resolveOrangeCheckoutUrl();
       if (orangeCheckoutUrl != null) {
         return orangeCheckoutUrl;
       }
@@ -183,6 +179,37 @@ class PaymentScreenState extends State<PaymentScreen> {
       return resolvedFromFallbackEndpoint;
     }
     return fallbackUrl;
+  }
+
+  Future<String?> _resolveOrangeCheckoutUrl() async {
+    final Uri uri = Uri.parse(
+      '${AppConstants.baseUrl}/api/v1/payment/orange-money',
+    );
+
+    final Map<String, dynamic> payload = {
+      'order_id': widget.orderModel.id.toString(),
+      'amount': widget.orderModel.orderAmount ?? 0,
+      'callback_url': 'fama://stackfood.com/payment-callback',
+    };
+
+    try {
+      final http.Response response = await http.post(
+        uri,
+        headers: const {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(payload),
+      );
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        return null;
+      }
+
+      final dynamic body = jsonDecode(response.body);
+      return _extractCheckoutUrlFromBody(body);
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<String?> _resolveFromJsonEndpoint(String endpointUrl) async {
@@ -499,10 +526,15 @@ class MyInAppBrowser extends InAppBrowser {
       }
     }
 
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-      return;
-    }
+    try {
+      final bool launched = await launchUrl(
+        uri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (launched) {
+        return;
+      }
+    } catch (_) {}
 
     // Fallback if http URL is embedded in custom scheme payload.
     final String decoded = Uri.decodeFull(rawUrl);
