@@ -16,6 +16,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class PaymentScreen extends StatefulWidget {
   final OrderModel orderModel;
@@ -36,7 +37,7 @@ class PaymentScreen extends StatefulWidget {
 class PaymentScreenState extends State<PaymentScreen> {
   late String selectedUrl;
   double value = 0.0;
-  final bool _isLoading = true;
+  bool _isLoading = true;
   PullToRefreshController? pullToRefreshController;
   late MyInAppBrowser browser;
   double? maxCodOrderAmount;
@@ -84,6 +85,19 @@ class PaymentScreenState extends State<PaymentScreen> {
       }
     }
 
+    if (_shouldOpenWaveExternally(selectedUrl)) {
+      final Uri? uri = Uri.tryParse(selectedUrl);
+      if (uri != null) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+      return;
+    }
+
     await browser.openUrlRequest(
       urlRequest: URLRequest(url: WebUri(selectedUrl)),
       settings: InAppBrowserClassSettings(
@@ -91,6 +105,13 @@ class PaymentScreenState extends State<PaymentScreen> {
         browserSettings: InAppBrowserSettings(hideUrlBar: true, hideToolbarTop: GetPlatform.isAndroid),
       ),
     );
+  }
+
+  bool _shouldOpenWaveExternally(String url) {
+    final Uri? uri = Uri.tryParse(url);
+    if (uri == null) return false;
+    final String host = uri.host.toLowerCase();
+    return host.contains('pay.wave.com') || host.contains('qr.pay.wave.com') || uri.scheme.toLowerCase() == 'wave';
   }
 
   @override
@@ -211,7 +232,57 @@ class MyInAppBrowser extends InAppBrowser {
     if (kDebugMode) {
       print("\n\nOverride ${navigationAction.request.url}\n\n");
     }
+    final Uri? uri = navigationAction.request.url;
+    if (uri == null) {
+      return NavigationActionPolicy.CANCEL;
+    }
+
+    if (_isWaveHttpUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+      return NavigationActionPolicy.CANCEL;
+    }
+
+    if (!["http", "https", "file", "chrome", "data", "javascript", "about"].contains(uri.scheme)) {
+      await _launchExternalForCustomScheme(uri);
+      return NavigationActionPolicy.CANCEL;
+    }
     return NavigationActionPolicy.ALLOW;
+  }
+
+  bool _isWaveHttpUrl(Uri uri) {
+    final String host = uri.host.toLowerCase();
+    return (uri.scheme == 'http' || uri.scheme == 'https')
+        && (host.contains('pay.wave.com') || host.contains('qr.pay.wave.com'));
+  }
+
+  Future<void> _launchExternalForCustomScheme(Uri uri) async {
+    final String rawUrl = uri.toString();
+
+    // Wave can return deep-links like:
+    // wave://capture/https://pay.wave.com/...
+    if (rawUrl.startsWith('wave://capture/')) {
+      final String extracted = Uri.decodeFull(rawUrl.substring('wave://capture/'.length));
+      final Uri? extractedUri = Uri.tryParse(extracted);
+      if (extractedUri != null) {
+        await launchUrl(extractedUri, mode: LaunchMode.externalApplication);
+        return;
+      }
+    }
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+      return;
+    }
+
+    // Fallback if http URL is embedded in custom scheme payload.
+    final String decoded = Uri.decodeFull(rawUrl);
+    final int httpIndex = decoded.indexOf('http');
+    if (httpIndex != -1) {
+      final Uri? fallbackUri = Uri.tryParse(decoded.substring(httpIndex));
+      if (fallbackUri != null) {
+        await launchUrl(fallbackUri, mode: LaunchMode.externalApplication);
+      }
+    }
   }
 
   @override

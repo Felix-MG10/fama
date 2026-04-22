@@ -82,10 +82,29 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <!-- Accepts URIs that begin with YOUR_SCHEME://YOUR_HOST -->
+                <!-- Custom scheme deep links -->
+                <data
+                    android:scheme="stackfood"
+                    android:host="stackfood.com" />
                 <data
                     android:scheme="StackFood"
                     android:host="stackfood.com" />
+                <data
+                    android:scheme="fama"
+                    android:host="stackfood.com" />
+            </intent-filter>
+
+            <!-- Payment return links from browser -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="aliceblue-herring-852976.hostingersite.com" android:pathPrefix="/payment-success" />
+                <data android:scheme="https" android:host="aliceblue-herring-852976.hostingersite.com" android:pathPrefix="/payment-fail" />
+                <data android:scheme="https" android:host="aliceblue-herring-852976.hostingersite.com" android:pathPrefix="/payment-cancel" />
+                <data android:scheme="https" android:host="aliceblue-herring-852976.hostingersite.com" android:pathPrefix="/subscription-success" />
+                <data android:scheme="https" android:host="aliceblue-herring-852976.hostingersite.com" android:pathPrefix="/subscription-fail" />
+                <data android:scheme="https" android:host="aliceblue-herring-852976.hostingersite.com" android:pathPrefix="/subscription-cancel" />
             </intent-filter>
 
         </activity>

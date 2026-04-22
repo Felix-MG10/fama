@@ -87,6 +87,9 @@ class SplashController extends GetxController implements GetxService {
           route(notificationBody: notificationBody, linkBody: linkBody);
         }
         _onRemoveLoader();
+      } else {
+        // Invalid payload (e.g. HTML challenge page with HTTP 200): avoid infinite splash.
+        _hasConnection = false;
       }
     } else {
       if(response.statusText == ApiClient.noInternetMessage) {

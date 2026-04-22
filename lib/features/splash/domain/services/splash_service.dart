@@ -4,6 +4,7 @@ import 'package:stackfood_multivendor/features/splash/domain/repositories/splash
 import 'package:stackfood_multivendor/features/splash/domain/services/splash_service_interface.dart';
 import 'package:stackfood_multivendor/common/widgets/custom_snackbar_widget.dart';
 import 'package:get/get.dart';
+import 'dart:convert';
 
 class SplashService implements SplashServiceInterface {
   final SplashRepositoryInterface splashRepositoryInterface;
@@ -21,11 +22,30 @@ class SplashService implements SplashServiceInterface {
 
   @override
   ConfigModel? prepareConfigData(Response response){
-    ConfigModel? configModel;
-    if(response.statusCode == 200) {
-      configModel = ConfigModel.fromJson(response.body);
+    if(response.statusCode != 200) {
+      return null;
     }
-    return configModel;
+
+    final dynamic body = response.body;
+
+    // Some gateways can return HTML challenge pages with HTTP 200.
+    // Ignore non-JSON payloads to avoid crashing on splash.
+    if (body is Map<String, dynamic>) {
+      return ConfigModel.fromJson(body);
+    } else if (body is Map) {
+      return ConfigModel.fromJson(Map<String, dynamic>.from(body));
+    } else if (body is String) {
+      try {
+        final dynamic decoded = jsonDecode(body);
+        if (decoded is Map<String, dynamic>) {
+          return ConfigModel.fromJson(decoded);
+        } else if (decoded is Map) {
+          return ConfigModel.fromJson(Map<String, dynamic>.from(decoded));
+        }
+      } catch (_) {}
+    }
+
+    return null;
   }
 
   @override

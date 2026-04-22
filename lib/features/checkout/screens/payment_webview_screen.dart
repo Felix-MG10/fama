@@ -61,6 +61,19 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
       _maximumCodOrderAmount = zoneData.maxCodOrderAmount;
     }
 
+    if (_shouldOpenWaveExternally(selectedUrl)) {
+      final Uri? uri = Uri.tryParse(selectedUrl);
+      if (uri != null) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+      return;
+    }
+
     pullToRefreshController = GetPlatform.isWeb || ![TargetPlatform.iOS, TargetPlatform.android].contains(defaultTargetPlatform) ? null : PullToRefreshController(
       onRefresh: () async {
         if (defaultTargetPlatform == TargetPlatform.android) {
@@ -70,6 +83,13 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
         }
       },
     );
+  }
+
+  bool _shouldOpenWaveExternally(String url) {
+    final Uri? uri = Uri.tryParse(url);
+    if (uri == null) return false;
+    final String host = uri.host.toLowerCase();
+    return host.contains('pay.wave.com') || host.contains('qr.pay.wave.com') || uri.scheme.toLowerCase() == 'wave';
   }
 
   @override
@@ -92,6 +112,7 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
               initialSettings: InAppWebViewSettings(
                 userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36',
                 useHybridComposition: true,
+                useShouldOverrideUrlLoading: true,
               ),
               onWebViewCreated: (controller) async {
                 webViewController = controller;
@@ -103,12 +124,19 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
                 });
               },
               shouldOverrideUrlLoading: (controller, navigationAction) async {
-                Uri uri = navigationAction.request.url!;
+                final Uri? uri = navigationAction.request.url;
+                if (uri == null) {
+                  return NavigationActionPolicy.CANCEL;
+                }
+
+                if (_isWaveHttpUrl(uri)) {
+                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  return NavigationActionPolicy.CANCEL;
+                }
+
                 if (!["http", "https", "file", "chrome", "data", "javascript", "about"].contains(uri.scheme)) {
-                  if (await canLaunchUrl(uri)) {
-                    await launchUrl(uri, mode: LaunchMode.externalApplication);
-                    return NavigationActionPolicy.CANCEL;
-                  }
+                  await _launchExternalForCustomScheme(uri);
+                  return NavigationActionPolicy.CANCEL;
                 }
                 return NavigationActionPolicy.ALLOW;
               },
@@ -189,6 +217,41 @@ class PaymentScreenState extends State<PaymentWebViewScreen> {
           }
         }
       }
+    }
+  }
+
+  bool _isWaveHttpUrl(Uri uri) {
+    final String host = uri.host.toLowerCase();
+    return (uri.scheme == 'http' || uri.scheme == 'https')
+        && (host.contains('pay.wave.com') || host.contains('qr.pay.wave.com'));
+  }
+
+  Future<void> _launchExternalForCustomScheme(Uri uri) async {
+    final String rawUrl = uri.toString();
+
+    if (rawUrl.startsWith('wave://capture/')) {
+      final String extracted = Uri.decodeFull(rawUrl.substring('wave://capture/'.length));
+      final Uri? extractedUri = Uri.tryParse(extracted);
+      if (extractedUri != null) {
+        await launchUrl(extractedUri, mode: LaunchMode.externalApplication);
+        return;
+      }
+    }
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+      return;
+    }
+
+    final String decoded = Uri.decodeFull(rawUrl);
+    final int httpIndex = decoded.indexOf('http');
+    if (httpIndex != -1) {
+      final Uri? fallbackUri = Uri.tryParse(decoded.substring(httpIndex));
+      if (fallbackUri != null) {
+        await launchUrl(fallbackUri, mode: LaunchMode.externalApplication);
+      }
+    } else {
+      debugPrint('Cannot open external url scheme: $uri');
     }
   }
 

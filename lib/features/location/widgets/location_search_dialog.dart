@@ -64,27 +64,31 @@ class _LocationSearchDialogState extends State<LocationSearchDialog> {
           viewConstraints: const BoxConstraints(minHeight: 100 , maxHeight: 300),
 
           builder: (BuildContext context, SearchController controller) {
-            return widget.child ?? Container(
-              height: 50, width: 500,
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
-                border: Border.all(color: Theme.of(context).primaryColor.withValues(alpha: 0.3)),
+            return InkWell(
+              onTap: () => controller.openView(),
+              borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+              child: widget.child ?? Container(
+                height: 50, width: 500,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).cardColor,
+                  borderRadius: BorderRadius.circular(Dimensions.radiusSmall),
+                  border: Border.all(color: Theme.of(context).primaryColor.withValues(alpha: 0.3)),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
+                child: Row(children: [
+
+                  Icon(Icons.location_on, size: 25, color: Theme.of(context).primaryColor),
+                  const SizedBox(width: Dimensions.paddingSizeSmall),
+
+                  Expanded(child: Text(
+                    controller.text.isNotEmpty ? controller.text : 'search_location'.tr,
+                    style: robotoRegular.copyWith(color: controller.text.isEmpty ? Theme.of(context).disabledColor : Theme.of(context).textTheme.bodyMedium!.color),
+                    maxLines: 1, overflow: TextOverflow.ellipsis,
+                  )),
+
+                  Icon(Icons.search, color: Theme.of(context).disabledColor),
+                ]),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: Dimensions.paddingSizeSmall),
-              child: Row(children: [
-
-                Icon(Icons.location_on, size: 25, color: Theme.of(context).primaryColor),
-                const SizedBox(width: Dimensions.paddingSizeSmall),
-
-                Expanded(child: Text(
-                  controller.text.isNotEmpty ? controller.text : 'search_location'.tr,
-                  style: robotoRegular.copyWith(color: controller.text.isEmpty ? Theme.of(context).disabledColor : Theme.of(context).textTheme.bodyMedium!.color),
-                  maxLines: 1, overflow: TextOverflow.ellipsis,
-                )),
-
-                Icon(Icons.search, color: Theme.of(context).disabledColor),
-              ]),
             );
           },
           suggestionsBuilder: (BuildContext context, SearchController controller) async {
